@@ -1,0 +1,92 @@
+[
+  {
+    "input": {
+      "supply_loss_pct": 0.5,
+      "conflict_intensity": 5
+    },
+    "response": {
+      "predicted_price_change_pct": 3.33,
+      "explanation": "A 0.5% loss of global supply, under standard short-run demand inelasticity (Ed = -0.15), implies roughly a 3.3% price increase.",
+      "model_used": "elasticity_formula_baseline",
+      "ev_feasibility": {
+        "barrels_per_day_lost": 505000.0,
+        "gasoline_vehicle_years_displaced": 7188675.0,
+        "lithium_tonnes_required": 57509.0,
+        "lithium_supply_ratio": 0.318,
+        "explanation": "A 0.5% loss of global crude supply removes about 505,000 barrels/day. Over 1.0 year(s), that's 3,594,337,500 gallons of gasoline that won't get refined -- roughly the annual fuel needs of 7,188,675 gasoline vehicles. Replacing that many vehicles with EVs instead would need about 57,509 tonnes of lithium (as LCE) -- about 31.8% of the world's annual lithium production."
+      }
+    }
+  },
+  {
+    "input": {
+      "supply_loss_pct": 2,
+      "conflict_intensity": 5
+    },
+    "response": {
+      "predicted_price_change_pct": 13.33,
+      "explanation": "A 2.0% loss of global supply, under standard short-run demand inelasticity (Ed = -0.15), implies roughly a 13.3% price increase.",
+      "model_used": "elasticity_formula_baseline",
+      "ev_feasibility": {
+        "barrels_per_day_lost": 2020000.0,
+        "gasoline_vehicle_years_displaced": 28754700.0,
+        "lithium_tonnes_required": 230038.0,
+        "lithium_supply_ratio": 1.273,
+        "explanation": "A 2.0% loss of global crude supply removes about 2,020,000 barrels/day. Over 1.0 year(s), that's 14,377,350,000 gallons of gasoline that won't get refined -- roughly the annual fuel needs of 28,754,700 gasoline vehicles. Replacing that many vehicles with EVs instead would need about 230,038 tonnes of lithium (as LCE) -- 1.3x the world's entire annual lithium production, so full EV substitution isn't realistic within a single year at this scale."
+      }
+    }
+  },
+  {
+    "input": {
+      "supply_loss_pct": 5,
+      "conflict_intensity": 5
+    },
+    "response": {
+      "predicted_price_change_pct": 33.33,
+      "explanation": "A 5.0% loss of global supply, under standard short-run demand inelasticity (Ed = -0.15), implies roughly a 33.3% price increase.",
+      "model_used": "elasticity_formula_baseline",
+      "ev_feasibility": {
+        "barrels_per_day_lost": 5050000.0,
+        "gasoline_vehicle_years_displaced": 71886750.0,
+        "lithium_tonnes_required": 575094.0,
+        "lithium_supply_ratio": 3.181,
+        "explanation": "A 5.0% loss of global crude supply removes about 5,050,000 barrels/day. Over 1.0 year(s), that's 35,943,375,000 gallons of gasoline that won't get refined -- roughly the annual fuel needs of 71,886,750 gasoline vehicles. Replacing that many vehicles with EVs instead would need about 575,094 tonnes of lithium (as LCE) -- 3.2x the world's entire annual lithium production, so full EV substitution isn't realistic within a single year at this scale."
+      }
+    }
+  },
+  {
+    "input": {
+      "supply_loss_pct": 8,
+      "conflict_intensity": 5
+    },
+    "response": {
+      "predicted_price_change_pct": 53.33,
+      "explanation": "A 8.0% loss of global supply, under standard short-run demand inelasticity (Ed = -0.15), implies roughly a 53.3% price increase.",
+      "model_used": "elasticity_formula_baseline",
+      "ev_feasibility": {
+        "barrels_per_day_lost": 8080000.0,
+        "gasoline_vehicle_years_displaced": 115018800.0,
+        "lithium_tonnes_required": 920150.0,
+        "lithium_supply_ratio": 5.09,
+        "explanation": "A 8.0% loss of global crude supply removes about 8,080,000 barrels/day. Over 1.0 year(s), that's 57,509,400,000 gallons of gasoline that won't get refined -- roughly the annual fuel needs of 115,018,800 gasoline vehicles. Replacing that many vehicles with EVs instead would need about 920,150 tonnes of lithium (as LCE) -- 5.1x the world's entire annual lithium production, so full EV substitution isn't realistic within a single year at this scale."
+      }
+    }
+  },
+  {
+    "input": {
+      "supply_loss_pct": -3,
+      "conflict_intensity": 5
+    },
+    "response": {
+      "predicted_price_change_pct": -20.0,
+      "explanation": "A 3.0% increase in supply implies roughly a 20.0% price decrease.",
+      "model_used": "elasticity_formula_baseline",
+      "ev_feasibility": {
+        "barrels_per_day_lost": 0.0,
+        "gasoline_vehicle_years_displaced": 0.0,
+        "lithium_tonnes_required": 0.0,
+        "lithium_supply_ratio": 0.0,
+        "explanation": "No supply loss in this scenario, so there's no oil demand for EVs to displace."
+      }
+    }
+  }
+]

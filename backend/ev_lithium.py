@@ -15,35 +15,28 @@ inline where a number is an assumption rather than a physical fact.
 from dataclasses import dataclass
 
 # ---------------------------------------------------------------------------
-# Conversion constants
+# Conversion constants -- ONE source of truth: services/config.py (DEFAULT_CONFIG).
+# The names below are kept as read-only aliases so existing imports and tests keep
+# working; no value is defined here. See config.py for each value's source/assumption.
 # ---------------------------------------------------------------------------
+from services.config import DEFAULT_CONFIG as _CFG
 
-# Physical fact: a barrel of crude oil is defined as 42 US gallons.
-GALLONS_PER_BARREL = 42.0
+GALLONS_PER_BARREL = 42.0  # physical fact: a barrel of crude is 42 US gallons
 
-# Average gasoline yield from a barrel of crude at a typical refinery
-# (the rest becomes diesel, jet fuel, other products). ~46% yield.
-GASOLINE_YIELD_GAL_PER_BBL = 19.5
+GASOLINE_YIELD_GAL_PER_BBL = _CFG.gasoline_gal_per_bbl
+ANNUAL_FUEL_GAL_PER_VEHICLE = _CFG.gal_per_vehicle_year
 
-# Average annual gasoline consumption of one typical gasoline-powered
-# passenger vehicle. A rule-of-thumb average, not a per-model figure.
-ANNUAL_FUEL_GAL_PER_VEHICLE = 500.0
+# Project assumption (0.008 t LCE per EV). /simulate keeps using this one; the sourced case
+# (_CFG.li_kg_per_kwh x typical_pack_kwh x lce_per_t_li) is the headline of /simulate/report.
+LCE_TONNES_PER_EV_BATTERY = _CFG.lce_t_per_ev_project
 
-# Average lithium carbonate equivalent (LCE) needed to build one EV
-# battery pack, in tonnes. A rule-of-thumb average across battery sizes.
-LCE_TONNES_PER_EV_BATTERY = 0.008
+# World supply: EIA 103.3 Mb/d (2024). Was 101 Mb/d, an unsourced assumption.
+DEFAULT_GLOBAL_DAILY_CRUDE_PRODUCTION_BBL = _CFG.global_supply_bpd
 
-# Approximate global daily crude oil production, in barrels/day.
-# This is an assumption used as a default when the caller doesn't supply
-# their own figure -- refine with a real, sourced number before treating
-# this as authoritative (see PHASE1_SUMMARY.md's "what would help" notes
-# for the same caveat applied to event data).
-DEFAULT_GLOBAL_DAILY_CRUDE_PRODUCTION_BBL = 101_000_000.0
-
-# Approximate global annual lithium production, in tonnes of LCE
-# (lithium carbonate equivalent). Roughly USGS's 2023 figure. Used only
-# as a feasibility yardstick -- not a precise, up-to-date supply number.
-GLOBAL_ANNUAL_LITHIUM_PRODUCTION_TONNES = 180_000.0
+# World lithium production in tonnes of LCE. USGS reports lithium CONTENT (290,000 t Li, 2025 est.),
+# so it is converted with 5.323. CORRECTED: this was 180,000 t labelled "LCE", which was lithium
+# content, so the supply ratio was about 5.3x too high.
+GLOBAL_ANNUAL_LITHIUM_PRODUCTION_TONNES = _CFG.world_li_production_t_li * _CFG.lce_per_t_li
 
 
 # ---------------------------------------------------------------------------

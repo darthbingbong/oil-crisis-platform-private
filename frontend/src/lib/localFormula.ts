@@ -13,8 +13,10 @@ const ELASTICITY = 0.15;
 const GASOLINE_YIELD_GAL_PER_BBL = 19.5;
 const ANNUAL_FUEL_GAL_PER_VEHICLE = 500.0;
 const LCE_TONNES_PER_EV_BATTERY = 0.008;
-const DEFAULT_GLOBAL_DAILY_CRUDE_PRODUCTION_BBL = 101_000_000.0;
-const GLOBAL_ANNUAL_LITHIUM_PRODUCTION_TONNES = 180_000.0;
+// Mirrors backend/services/config.py (single source of truth). Keep in sync.
+const DEFAULT_GLOBAL_DAILY_CRUDE_PRODUCTION_BBL = 103_300_000.0; // EIA world oil supply, 2024
+const LCE_PER_T_LI = 5.323; // USGS reports lithium content; LCE = Li x 5.323
+const GLOBAL_ANNUAL_LITHIUM_PRODUCTION_TONNES = 290_000.0 * LCE_PER_T_LI; // USGS MCS 2026, 2025 est., in t LCE
 
 function evFeasibility(supplyLossPct: number): EvFeasibility {
   if (supplyLossPct <= 0) {

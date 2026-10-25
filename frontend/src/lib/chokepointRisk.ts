@@ -5,7 +5,8 @@
 
 import type { ChokepointRisk, RefineryHub } from "../types";
 
-const DEFAULT_GLOBAL_DAILY_CRUDE_PRODUCTION_BBL = 101_000_000.0;
+// Mirrors backend/services/config.py global_supply_bpd (EIA world oil supply, 2024).
+const DEFAULT_GLOBAL_DAILY_CRUDE_PRODUCTION_BBL = 103_300_000.0;
 
 export function computeChokepointRisk(refineries: RefineryHub[], chokepoint: string): ChokepointRisk {
   const affected = refineries.filter(

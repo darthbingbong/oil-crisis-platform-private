@@ -132,12 +132,14 @@ def test_supply_shock_lithium_ratio_zero_when_no_loss():
 
 
 def test_supply_shock_lithium_ratio_exceeds_world_supply_at_crisis_scale():
-    """A 5% global supply shock needs far more lithium than the world
-    produces in a year -- this is the real feasibility finding the module
-    exists to surface, not just a smoke test."""
-    result = supply_shock_to_ev_feasibility(supply_loss_pct=5)
-    assert result.lithium_supply_ratio > 1
-    assert "x the world's entire annual lithium production" in result.explanation
+    """CORRECTED (see README changelog): world lithium production is now in true LCE
+    (290,000 t Li x 5.323 = 1.54 Mt LCE), so a 5% shock needs about 37% of a year's output
+    (it showed 3.2x before the unit fix). Exceeding a full year now takes roughly a 14%+ shock."""
+    five = supply_shock_to_ev_feasibility(supply_loss_pct=5)
+    assert 0.3 < five.lithium_supply_ratio < 0.45
+    big = supply_shock_to_ev_feasibility(supply_loss_pct=15)
+    assert big.lithium_supply_ratio > 1
+    assert "x the world's entire annual lithium production" in big.explanation
 
 
 def test_supply_shock_lithium_ratio_under_world_supply_for_small_shock():
