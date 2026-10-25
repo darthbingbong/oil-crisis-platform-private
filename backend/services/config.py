@@ -55,6 +55,12 @@ class CalcConfig:
     # IEA GEVO 2026: average BEV battery in 2025 'below 60 kWh' in China, 'close to 70 kWh' in the EU,
     # 90 kWh in the US. 60 kWh is used as a typical global pack (China is the largest market).
     typical_pack_kwh: float = 60.0
+    # Sensitivity: the other IEA GEVO 2026 regional BEV pack sizes (EU 'close to 70 kWh', US 90 kWh).
+    pack_cases: tuple = (("China, below 60 kWh (headline)", 60.0), ("EU, close to 70 kWh", 70.0), ("US, 90 kWh", 90.0))
+    # Chemistry caveat shown beside every sourced lithium figure.
+    chemistry_caveat: str = (
+        "The 0.10 kg Li per kWh figure is for NMC-811 cathodes (ICCT 2024). LFP, which dominates in China, is not covered "
+        "by a sourced figure here, so the sourced case may over- or under-state lithium for LFP-heavy fleets.")
     # Which case the Results page calls the headline: "sourced" or "project".
     lithium_headline_case: str = "sourced"
     # USGS MCS 2026 world mine production, tonnes lithium content (2025 estimate), excl. US.

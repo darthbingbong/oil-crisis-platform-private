@@ -28,6 +28,31 @@ def validated_supply_loss_max_pct() -> float:
     return float(e[e["resolution"] == "daily"]["supply_loss_pct"].abs().max())
 
 
+@lru_cache(maxsize=1)
+def validated_reference() -> dict:
+    """The largest-supply-loss event among the 21 daily-resolution validation events, with its ACTUAL price move,
+    computed exactly as phase1_analysis.py does (nearest daily WTI price 5 days before vs 30 days after the event)."""
+    import pandas as pd
+    ev = pd.read_csv(DATA_DIR / "events.csv", parse_dates=["event_date"])
+    daily = pd.read_csv(DATA_DIR / "oil_daily_prices.csv", parse_dates=["date"]).sort_values("date")
+
+    def px(d):
+        c = daily[(daily["date"] >= d) & daily["wti"].notna()]
+        return float(c.iloc[0]["wti"])
+
+    ev = ev[ev["resolution"] == "daily"]
+    top = ev.loc[ev["supply_loss_pct"].abs().idxmax()]
+    before, after = px(top["event_date"] - pd.Timedelta(days=5)), px(top["event_date"] + pd.Timedelta(days=30))
+    return {
+        "name": str(top["name"]), "date": top["event_date"].strftime("%Y-%m-%d"),
+        "supply_loss_pct": float(top["supply_loss_pct"]),
+        "actual_price_move_pct": (after - before) / before * 100.0,
+        "price_window": "WTI nearest daily price 5 days before vs 30 days after the event (same method as phase1_analysis.py)",
+        "note": "events.csv marks this event's supply loss as a ROUGH ESTIMATE and still unfolding, so the top of the validated range is itself uncertain."
+        if "ROUGH ESTIMATE" in str(top["notes"]) else None,
+    }
+
+
 def normalize_id(raw: str) -> str:
     """'Bab el-Mandeb', 'bab el-mandeb' and 'bab_el_mandeb' all become 'bab_el_mandeb'."""
     return raw.strip().lower().replace(" ", "_").replace("-", "_")

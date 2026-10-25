@@ -225,3 +225,57 @@ def test_report_default_lithium_availability_is_10_pct_and_produces_a_deficit_fo
     j = post(route_id="hormuz").json()
     assert j["scenario"]["lithium_availability_pct"] == 10
     assert j["kpis"]["lithium_deficit_t_lce"] > 0
+
+
+# ---------------------------------------------------------------------------
+# Extreme scenarios: outside the validated range
+# ---------------------------------------------------------------------------
+def test_validated_reference_is_the_2026_iran_event_with_its_actual_move():
+    j = post(route_id="hormuz").json()
+    ref = j["validated_reference"]
+    assert ref["supply_loss_pct"] == 8.0 and "2026" in ref["name"]
+    assert ref["actual_price_move_pct"] == pytest.approx(57.76, abs=0.05)  # matches phase1_analysis.py output
+    assert "ROUGH ESTIMATE" in ref["note"]
+
+
+def test_band_hidden_and_flagged_outside_validated_range():
+    j = post(route_id="hormuz").json()                      # ~15.5% supply loss
+    p = j["sections"]["price"]
+    assert j["kpis"]["outside_validated_range"] is True and j["kpis"]["price_band_pp"] is None
+    assert "Outside the validated range" in j["kpis"]["validated_note"]
+    assert p["chart"]["band_validated"] is False
+    assert all(pt["low"] is None and pt["high"] is None for pt in p["chart"]["trajectory"])
+    assert any(pt["beyond_validated"] for pt in p["chart"]["trajectory"])
+    assert p["chart"]["validated_price_ceiling_pct"] == pytest.approx(8 / 0.15)
+    assert "NOT shown" in p["summary"] and "not validated at this magnitude" in p["summary"]
+
+
+def test_band_shown_inside_validated_range():
+    j = post(route_id="suez", disruption_type="detour", detour_days=5, duration_days=30).json()
+    assert j["kpis"]["outside_validated_range"] is False and j["kpis"]["price_band_pp"] == 13.09
+    traj = j["sections"]["price"]["chart"]["trajectory"]
+    assert all(pt["low"] is not None for pt in traj) and not any(pt["beyond_validated"] for pt in traj)
+
+
+def test_beyond_validated_flag_follows_the_decay_back_inside_the_range():
+    traj = post(route_id="hormuz", duration_days=30).json()["sections"]["price"]["chart"]["trajectory"]
+    assert traj[0]["beyond_validated"] and not traj[-1]["beyond_validated"]   # decays below the 53.3% ceiling by day 180
+
+
+def test_summaries_say_implies_never_will():
+    for body in (dict(route_id="hormuz"), dict(route_id="suez", disruption_type="detour", detour_days=5)):
+        j = post(**body).json()
+        text = " ".join(s["summary"] + " " + s["takeaway"] for s in j["sections"].values())
+        assert "implies" in j["sections"]["price"]["summary"]
+        assert "the price will" not in text.lower() and "prices will" not in text.lower()
+
+
+def test_lithium_range_uses_other_iea_pack_sizes_and_states_the_chemistry_caveat():
+    j = post(route_id="hormuz").json()
+    c = j["sections"]["lithium"]["chart"]
+    assert [x["pack_kwh"] for x in c["pack_cases"]] == [60, 70, 90]
+    low, high = c["range_t_lce"]
+    assert low == c["cases"]["sourced"]["required_t_lce"] and high / low == pytest.approx(90 / 60)
+    assert j["kpis"]["extra_lithium_range_t_lce"] == [low, high]
+    assert "NMC-811" in c["chemistry_caveat"] and "LFP" in c["chemistry_caveat"]
+    assert "NMC-811" in j["sections"]["lithium"]["summary"]
