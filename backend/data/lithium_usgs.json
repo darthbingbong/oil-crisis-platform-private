@@ -1,0 +1,44 @@
+{
+  "_meta": {
+    "description": "World lithium mine production and reserves, USGS Mineral Commodity Summaries 2026 (February 2026), Lithium chapter by Brian W. Jaskula.",
+    "source": "U.S. Geological Survey, Mineral Commodity Summaries 2026, Lithium",
+    "source_url": "https://pubs.usgs.gov/periodicals/mcs2026/mcs2026-lithium.pdf",
+    "units": "metric tons of LITHIUM CONTENT (Li), not lithium carbonate equivalent (LCE).",
+    "lce_conversion": {
+      "factor_lce_per_t_li": 5.323,
+      "derivation": "Li2CO3 molar mass 73.89 g/mol divided by 2 x 6.94 g/mol for Li. Standard stoichiometry, computed by us, not a USGS figure.",
+      "is_estimate": false
+    },
+    "extraction_note": "The USGS PDF table lost its footnote spacing when text was extracted, so 'Argentina 2024 = 513,800' and 'Chile 2024 = 548,900' were read as 13,800 and 48,900 (a footnote digit '5' = 'Reported' got glued on). Same issue for Australia reserves: '68,400,000' is 8,400,000 with footnote '6' attached. Check: reserves of all rows sum to 36.47 Mt against USGS's 37 Mt total (they would sum to 96 Mt with the glued digit). Production check: the nine producing countries' 2024 values sum to 222,970 against USGS's rounded world total of 222,000 (which excludes the US); with the glued digits the sum would be over 1,000,000. The 2025 column sums to 288,380 against 290,000. Please eyeball these two cells against the PDF before presenting.",
+    "us_production_note": "US production is withheld by USGS (W) and excluded from the world totals.",
+    "ev_lithium_per_vehicle_t_lce": {
+      "value": 0.008,
+      "is_estimate": true,
+      "note": "From the project brief (about 8 kg LCE per EV). ASSUMPTION, configurable in the calc engine. Not from USGS. Real values depend on battery size and chemistry."
+    },
+    "data_year": 2025,
+    "is_estimate": false
+  },
+  "world": {
+    "mine_production_t_li": {"2024": 222000, "2025": 290000},
+    "mine_production_note": "Excludes US production. 2025 is a USGS estimate ('e').",
+    "reserves_t_li": 37000000,
+    "resources_t_li": 150000000,
+    "consumption_t_li": {"2024": 220000, "2025": 263000},
+    "battery_end_use_pct": 88,
+    "price_usd_per_t_lithium_carbonate": {"2024": 11800, "2025": 9000, "note": "US annual average, real dollars, battery grade"}
+  },
+  "countries": [
+    {"iso3": "USA", "name": "United States", "mine_production_t_li": {"2024": null, "2025": null}, "reserves_t_li": 4400000, "production_note": "withheld by USGS"},
+    {"iso3": "ARG", "name": "Argentina", "mine_production_t_li": {"2024": 13800, "2025": 23000}, "reserves_t_li": 4400000},
+    {"iso3": "AUS", "name": "Australia", "mine_production_t_li": {"2024": 82700, "2025": 92000}, "reserves_t_li": 8400000, "reserves_note": "USGS footnote: JORC-compliant reserves were 5.1 million tons"},
+    {"iso3": "BRA", "name": "Brazil", "mine_production_t_li": {"2024": 10200, "2025": 12000}, "reserves_t_li": 540000},
+    {"iso3": "CAN", "name": "Canada", "mine_production_t_li": {"2024": 4820, "2025": 5600}, "reserves_t_li": 1600000},
+    {"iso3": "CHL", "name": "Chile", "mine_production_t_li": {"2024": 48900, "2025": 56000}, "reserves_t_li": 9200000},
+    {"iso3": "CHN", "name": "China", "mine_production_t_li": {"2024": 41400, "2025": 62000}, "reserves_t_li": 4600000},
+    {"iso3": "MLI", "name": "Mali", "mine_production_t_li": {"2024": 770, "2025": 9400}, "reserves_t_li": 370000},
+    {"iso3": "PRT", "name": "Portugal", "mine_production_t_li": {"2024": 380, "2025": 380}, "reserves_t_li": 60000},
+    {"iso3": "ZWE", "name": "Zimbabwe", "mine_production_t_li": {"2024": 20000, "2025": 28000}, "reserves_t_li": 500000},
+    {"iso3": null, "name": "Other countries", "mine_production_t_li": {"2024": null, "2025": null}, "reserves_t_li": 2400000}
+  ]
+}

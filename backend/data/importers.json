@@ -1,0 +1,75 @@
+{
+  "_meta": {
+    "description": "Importer dependence on oil routes. Only figures that a cited source states directly are included. Per-country shares of each route's flow are NOT published by EIA and are NOT invented here.",
+    "what_is_missing": [
+      "Per-country shares for Hormuz (EIA gives only a four-country combined share)",
+      "Any destination breakdown for Bab el-Mandeb, Suez, Turkish Straits, Danish Straits",
+      "Strategic petroleum reserve days of cover per country (not sourced yet; IEA/EIA stock data would be needed)"
+    ],
+    "comtrade_note": "UN Comtrade would add bilateral crude import values by country, which could give true per-country shares of Gulf-origin crude. It needs a (free, rate-limited) subscription key and reports trade by origin and destination country, not by chokepoint, so route shares would still be inferred. Not used in M1."
+  },
+  "groups": [
+    {
+      "id": "cn_in_jp_kr",
+      "label": "China, India, Japan and South Korea (combined)",
+      "members_iso3": ["CHN", "IND", "JPN", "KOR"],
+      "route_id": "hormuz",
+      "share_of_route_flow_pct": 69,
+      "basis": "share of crude oil and condensate flows through Hormuz, 2024; 74% in 1H25",
+      "source": "EIA Today in Energy, 'Amid regional conflict, the Strait of Hormuz remains critical oil chokepoint' (2025); EIA World Oil Transit Chokepoints",
+      "source_url": "https://www.eia.gov/todayinenergy/detail.php?id=65504",
+      "data_year": 2024,
+      "is_estimate": false
+    },
+    {
+      "id": "asia_all",
+      "label": "All Asian markets",
+      "members_iso3": [],
+      "route_id": "hormuz",
+      "share_of_route_flow_pct": 84,
+      "basis": "share of crude oil and condensate flows through Hormuz, 2024; 89% in 1H25",
+      "source": "EIA Today in Energy, 'Amid regional conflict, the Strait of Hormuz remains critical oil chokepoint' (2025); EIA World Oil Transit Chokepoints",
+      "source_url": "https://www.eia.gov/todayinenergy/detail.php?id=65504",
+      "data_year": 2024,
+      "is_estimate": false
+    }
+  ],
+  "countries": [
+    {
+      "iso3": "CHN",
+      "name": "China",
+      "route_id": "malacca",
+      "share_of_route_flow_pct": 48,
+      "volume_bpd": null,
+      "basis": "share of import volumes passing through the Strait of Malacca, 1H25",
+      "source": "EIA, World Oil Transit Chokepoints",
+      "source_url": "https://www.eia.gov/international/content/analysis/special_topics/World_Oil_Transit_Chokepoints",
+      "data_year": 2025,
+      "is_estimate": false
+    },
+    {
+      "iso3": "CHN",
+      "name": "China",
+      "route_id": "cape_good_hope",
+      "share_of_route_flow_pct": 40,
+      "volume_bpd": null,
+      "basis": "EIA says 'more than 40%' of crude via the Cape went to China, 1H25. 40 is a floor.",
+      "source": "EIA, World Oil Transit Chokepoints",
+      "source_url": "https://www.eia.gov/international/content/analysis/special_topics/World_Oil_Transit_Chokepoints",
+      "data_year": 2025,
+      "is_estimate": false
+    },
+    {
+      "iso3": "USA",
+      "name": "United States",
+      "route_id": "hormuz",
+      "share_of_route_flow_pct": null,
+      "volume_bpd": 400000,
+      "basis": "about 0.4 Mb/d of crude and condensate imported from Persian Gulf countries through Hormuz, about 7% of US crude and condensate imports (1H25). Volume is given by EIA; share of Hormuz flow is not stated and not computed.",
+      "source": "EIA, World Oil Transit Chokepoints",
+      "source_url": "https://www.eia.gov/international/content/analysis/special_topics/World_Oil_Transit_Chokepoints",
+      "data_year": 2025,
+      "is_estimate": false
+    }
+  ]
+}
