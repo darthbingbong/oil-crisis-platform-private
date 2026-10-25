@@ -55,7 +55,8 @@ export default function RoutePanel({ route, visible, onClose, onSimulate }: Prop
 
   const isPipeline = route.type === "pipeline";
   const color = ROUTE_COLORS[route.type];
-  const canSimulate = !isPipeline && !route.excluded_from_calculations;
+  const isAlternateLane = route.type === "sea_lane";   // the Cape of Good Hope lane: what traffic uses when Suez / Bab el-Mandeb is rerouted
+  const canSimulate = !isPipeline && !isAlternateLane && !route.excluded_from_calculations;
   const canDetour = detail?.baseline_voyage_days != null;
   const importers = detail?.top_importers ?? [];
 
@@ -301,6 +302,11 @@ export default function RoutePanel({ route, visible, onClose, onSimulate }: Prop
             Simulate disruption on this route
           </button>
         </div>
+      )}
+      {isAlternateLane && (
+        <p className="text-xs" style={{ color: "var(--color-ash)", margin: 0 }} data-testid="alternate-lane-note">
+          This is the lane used when Suez / Bab el-Mandeb traffic is rerouted, so it is not a route you would disrupt. Simulate Suez or Bab el-Mandeb with a detour instead.
+        </p>
       )}
       {isPipeline && (
         <p className="text-xs" style={{ color: "var(--color-ash)", margin: 0 }} data-testid="pipeline-no-sim">

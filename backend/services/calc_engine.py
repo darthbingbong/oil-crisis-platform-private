@@ -165,22 +165,23 @@ def importer_shortfall(displaced_bpd: float, importers: list[dict]) -> list[dict
 # 7. Economy and markets (indicative ranges only)
 # ---------------------------------------------------------------------------
 def macro_ranges(price_impact: float, duration_days: float, cfg: CalcConfig = DEFAULT_CONFIG) -> dict:
-    """Indicative ranges from IMF rules of thumb. Effects scale with the price move per 10% and with
-    how much of a year the shock lasts (ASSUMPTION). Returned as (low, high) in percentage points,
-    ordered so low <= high. Never a single point."""
+    """Indicative effects from the CITED coefficients in config (cfg.macro_coefficients), nothing else.
+
+    Each coefficient is "effect of a +10% oil price rise, if it lasts most of a year". Effects scale with the price move per 10% and
+    with how much of a year the shock lasts (ASSUMPTION, labelled). A coefficient the source gives as a single point stays a
+    single point (is_point=True); no range is invented around it. Returns {'scale_vs_10pct_year', 'items': [...]} where each item
+    carries the source, year, link and quoted sentence so the page can cite it."""
     scale = price_impact / 10.0 * min(duration_days, cfg.macro_full_effect_days) / cfg.macro_full_effect_days
-
-    def rng(pair):
-        a, b = pair[0] * scale, pair[1] * scale
-        return (min(a, b), max(a, b))
-
-    return {
-        "global_gdp_growth_pp": rng(cfg.gdp_growth_pp_per_10pct),
-        "global_inflation_pp": rng(cfg.inflation_pp_per_10pct),
-        "oil_importer_gdp_growth_pp": rng(cfg.importer_gdp_pp_per_10pct),
-        "oil_importer_inflation_pp": rng(cfg.importer_inflation_pp_per_10pct),
-        "scale_vs_10pct_year": scale,
-    }
+    items = []
+    for c in cfg.macro_coefficients:
+        a, b = c.low * scale, c.high * scale
+        items.append({
+            "key": c.key, "label": c.label, "unit": c.unit,
+            "low": min(a, b), "high": max(a, b), "is_point": c.low == c.high,
+            "per_10pct_low": c.low, "per_10pct_high": c.high,
+            "source": c.source, "source_url": c.source_url, "year": c.year, "quote": c.quote, "corroboration": c.corroboration,
+        })
+    return {"scale_vs_10pct_year": scale, "items": items}
 
 
 def tonne_mile_change_pct(baseline_voyage_days: float, detour_days: float) -> float:

@@ -7,6 +7,7 @@ import type {
   ChokepointRisk,
   ConflictEvent,
   RefineryHub,
+  ReportResponse,
   RouteDetail,
   RouteNews,
   RoutesResponse,
@@ -64,6 +65,42 @@ export interface ReportRequest {
   detour_days: number | null;
   duration_days: number;
   lithium_availability_pct: number;
+  conflict_intensity?: number;
+  demand_change_pct?: number;
+  ev_substitution_rate_pct?: number;
+  fleet_constrained?: boolean;
+  horizon_years?: number;
+  baseline_year?: number | null;
+}
+
+/** An API error that keeps the HTTP status and the backend's own message (e.g. "pipeline ... cannot be simulated"). */
+export class ApiError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
+
+/** The full scenario report for the Results page. 4xx replies carry a human-readable `detail` from the backend. */
+export async function simulateReport(req: ReportRequest): Promise<ReportResponse> {
+  const res = await fetch(`${API_BASE}/simulate/report`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(req),
+  });
+  if (!res.ok) {
+    let detail = `The server answered ${res.status}.`;
+    try {
+      const body = await res.json();
+      if (typeof body.detail === "string") detail = body.detail;
+      else if (Array.isArray(body.detail)) detail = body.detail.map((d: { loc?: string[]; msg?: string }) => `${(d.loc ?? []).slice(1).join(".")}: ${d.msg}`).join("; ");
+    } catch {
+      /* keep the generic message */
+    }
+    throw new ApiError(res.status, detail);
+  }
+  return res.json() as Promise<ReportResponse>;
 }
 
 /** Only the fields the scenario controls need from POST /simulate/report (the Results page reads the rest in M5). */

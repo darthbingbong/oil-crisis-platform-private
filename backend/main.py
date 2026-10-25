@@ -30,6 +30,7 @@ interactive UI to test both endpoints without writing any frontend code yet)
 import asyncio
 import json
 import logging
+import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
@@ -53,6 +54,8 @@ from refineries import capacity_at_risk_bpd, capacity_at_risk_pct_of_global, loa
 from routers import news as route_news_router
 from routers import report as report_router
 from routers import routes as routes_router
+from services.news_feed import warm_cache
+from services.route_data import all_routes
 
 from news import db as news_db
 from news import price_engine
@@ -71,8 +74,15 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 async def lifespan(app: FastAPI):
     news_db.init_db()
     poller_task = asyncio.create_task(poll_loop())
+    # Route-news cache warm-up: one route at a time, at least 6 s apart, so the first click in a demo is instant.
+    # Set NEWS_WARMUP=0 to disable (e.g. to measure a cold start).
+    warmup_task = None
+    if os.environ.get("NEWS_WARMUP", "1") != "0":
+        warmup_task = asyncio.create_task(warm_cache(all_routes()))
     yield
     poller_task.cancel()
+    if warmup_task is not None:
+        warmup_task.cancel()
 
 
 app = FastAPI(title="Oil Crisis Simulation API", lifespan=lifespan)

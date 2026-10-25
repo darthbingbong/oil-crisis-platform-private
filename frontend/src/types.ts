@@ -221,6 +221,8 @@ export interface RouteNews {
   items: NewsItem[];
   count: number;
   stale: boolean;
+  /** true: the last cached result is shown at once while a fresh one is fetched in the background. */
+  refreshing: boolean;
   feed: "gdelt";
   feed_status: "ok" | "empty" | "stale" | "unavailable";
   last_updated: string | null;
@@ -237,4 +239,150 @@ export interface RouteScenarioPrefill {
   blockedSharePct: number;
   detourDays: number;
   nonce: number;
+  /** Set when restoring from the Results page ("Edit scenario"); the route panel's button leaves these to the defaults. */
+  detourUserSet?: boolean;
+  durationDays?: number;
+  lithiumAvailabilityPct?: number;
+  conflictIntensity?: number;
+  demandChangePct?: number;
+  evSubstitutionPct?: number;
+  horizonYears?: number;
+  fleetConstrained?: boolean;
+  baselineYear?: number | null;
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/v1/simulate/report (backend/services/report.py). Only the fields the Results page reads are typed.
+// ---------------------------------------------------------------------------
+export interface Assumption {
+  text: string;
+  source: string | null;
+  source_url: string | null;
+  is_estimate: boolean;
+}
+
+export interface ReportSectionBase {
+  title: string;
+  summary: string;
+  takeaway: string;
+  assumptions: Assumption[];
+}
+
+export interface TrajectoryPoint {
+  day: number;
+  pct: number;
+  low: number | null;
+  high: number | null;
+  beyond_validated: boolean;
+}
+
+export interface ValidatedReference {
+  name: string;
+  date: string;
+  supply_loss_pct: number;
+  actual_price_move_pct: number;
+  n_events: number;
+  note: string | null;
+}
+
+export interface BypassCase {
+  label: string;
+  bypass_bpd: number;
+  displaced_bpd: number;
+  supply_loss_pct: number;
+  price_impact_pct: number;
+}
+
+export interface MacroItem {
+  key: string;
+  label: string;
+  unit: string;
+  low: number;
+  high: number;
+  is_point: boolean;
+  per_10pct_low: number;
+  per_10pct_high: number;
+  source: string;
+  source_url: string;
+  year: number;
+  quote: string;
+  corroboration: string;
+}
+
+export interface ReportResponse {
+  scenario: {
+    route_id: string;
+    route_name: string;
+    disruption_type: "blockade" | "detour";
+    blocked_share_pct: number;
+    detour_days: number;
+    detour_days_default: number | null;
+    detour_days_source: "user" | "route default";
+    duration_days: number;
+    conflict_intensity: number;
+    demand_change_pct: number;
+    ev_substitution_rate_pct: number;
+    lithium_availability_pct: number;
+    fleet_constrained: boolean;
+    horizon_years: number;
+    baseline_year: number;
+  };
+  baseline: { route_id: string; route_name: string; year: number; flow_bpd: number; label: string; note: string | null; depressed_by_red_sea: boolean };
+  current_conditions: CurrentConditions;
+  kpis: {
+    price_impact_pct: number;
+    price_band_pp: number | null;
+    outside_validated_range: boolean;
+    validated_note: string | null;
+    displaced_bpd: number;
+    evs_required: number;
+    extra_lithium_t_lce: number;
+    extra_lithium_range_t_lce: [number, number];
+    lithium_deficit_t_lce: number;
+    lithium_headline_case: string;
+    horizon_years: number;
+  };
+  caveats: string[];
+  validated_supply_loss_max_pct: number;
+  validated_reference: ValidatedReference;
+  sections: {
+    barrels: ReportSectionBase & {
+      chart: { series: { day: number; daily_bbl: number; cumulative_bbl: number }[] };
+      numbers: { displaced_bpd: number; supply_loss_pct: number; transit_gap_bbl: number; baseline_voyage_days?: number; delivery_factor?: number };
+    };
+    price: ReportSectionBase & {
+      chart: { trajectory: TrajectoryPoint[]; half_life_days: number; band_validated: boolean; validated_price_ceiling_pct: number; validated_reference: ValidatedReference };
+      sensitivity: BypassCase[];
+    };
+    evs: ReportSectionBase & {
+      chart: {
+        horizons: { years: number; total_evs: number; evs_per_year: number; x_current_global_production: number; x_current_global_sales: number }[];
+        current_global_sales: number;
+        current_global_production: number;
+        current_data_year: number;
+        source: string;
+        source_url: string;
+      };
+    };
+    lithium: ReportSectionBase & {
+      chart: {
+        cases: Record<"project" | "sourced", { label: string; lce_t_per_ev: number; required_t_lce: number; deficit_t_lce: number; supply_cap_over_horizon_t_lce: number; supply_cap_per_year_t_lce: number; pct_of_world_production_per_year: number }>;
+        headline_case: string;
+        pack_cases: { label: string; pack_kwh: number; lce_t_per_ev: number; required_t_lce: number; deficit_t_lce: number }[];
+        range_t_lce: [number, number];
+        world_production_2025_t_lce: number;
+        chemistry_caveat: string;
+      };
+    };
+    importers: ReportSectionBase & {
+      chart: { importers: { name: string; iso3: string | null; level: string; derived: boolean; share_of_route_flow_pct: number; shortfall_bpd: number; reserve_cover_days: number | null }[]; label: string };
+    };
+    economy: ReportSectionBase & {
+      chart: {
+        items: MacroItem[];
+        hard_numbers: { label: string; value: number; unit: string }[];
+        sectors: { sector: string; direction: string; quantified: boolean; note: string }[];
+      };
+    };
+  };
 }

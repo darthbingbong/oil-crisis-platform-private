@@ -19,8 +19,10 @@
 | GET | `/api/v1/routes` | new | All 14 routes with illustrative geometry and summary stats |
 | GET | `/api/v1/routes/{id}` | **superset of the old endpoint** | Old bypass keys (`chokepoint`, `capacity_at_risk_bpd`, `affected_hubs`, `bypass_options`, `fast_bypass_capacity_bpd`, `uncovered_capacity_bpd`, `explanation`) keep the same key, value and type; route stats are added alongside. Accepts old spellings (`hormuz`, `Hormuz`, `bab%20el-mandeb`) and new ids (`bab_el_mandeb`) |
 | GET | `/api/v1/routes/{id}/bypass` | new | The original bypass payload only |
-| POST | `/api/v1/simulate/report` | new | Full scenario report for the Results page |
-| GET | `/api/v1/routes/{id}/news`, `/price/*`, `/health`, WS `/ws/vessels` | planned | Milestones M4, M6, M7 |
+| POST | `/api/v1/simulate/report` | new | Full scenario report for the Results page: KPIs, six sections each with chart data, a templated 2-4 sentence summary, a one-line takeaway and cited assumptions. Rejects (422, with a plain message) pipelines, routes with no sourced figure and the Cape alternate lane |
+| GET | `/api/v1/routes/{id}/news` | new (M4) | Tagged headlines (title, source, date, link only) from GDELT; cached 20 min; `stale` / `refreshing` when the live feed is down or being refreshed |
+| POST | `/api/v1/dev/news-feed` | new, DEV-ONLY | Simulate a feed failure, an empty feed, or an aged cache |
+| GET | `/api/v1/price/*`, `/api/v1/health`, WS `/ws/vessels` | planned | Milestones M6, M7 |
 
 **Route-collision decision: Option A.** `/api/v1/routes/{id}` returns a superset of what `/api/v1/routes/{chokepoint}`
 returned before. `backend/tests/test_routes_api.py` checks it against snapshots of the original responses
@@ -127,3 +129,39 @@ recall is deliberately low because the headline must name the route.
 With `fail` and an aged cache the backend returned the same 2 headlines with `stale: true` and the original 07:02 UTC time; with nothing cached it
 said so; with `empty` it showed the empty message. Screenshots: `docs/m4_screenshots/` (`11_news_normal`, `12_news_stale`,
 `13_news_unavailable_nothing_cached`, `14_news_empty`), produced by `frontend/e2e/news_states.mjs`.
+
+## Results page (Milestone 5)
+
+`/results` is the full report for one scenario. **The whole scenario is in the address**, so a refresh or a shared link restores the same page:
+
+`/results?route=suez&type=detour&detour=20&dur=60&conf=5&dem=0&ev=100&li=10&horizon=5`
+
+| Param | Meaning | Allowed |
+|---|---|---|
+| `route` | route id (required) | any simulatable route; `bab el-mandeb`, `Bab-el-Mandeb` and `bab_el_mandeb` are the same |
+| `type` | `blockade` or `detour` | default `blockade` |
+| `share` | % of the route blocked (blockade) | 0 to 100, default 100 |
+| `detour` | extra voyage days (detour) | 0 to 120; **omit it to use the route's derived default**, and the page then says so |
+| `dur` | disruption length in days | above 0 up to 730, default 30 |
+| `conf`, `dem` | conflict intensity, demand change % | 0 to 10, -50 to 50 |
+| `ev` | % of lost fuel demand replaced by EVs | 0 to 100, default 100 |
+| `li` | % of world lithium production available (the supply cap) | 0 to 100, default 10 |
+| `horizon` | years for the headline EV and lithium numbers | 1 to 10, default 5 |
+| `fleet`, `by` | `0` = tanker fleet can expand; baseline-year override | optional |
+
+A bad value gets a plain list of what is wrong and a way back to the map (no crash, no request). Pipelines, routes with no sourced figure and the Cape
+of Good Hope alternate lane are explained, not errored. "Back to map" returns to the globe; "Edit scenario" returns to the map with every control restored.
+
+Page layout: header (route, baseline year, the user's detour days next to the route's derived default, the current-conditions note with the EIA links),
+a KPI strip (price impact, barrels per day displaced, EVs required, extra lithium, lithium deficit; the "outside the validated range" warning sits here when it
+applies), then six sections, each with a chart, a 2-4 sentence summary written by the backend from computed numbers, a one-line takeaway and a collapsible
+"Assumptions and sources" block. The price chart draws the part beyond the validated range dashed on a shaded zone, shows the reference event (the 2026 Iran war,
+labelled a soft figure, still unfolding), shows the Hormuz bypass sensitivity (4.7 vs 2.6 Mb/d), and replaces the plus or minus 13.09 pp band with
+"not validated at this magnitude" beyond 8% supply loss. The economy section shows an effect only where a coefficient has a cited primary source.
+
+**Tests.** `backend/tests/test_report_consistency.py` checks that every number quoted in a summary, takeaway or warning matches a value in the report payload
+(across nine scenarios, with a guard test proving it catches a wrong number) and that every summary is 2 to 4 sentences. Browser checks are in
+`frontend/e2e/results_page.mjs` and `m5_flow.mjs`; screenshots are in `docs/m5_screenshots/`. Known limitations: `LIMITATIONS_AND_FUTURE_WORK.md`.
+
+**News warm-up.** At startup the backend fetches route news one route at a time, at least 6 s apart (with the 429 back-off), so the first click in a demo does not wait
+10 to 20 s or more. Set `NEWS_WARMUP=0` to disable it. Measured: with an empty cache the first request took 44.5 s (Bab el-Mandeb) and 68.8 s then 17.6 s (Hormuz, whose first attempt failed); once cached, 0.017 s. A full warm-up pass over 14 routes fetched 5, found 2 already fresh and **7 failed** (GDELT answered 429 or timed out on every retry), so a route can still start cold; afterwards cached clicks took 14 to 24 ms, and an expired entry was shown at once (about 0.5 s, marked stale and refreshing) while a refresh ran in the background.

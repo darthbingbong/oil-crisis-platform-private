@@ -22,7 +22,8 @@ async def route_news(route_id: str):
     route = get_route(route_id)
     if route is None:
         raise HTTPException(status_code=404, detail=f"Unknown route '{route_id}'")
-    return await get_route_news(route)
+    # an expired cached result is returned at once (marked stale + refreshing) while a fresh one is fetched in the background
+    return await get_route_news(route, stale_while_revalidate=True)
 
 
 class NewsSimulation(BaseModel):

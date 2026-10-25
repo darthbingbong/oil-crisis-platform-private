@@ -181,11 +181,42 @@ def test_report_route_without_importer_data_does_not_invent_any():
     assert "No sourced importer breakdown" in j2["sections"]["importers"]["summary"]
 
 
-def test_report_economy_is_ranges_never_points():
+def test_report_economy_shows_only_cited_coefficients_plus_hard_numbers():
     j = post(route_id="hormuz", duration_days=365).json()
-    for row in j["sections"]["economy"]["chart"]["ranges"][:2]:
-        assert row["low"] < row["high"]
-    assert any(s["quantified"] is False for s in j["sections"]["economy"]["chart"]["sectors"])
+    eco = j["sections"]["economy"]["chart"]
+    assert {i["key"] for i in eco["items"]} == {"global_inflation_pp", "global_output_pct"}
+    for i in eco["items"]:
+        assert i["source_url"].startswith("https://www.imf.org/") and i["year"] and i["quote"]   # exact figure's source, year, link
+    output = next(i for i in eco["items"] if i["key"] == "global_output_pct")
+    assert output["low"] < output["high"]                                                     # IMF gave a range for output
+    assert any(s["quantified"] is False and "No sourced coefficient" in s["note"] for s in eco["sectors"])
+    assert {h["label"] for h in eco["hard_numbers"]} >= {"Barrels displaced per day", "Supply loss"}
+
+
+def test_report_economy_never_uses_the_unverified_figures():
+    j = post(route_id="hormuz", duration_days=365).json()
+    text = json.dumps(j["sections"]["economy"])
+    assert "World Bank PRWP" not in text.replace("Not shown", "") .split("assumptions")[0]    # not in any figure or summary
+    assert "MENAP" not in j["sections"]["economy"]["summary"] and "importer" not in j["sections"]["economy"]["takeaway"].lower()
+
+
+def test_cape_lane_is_rejected_as_not_a_route_you_would_disrupt():
+    for body in (dict(route_id="cape_good_hope"), dict(route_id="cape_good_hope", disruption_type="detour", detour_days=5)):
+        r = post(**body)
+        assert r.status_code == 422 and "alternate lane" in r.json()["detail"]
+
+
+def test_report_records_the_users_detour_days_next_to_the_route_default():
+    user = post(route_id="suez", disruption_type="detour", detour_days=20).json()["scenario"]
+    assert user["detour_days"] == 20 and user["detour_days_source"] == "user" and user["detour_days_default"] == pytest.approx(12.7)
+    dflt = post(route_id="suez", disruption_type="detour").json()["scenario"]
+    assert dflt["detour_days"] == pytest.approx(12.7) and dflt["detour_days_source"] == "route default"
+
+
+def test_report_ev_section_compares_with_sourced_production_and_year():
+    c = post(route_id="suez", disruption_type="detour", detour_days=20).json()["sections"]["evs"]
+    assert c["chart"]["current_data_year"] == 2025 and c["chart"]["current_global_production"] == 22_000_000
+    assert "2025" in c["summary"] and "IEA" in c["summary"] and "produced worldwide" in c["summary"]
 
 
 def test_report_is_deterministic():
@@ -247,7 +278,7 @@ def test_band_hidden_and_flagged_outside_validated_range():
     assert all(pt["low"] is None and pt["high"] is None for pt in p["chart"]["trajectory"])
     assert any(pt["beyond_validated"] for pt in p["chart"]["trajectory"])
     assert p["chart"]["validated_price_ceiling_pct"] == pytest.approx(8 / 0.15)
-    assert "NOT shown" in p["summary"] and "not validated at this magnitude" in p["summary"]
+    assert "not validated at this magnitude" in p["summary"] and "is not shown" in p["summary"]
 
 
 def test_band_shown_inside_validated_range():
@@ -278,4 +309,5 @@ def test_lithium_range_uses_other_iea_pack_sizes_and_states_the_chemistry_caveat
     assert low == c["cases"]["sourced"]["required_t_lce"] and high / low == pytest.approx(90 / 60)
     assert j["kpis"]["extra_lithium_range_t_lce"] == [low, high]
     assert "NMC-811" in c["chemistry_caveat"] and "LFP" in c["chemistry_caveat"]
-    assert "NMC-811" in j["sections"]["lithium"]["summary"]
+    # the caveat now lives beside the availability control (chart payload), not repeated inside the 2-4 sentence summary
+    assert f"{low:,.0f} to {high:,.0f}" in j["sections"]["lithium"]["summary"]

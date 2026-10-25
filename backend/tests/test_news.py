@@ -355,7 +355,9 @@ def test_simulated_failure_serves_stale_then_recovers(monkeypatch):
     assert stale["stale"] is True and stale["items"] == ok["items"] and stale["last_updated"] == ok["last_updated"]
     client.post("/api/v1/dev/news-feed", json={"mode": "off"})
     again = client.get("/api/v1/routes/hormuz/news").json()
-    assert again["stale"] is False and again["feed_status"] == "ok"
+    # the entry is still expired, so the endpoint now answers at once with the last result, marked refreshing, instead of making
+    # the user wait for the feed (recovery to a fresh result is covered by the async stale-while-revalidate tests above)
+    assert again["stale"] is True and again["refreshing"] is True and again["items"] == ok["items"]
 
 
 def test_simulated_empty_feed_shows_the_empty_message_and_keeps_the_real_cache(monkeypatch):
@@ -371,3 +373,101 @@ def test_simulated_empty_feed_shows_the_empty_message_and_keeps_the_real_cache(m
 
 def test_dev_switch_rejects_unknown_modes():
     assert client.post("/api/v1/dev/news-feed", json={"mode": "chaos"}).status_code == 422
+
+
+# ------------------------------------------------------------------ stale-while-revalidate and startup warm-up
+def test_expired_cache_is_returned_immediately_while_a_refresh_runs_in_the_background():
+    import time
+
+    async def scenario():
+        clock = Clock()
+        cache = TTLCache(None, 1200, clock)
+        calls = {"n": 0}
+
+        async def slow_fetch(q):
+            calls["n"] += 1
+            await asyncio.sleep(0.3 if calls["n"] > 1 else 0)          # the refresh is slow, like the real feed
+            return [rec(f"Hormuz tanker traffic slows, update {calls['n']}")]
+
+        first = await nf.get_route_news(HORMUZ, cache=cache, fetch=slow_fetch)
+        clock.t += 5000                                                   # expired
+        t0 = time.monotonic()
+        quick = await nf.get_route_news(HORMUZ, cache=cache, fetch=slow_fetch, stale_while_revalidate=True)
+        elapsed = time.monotonic() - t0
+        await asyncio.sleep(0.6)                                          # let the background refresh finish
+        later = await nf.get_route_news(HORMUZ, cache=cache, fetch=slow_fetch, stale_while_revalidate=True)
+        return first, quick, elapsed, later, calls["n"]
+
+    first, quick, elapsed, later, n = run(scenario())
+    assert elapsed < 0.15                                                 # did not wait for the 0.3 s refresh
+    assert quick["stale"] is True and quick["refreshing"] is True and quick["items"] == first["items"]
+    assert quick["last_updated"] == first["last_updated"]
+    assert later["stale"] is False and later["refreshing"] is False and later["items"][0]["title"].endswith("update 2")
+    assert n == 2                                                         # one refresh, not one per request
+
+
+def test_only_one_background_refresh_runs_per_route_at_a_time():
+    async def scenario():
+        clock = Clock()
+        cache = TTLCache(None, 1200, clock)
+        n = {"calls": 0}
+
+        async def fetch(q):
+            n["calls"] += 1
+            await asyncio.sleep(0.2)
+            return [rec("Hormuz tanker traffic slows")]
+
+        await nf.get_route_news(HORMUZ, cache=cache, fetch=fetch)
+        clock.t += 5000
+        for _ in range(5):                                                # five quick clicks while it is stale
+            await nf.get_route_news(HORMUZ, cache=cache, fetch=fetch, stale_while_revalidate=True)
+        await asyncio.sleep(0.5)
+        return n["calls"]
+
+    assert run(scenario()) == 2                                           # the first fetch plus ONE refresh
+
+
+def test_warmup_is_sequential_spaced_ordered_and_skips_fresh_routes():
+    import time
+
+    async def scenario():
+        cache = TTLCache(None, 1200, Clock())
+        cache.put("news_suez", {"items": []})                             # already fresh: must be skipped
+        log, state = [], {"in_flight": 0, "max_in_flight": 0}
+
+        async def fetch(q):
+            state["in_flight"] += 1
+            state["max_in_flight"] = max(state["max_in_flight"], state["in_flight"])
+            log.append(time.monotonic())
+            await asyncio.sleep(0.02)
+            state["in_flight"] -= 1
+            return [rec("Hormuz tanker traffic slows")]
+
+        routes = [{"id": "btc", "name": "BTC"}, {"id": "suez", "name": "Suez"}, {"id": "hormuz", "name": "Strait of Hormuz"},
+                  {"id": "malacca", "name": "Malacca"}]
+        out = await nf.warm_cache(routes, cache=cache, fetch=fetch, gap=0.1, initial_delay=0)
+        return out, log, state
+
+    out, log, state = run(scenario())
+    assert state["max_in_flight"] == 1                                     # never in parallel
+    assert all(b - a >= 0.1 for a, b in zip(log, log[1:]))                 # at least `gap` apart
+    assert out["already_fresh"] == ["suez"] and len(out["fetched"]) + len(out["failed"]) == 3
+    assert (out["fetched"] + out["failed"])[:2] == ["hormuz", "malacca"]   # priority routes first, then the rest
+
+
+def test_warmup_carries_on_after_a_failed_route():
+    async def scenario():
+        cache = TTLCache(None, 1200, Clock())
+        seen = []
+
+        async def fetch(q):
+            seen.append(q)
+            if len(seen) == 1:
+                raise nf.FeedError("HTTP 429")
+            return [rec("Bab el-Mandeb tanker traffic slows")]
+
+        routes = [{"id": "hormuz", "name": "Strait of Hormuz"}, {"id": "bab_el_mandeb", "name": "Bab el-Mandeb"}]
+        return await nf.warm_cache(routes, cache=cache, fetch=fetch, gap=0, initial_delay=0), len(seen)
+
+    out, n = run(scenario())
+    assert out["failed"] == ["hormuz"] and out["fetched"] == ["bab_el_mandeb"] and n == 2

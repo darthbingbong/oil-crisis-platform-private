@@ -11,7 +11,44 @@ EIA_CHOKEPOINTS_URL = "https://www.eia.gov/international/content/analysis/specia
 ICCT_URL = "https://theicct.org/wp-content/uploads/2024/02/ID-85-%E2%80%93-EV-supply-chain-Report-Letter-70112-v3.pdf"
 IEA_GEVO_URL = "https://www.iea.org/reports/global-ev-outlook-2026"
 USGS_LITHIUM_URL = "https://pubs.usgs.gov/periodicals/mcs2026/mcs2026-lithium.pdf"
-IMF_RULE_URL = "https://www.bloomberg.com/news/articles/2026-03-06/imf-says-ready-to-help-economies-squeezed-by-mideast-oil-shock"
+IMF_SPEECH_URL = "https://www.imf.org/en/news/articles/2026/03/09/sp030926-coping-and-thriving-in-a-fluid-world"
+IMF_WP17196_URL = "https://www.imf.org/en/publications/wp/issues/2017/09/05/oil-prices-and-inflation-dynamics-evidence-from-advanced-and-developing-economies-45180"
+
+
+@dataclass(frozen=True)
+class MacroCoefficient:
+    """One cited rule of thumb: effect of a +10% oil price rise. A coefficient with no verified source is not allowed here."""
+    key: str
+    label: str
+    unit: str            # "pp" (percentage points) or "% of output"
+    low: float           # equal to high when the source gives a single point
+    high: float
+    source: str
+    source_url: str
+    year: int
+    quote: str           # the exact sentence the figure comes from
+    corroboration: str = ""
+
+
+# Verified against the primary source on 2026-10-25 (the page text was read, not a search summary).
+# NOT included because no primary source was verified: World Bank 0.5 pp (PRWP 10648) and the IMF MENAP importer figures
+# (-0.5 pp output, +1.0 pp inflation): the regional-outlook PDF could not be retrieved, so they are left out rather than guessed.
+MACRO_COEFFICIENTS = (
+    MacroCoefficient(
+        key="global_inflation_pp", label="Global headline inflation", unit="pp", low=0.4, high=0.4,
+        source="IMF Managing Director K. Georgieva, keynote speech, Japan Ministry of Finance symposium", source_url=IMF_SPEECH_URL, year=2026,
+        quote="Every 10 percent increase in oil prices results in a 40 basis point increase in global headline inflation "
+              "[assuming the increase lasts through most of the year].",
+        corroboration="IMF Working Paper 17/196 (Choi, Furceri, Loungani, Mishra, Ribeiro, 2017): a 10% rise in global oil inflation lifts "
+                      "domestic inflation by about 0.4 percentage point on impact, fading within roughly two years.",
+    ),
+    MacroCoefficient(
+        key="global_output_pct", label="Global output", unit="% of output", low=-0.2, high=-0.1,
+        source="IMF Managing Director K. Georgieva, keynote speech, Japan Ministry of Finance symposium", source_url=IMF_SPEECH_URL, year=2026,
+        quote="Every 10 percent increase in oil prices results in ... a 0.1-0.2 percent fall in global output "
+              "[assuming the increase lasts through most of the year].",
+    ),
+)
 
 
 @dataclass(frozen=True)
@@ -67,20 +104,13 @@ class CalcConfig:
     world_li_production_t_li: float = 290_000.0
     world_li_reserves_t_li: float = 37_000_000.0
 
-    # --- macro rules of thumb (indicative) --------------------------------
-    # IMF (Mar 2026): a 10% oil price rise sustained through most of a year adds ~0.4 pp to global
-    # headline inflation (World Bank WP 10648 gives ~0.5 pp over 2-3 years) and cuts global output
-    # by 0.1-0.2%. Values below are PER +10% OIL PRICE, as (low, high). Source sentences differ on
-    # whether the growth effect is in % or pp; treated as pp of growth.
-    gdp_growth_pp_per_10pct: tuple = (-0.2, -0.1)
-    inflation_pp_per_10pct: tuple = (0.4, 0.5)
-    # IMF MENAP regional outlook 2026: for the average oil-importing economy a 10% rise gives
-    # about -0.5 pp output and +1.0 pp inflation (single points, no range published).
-    importer_gdp_pp_per_10pct: tuple = (-0.5, -0.5)
-    importer_inflation_pp_per_10pct: tuple = (1.0, 1.0)
-    # ASSUMPTION: the IMF coefficients are for a shock lasting about a year, so effects are scaled
-    # by min(duration_days, 365) / 365.
+    # --- macro rules of thumb (indicative; every coefficient is cited in MACRO_COEFFICIENTS above) ---
+    macro_coefficients: tuple = MACRO_COEFFICIENTS
+    # ASSUMPTION: the IMF figures assume the oil price rise lasts through most of a year, so effects are scaled linearly
+    # by min(duration_days, 365) / 365 (the source gives no figure for shorter shocks).
     macro_full_effect_days: float = 365.0
+    # Year of the EV sales/production figures above (IEA Global EV Outlook 2026).
+    current_ev_data_year: int = 2025
 
 
 DEFAULT_CONFIG = CalcConfig()

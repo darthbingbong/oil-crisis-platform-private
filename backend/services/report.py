@@ -4,7 +4,7 @@ Summaries are deterministic templates filled with the computed numbers, so text 
 """
 
 from . import calc_engine as ce
-from .config import DEFAULT_CONFIG, EIA_CHOKEPOINTS_URL, ICCT_URL, IEA_GEVO_URL, IMF_RULE_URL, USGS_LITHIUM_URL, CalcConfig
+from .config import DEFAULT_CONFIG, EIA_CHOKEPOINTS_URL, ICCT_URL, IEA_GEVO_URL, USGS_LITHIUM_URL, CalcConfig
 from .route_data import lithium_doc, routes_doc, validated_reference, validated_supply_loss_max_pct
 
 
@@ -46,13 +46,19 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
             f"Route '{route['id']}' is a pipeline with nameplate capacity only; no sourced throughput exists, "
             "so a disruption cannot be sized. Simulate a chokepoint or sea lane instead.")
 
+    if route["type"] == "sea_lane":
+        raise ScenarioError(
+            f"'{route['name']}' is the alternate lane used when Suez / Bab el-Mandeb traffic is rerouted, not a route you would "
+            "disrupt. Simulate Suez or Bab el-Mandeb with a detour instead.")
+
     req = dict(req)
     year = str(req.get("baseline_year") or route["baseline_year"])
     flows = route["flow_by_year_bpd"]
     if year not in flows:
         raise ScenarioError(f"No {year} flow stored for '{route['id']}'. Available: {sorted(flows)}")
     flow = float(flows[year])
-    if req.get("detour_days") is None:
+    user_detour = req.get("detour_days")
+    if user_detour is None:
         req["detour_days"] = route.get("default_detour_days", 0.0)
     bypass_known = route.get("bypass_capacity_bpd") is not None
     bypass = float(route.get("bypass_capacity_bpd") or 0.0)
@@ -134,7 +140,8 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
             + (f", including a one-time transit gap of {_mb(gap)} barrels while longer voyages refill." if gap else ".")),
         "takeaway": f"{_n(displaced)} barrels per day displaced ({loss:.2f}% of world supply).",
         "chart": {"series": dseries},
-        "numbers": {"displaced_bpd": displaced, "supply_loss_pct": loss, "transit_gap_bbl": gap, **detail},
+        "numbers": {"displaced_bpd": displaced, "supply_loss_pct": loss, "transit_gap_bbl": gap,
+                    "global_supply_bpd": cfg.global_supply_bpd, "cumulative_bbl": dseries[-1]["cumulative_bbl"], **detail},
         "assumptions": [
             _a(f"Baseline flow {_n(flow)} bpd, {year}.", "EIA, World Oil Transit Chokepoints", EIA_CHOKEPOINTS_URL),
             _a(f"World supply {_n(cfg.global_supply_bpd)} bpd (2024).", "EIA, World Oil Transit Chokepoints, Table 1", EIA_CHOKEPOINTS_URL),
@@ -149,17 +156,17 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
     }
 
     pk = traj[int(min(dur, cfg.trajectory_days))]["pct"]
-    band_txt = (f"The shaded band is plus or minus {cfg.price_band_pp:g} percentage points, the formula's average error across 21 historical events."
-                if not outside else
-                f"The plus or minus {cfg.price_band_pp:g} percentage point error band is NOT shown: it was measured on events up to {vmax:g}% supply loss, and this "
-                "scenario is beyond that, so the band is not validated at this magnitude.")
+    core = (f"For a {loss:.2f}% supply loss the linear formula implies about a {price:+.1f}% price move (supply loss divided by {cfg.elasticity_abs}), "
+            f"held for {format(dur, 'g')} days and then decaying toward baseline with a {hl:g}-day half-life.")
+    if outside:
+        second = (f"This is outside the validated range: the largest validated event, {ref['name']}, had a supply loss of {ref['supply_loss_pct']:g}% and an actual "
+                  f"price move of {ref['actual_price_move_pct']:+.1f}%, and the plus or minus {cfg.price_band_pp:g} percentage point error band, measured only on events "
+                  f"up to {vmax:g}% supply loss, is not validated at this magnitude and is not shown.")
+    else:
+        second = f"The shaded band is plus or minus {cfg.price_band_pp:g} percentage points, the formula's average error across {ref['n_events']} historical events."
     s_price = {
         "title": "Oil price trajectory",
-        "summary": (
-            f"For a {loss:.2f}% supply loss the linear formula implies about a {price:+.1f}% price move (supply loss divided by {cfg.elasticity_abs}). "
-            f"The formula holds that level for {format(dur, 'g')} days, then decays toward baseline with a {hl:g}-day half-life. " + band_txt
-            + (f" This is outside the validated range: the largest validated event, {ref['name']}, had a {ref['supply_loss_pct']:g}% supply loss and an actual "
-               f"price move of {ref['actual_price_move_pct']:+.1f}%. The linear formula implies {price:+.1f}% here, which is an extrapolation, not a forecast." if outside else "")),
+        "summary": core + " " + second,
         "takeaway": (f"The linear formula implies a peak of {pk:+.1f}%, outside the validated range (largest validated event: {ref['actual_price_move_pct']:+.1f}% at {ref['supply_loss_pct']:g}% supply loss)."
                      if outside else f"The linear formula implies a peak of {pk:+.1f}%, with a ±{cfg.price_band_pp:g} pp band."),
         "chart": {"trajectory": traj, "half_life_days": hl, "band_validated": not outside,
@@ -168,9 +175,9 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
                     "outside_validated_range": outside, "validated_supply_loss_max_pct": vmax},
         "sensitivity": sensitivity,
         "assumptions": [
-            _a(f"%dP = %dS / |Ed|, Ed = -{cfg.elasticity_abs} (borrowed textbook short-run value). Phase 1 tested a trained model on 21 events and it did not beat this formula.",
+            _a(f"%dP = %dS / |Ed|, Ed = -{cfg.elasticity_abs} (borrowed textbook short-run value). Phase 1 tested a trained model on {ref['n_events']} events and it did not beat this formula.",
                "backend/PHASE1_SUMMARY.md; phase1_analysis.py"),
-            _a(f"Band of ±{cfg.price_band_pp} pp = leave-one-out mean absolute error of the formula on 21 daily-resolution events, all with supply loss up to {vmax:g}% (small sample). It does not apply beyond that.",
+            _a(f"Band of ±{cfg.price_band_pp} pp = leave-one-out mean absolute error of the formula on {ref['n_events']} daily-resolution events, all with supply loss up to {vmax:g}% (small sample). It does not apply beyond that.",
                "phase1_analysis.py output: 13.09 pp"),
             _a(f"Exponential decay after the disruption with a {hl:g}-day half-life (default: half the duration, clamped to {cfg.half_life_min_days:g} to {cfg.half_life_max_days:g} days).",
                is_estimate=True),
@@ -180,27 +187,29 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
     caveats = ce.price_caveats(loss, req["conflict_intensity"], req["demand_change_pct"])
     if outside:
         caveats.insert(0, (
-            f"Outside the validated range: this scenario removes {loss:.1f}% of world supply, but the 21 events the formula's error band was "
+            f"Outside the validated range: this scenario removes {loss:.1f}% of world supply, but the {ref['n_events']} events the formula's error band was "
             f"measured on reach at most {vmax:g}%. The linear formula is extrapolated far beyond that evidence, so treat the price figure as an "
-            "order-of-magnitude illustration; the ±13 pp band understates the real uncertainty here."))
+            f"order-of-magnitude illustration; the ±{cfg.price_band_pp:g} pp band understates the real uncertainty here."))
     if sensitivity and len(sensitivity) > 1:
         lo_case = sensitivity[1]
         s_price["summary"] += (f" The blockade result depends on the bypass assumption: with the headline {_mb(sensitivity[0]['bypass_bpd'])} barrels per day of "
                                f"pipeline bypass the price impact is {sensitivity[0]['price_impact_pct']:+.1f}%, with the lower {_mb(lo_case['bypass_bpd'])} case it is "
                                f"{lo_case['price_impact_pct']:+.1f}%.")
 
+    prod_x = [x["x_current_global_production"] for x in horizons]
     s_evs = {
         "title": "EVs required",
         "summary": (
             f"Offsetting {_n(displaced)} barrels per day of lost crude would take about {_mb(evs)} electric cars replacing gasoline cars "
             f"(at a {req['ev_substitution_rate_pct']:g}% substitution rate). Delivered over 1, 3 or 5 years that is "
             f"{_mb(horizons[0]['evs_per_year'])}, {_mb(horizons[1]['evs_per_year'])} or {_mb(horizons[2]['evs_per_year'])} extra EVs per year, "
-            f"or {horizons[0]['x_current_global_sales']:.1f}, {horizons[1]['x_current_global_sales']:.1f} and {horizons[2]['x_current_global_sales']:.1f} times "
-            f"today's global sales of about {_mb(cfg.current_global_ev_sales_per_year)} a year."),
-        "takeaway": f"{_mb(evs)} EVs needed; a {h}-year plan is {horizons[[x['years'] for x in horizons].index(h)]['x_current_global_sales']:.1f}x today's annual sales."
-        if h in cfg.horizons_years else f"{_mb(evs)} EVs needed.",
+            f"or {prod_x[0]:.1f}, {prod_x[1]:.1f} and {prod_x[2]:.1f} times the roughly {_mb(cfg.current_global_ev_production_per_year)} electric cars "
+            f"produced worldwide in {cfg.current_ev_data_year} (IEA Global EV Outlook 2026)."),
+        "takeaway": (f"{_mb(evs)} EVs needed; a {h}-year plan is {prod_x[[x['years'] for x in horizons].index(h)]:.1f}x the {cfg.current_ev_data_year} global EV production."
+                     if h in cfg.horizons_years else f"{_mb(evs)} EVs needed."),
         "chart": {"horizons": horizons, "current_global_sales": cfg.current_global_ev_sales_per_year,
-                  "current_global_production": cfg.current_global_ev_production_per_year},
+                  "current_global_production": cfg.current_global_ev_production_per_year,
+                  "current_data_year": cfg.current_ev_data_year, "source": "IEA, Global EV Outlook 2026", "source_url": IEA_GEVO_URL},
         "numbers": {"vehicles_offset": evs},
         "assumptions": [
             _a(f"1 barrel of crude yields {cfg.gasoline_gal_per_bbl} gal of gasoline; one gasoline car burns {cfg.gal_per_vehicle_year:g} gal per year. "
@@ -210,21 +219,21 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
         ],
     }
 
+    sourced_vs_project = ce.lce_per_ev_sourced(cfg) / cfg.lce_t_per_ev_project
     s_li = {
         "title": "Lithium required",
         "summary": (
-            f"Building {_mb(evs)} EVs needs about {_n(cases_li['sourced']['required_t_lce'])} tonnes of lithium carbonate equivalent (LCE) using the sourced "
-            f"battery figure, or {_n(cases_li['project']['required_t_lce'])} tonnes using the project's 0.008 t per EV assumption. The sourced case is the headline "
-            f"because it rests on a published lithium-per-kWh figure; the project value is about "
-            f"{cfg.lce_t_per_ev_project and ce.lce_per_ev_sourced(cfg) / cfg.lce_t_per_ev_project:.1f} times lower. Over {h} years the headline case needs "
-            f"{head['pct_of_world_production_per_year']:.0f}% of current world mine production each year ({_n(production_lce)} t LCE in 2025). "
-            f"With {req['lithium_availability_pct']:g}% of that production available the shortfall is {_n(head['deficit_t_lce'])} tonnes LCE. "
-            f"Using the larger EU and US pack sizes instead of 60 kWh, the requirement ranges from {_n(range_low)} to {_n(range_high)} tonnes LCE. {cfg.chemistry_caveat}"),
+            f"Building {_mb(evs)} EVs needs about {_n(cases_li['sourced']['required_t_lce'])} tonnes of lithium carbonate equivalent (LCE) using the sourced battery figure, "
+            f"against {_n(cases_li['project']['required_t_lce'])} tonnes using the project's {cfg.lce_t_per_ev_project:g} t per EV assumption, which is about {sourced_vs_project:.1f} times lower. "
+            f"Over {h} years the headline case needs {head['pct_of_world_production_per_year']:.0f}% of current world mine production each year ({_n(production_lce)} t LCE in 2025), "
+            f"and with {req['lithium_availability_pct']:g}% of that production available the shortfall is {_n(head['deficit_t_lce'])} tonnes LCE. "
+            f"Using the larger EU and US pack sizes instead of {cfg.typical_pack_kwh:g} kWh, the requirement ranges from {_n(range_low)} to {_n(range_high)} tonnes LCE."),
         "takeaway": f"Headline ({head_key}): {_n(head['required_t_lce'])} t LCE needed, deficit {_n(head['deficit_t_lce'])} t LCE.",
         "chart": {"cases": cases_li, "headline_case": head_key, "world_production_2025_t_lce": production_lce,
                   "countries": countries, "pack_cases": pack_cases, "range_t_lce": [range_low, range_high],
                   "chemistry_caveat": cfg.chemistry_caveat},
-        "numbers": {"headline_case": head_key, "lce_t_per_ev_sourced": ce.lce_per_ev_sourced(cfg), "lce_t_per_ev_project": cfg.lce_t_per_ev_project},
+        "numbers": {"headline_case": head_key, "lce_t_per_ev_sourced": ce.lce_per_ev_sourced(cfg), "lce_t_per_ev_project": cfg.lce_t_per_ev_project,
+                    "sourced_vs_project_ratio": sourced_vs_project},
         "assumptions": [
             _a(f"Sourced case: NMC-811 cathodes hold about {cfg.li_kg_per_kwh} kg lithium per kWh; {cfg.typical_pack_kwh:g} kWh pack (IEA: BEV packs below 60 kWh in China, close to 70 in the EU, 90 in the US); x{cfg.lce_per_t_li} to convert lithium to LCE.",
                "ICCT (Feb 2024) p.17; IEA GEVO 2026", ICCT_URL),
@@ -260,39 +269,55 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
     }
 
     scale = macro["scale_vs_10pct_year"]
+    items = {i["key"]: i for i in macro["items"]}
+    inf, out = items["global_inflation_pp"], items["global_output_pct"]
+    hard_numbers = [
+        {"label": "Barrels displaced per day", "value": displaced, "unit": "bpd"},
+        {"label": "Supply loss", "value": loss, "unit": "% of world supply"},
+        {"label": "Oil price change implied by the linear formula", "value": price, "unit": "%"},
+    ]
+    if tonne_mile is not None:
+        hard_numbers.append({"label": "Tanker tonne-miles (longer voyages)", "value": tonne_mile, "unit": "% more"})
+        hard_numbers.append({"label": "One-time transit gap", "value": gap, "unit": "barrels"})
     s_eco = {
         "title": "Economy and markets (indicative)",
         "summary": (
-            f"Applying IMF rules of thumb to a {price:+.1f}% oil price move lasting {format(dur, 'g')} days implies a change in global GDP growth of roughly "
-            f"{macro['global_gdp_growth_pp'][0]:+.2f} to {macro['global_gdp_growth_pp'][1]:+.2f} percentage points and global inflation by "
-            f"{macro['global_inflation_pp'][0]:+.2f} to {macro['global_inflation_pp'][1]:+.2f} percentage points. Oil-importing economies in the Middle East, "
-            f"Central Asia and Pakistan are implied to be hit harder (inflation {macro['oil_importer_inflation_pp'][0]:+.2f} pp). These are indicative ranges, not forecasts"
-            + (f"; tanker demand in tonne-miles would rise about {tonne_mile:.0f}% because voyages are longer." if tonne_mile is not None else ".")),
-        "takeaway": f"Global growth {macro['global_gdp_growth_pp'][0]:+.2f} to {macro['global_gdp_growth_pp'][1]:+.2f} pp (indicative).",
-        "chart": {"ranges": [
-            {"label": "Global GDP growth (pp)", "low": macro["global_gdp_growth_pp"][0], "high": macro["global_gdp_growth_pp"][1]},
-            {"label": "Global inflation (pp)", "low": macro["global_inflation_pp"][0], "high": macro["global_inflation_pp"][1]},
-            {"label": "Oil-importer GDP growth (pp)", "low": macro["oil_importer_gdp_growth_pp"][0], "high": macro["oil_importer_gdp_growth_pp"][1]},
-            {"label": "Oil-importer inflation (pp)", "low": macro["oil_importer_inflation_pp"][0], "high": macro["oil_importer_inflation_pp"][1]},
-        ], "sectors": [
-            {"sector": "Airlines", "direction": "negative", "quantified": False, "note": "Fuel is a large share of costs; no sourced coefficient used."},
-            {"sector": "Tanker shipping rates", "direction": "positive" if tonne_mile else "uncertain", "quantified": tonne_mile is not None,
-             "note": (f"Tonne-mile demand +{tonne_mile:.0f}% (derived: detour days / baseline voyage days)." if tonne_mile is not None else "Not quantified for a blockade.")},
-            {"sector": "Energy equities", "direction": "positive", "quantified": False, "note": "Directional only; no sourced coefficient used."},
-        ]},
+            f"The linear formula implies a {price:+.1f}% oil price move lasting {format(dur, 'g')} days. Scaling the IMF rule of thumb "
+            f"(per +10% oil: about {inf['per_10pct_high']:+.1f} pp of global headline inflation and a {abs(out['per_10pct_high']):.1f} to "
+            f"{abs(out['per_10pct_low']):.1f}% fall in global output, if the rise lasts most of a year) to this scenario implies about "
+            f"{inf['low']:+.2f} pp of global inflation and {out['low']:+.2f}% to {out['high']:+.2f}% for global output. "
+            + (f"Tanker demand in tonne-miles would rise about {tonne_mile:.0f}% because voyages are longer. " if tonne_mile is not None else "")
+            + "These are rule-of-thumb illustrations, not forecasts, and the IMF gives inflation as a single figure, so no range is drawn around it."),
+        "takeaway": (f"Global inflation about {inf['low']:+.2f} pp and global output {out['low']:+.2f}% to {out['high']:+.2f}% "
+                     "(indicative, IMF rule of thumb)."),
+        "chart": {
+            "items": macro["items"],
+            "hard_numbers": hard_numbers,
+            "sectors": [
+                {"sector": "Airlines", "direction": "negative", "quantified": False, "note": "No sourced coefficient."},
+                {"sector": "Tanker shipping rates", "direction": "positive" if tonne_mile else "uncertain", "quantified": tonne_mile is not None,
+                 "note": (f"Tonne-mile demand +{tonne_mile:.0f}% (derived: detour days / baseline voyage days); no sourced rate coefficient."
+                          if tonne_mile is not None else "Not quantified for a blockade; no sourced coefficient.")},
+                {"sector": "Energy equities", "direction": "positive", "quantified": False, "note": "No sourced coefficient."},
+            ],
+        },
         "numbers": macro,
         "assumptions": [
-            _a("Per +10% oil price sustained about a year: +0.4 pp global headline inflation, -0.1 to -0.2 global output (IMF, March 2026 as reported by Bloomberg). "
-               "The sources differ on whether growth is in % or percentage points; treated as percentage points. Inflation upper bound 0.5 pp from a World Bank study over 2-3 years.",
-               "IMF via Bloomberg, 6 Mar 2026; World Bank PRWP 10648", IMF_RULE_URL),
-            _a("Oil-importing MENAP economies: about -0.5 pp output and +1.0 pp inflation per +10% (IMF regional outlook 2026); only a single point is published.", "IMF REO MCD/CCA 2026"),
-            _a(f"Effects scaled by price move / 10 and by duration / 365 days (scale = {scale:.3f}); the IMF figures assume a shock persisting most of a year.", is_estimate=True),
-            _a("Ranges use the central price estimate and ignore the ±13 pp price uncertainty, so true uncertainty is wider.", is_estimate=True),
+            *[_a(f"{i['label']}: \"{i['quote']}\"" + (f" Corroboration: {i['corroboration']}" if i["corroboration"] else ""),
+                 f"{i['source']} ({i['year']})", i["source_url"]) for i in macro["items"]],
+            _a(f"Effects scaled by price move / 10 and by duration / 365 days (scale = {scale:.3f}); the IMF figures assume a shock persisting most of a year, "
+               "and give no figure for shorter shocks.", is_estimate=True),
+            _a("Not shown: oil-importer-specific (MENAP) and World Bank figures. No primary source could be verified for them, so they are left out rather than guessed.",
+               is_estimate=True),
+            _a("These effects use the central price estimate and ignore the price uncertainty (and, beyond the validated range, the price itself is an extrapolation).",
+               is_estimate=True),
         ],
     }
 
     return {
-        "scenario": {**{k: v for k, v in req.items()}, "baseline_year": int(year), "route_name": route["name"]},
+        "scenario": {**{k: v for k, v in req.items()}, "baseline_year": int(year), "route_name": route["name"],
+                     "detour_days_default": route.get("default_detour_days"),
+                     "detour_days_source": "user" if user_detour is not None else "route default"},
         "baseline": {"route_id": route["id"], "route_name": route["name"], "year": int(year), "flow_bpd": flow,
                      "label": f"Baseline year {year}", "note": base_year_note, "depressed_by_red_sea": depressed,
                      "flow_by_year_bpd": flows},

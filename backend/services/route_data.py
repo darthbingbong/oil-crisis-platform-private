@@ -41,10 +41,11 @@ def validated_reference() -> dict:
         return float(c.iloc[0]["wti"])
 
     ev = ev[ev["resolution"] == "daily"]
+    n_events = int(len(ev))
     top = ev.loc[ev["supply_loss_pct"].abs().idxmax()]
     before, after = px(top["event_date"] - pd.Timedelta(days=5)), px(top["event_date"] + pd.Timedelta(days=30))
     return {
-        "name": str(top["name"]), "date": top["event_date"].strftime("%Y-%m-%d"),
+        "name": str(top["name"]), "date": top["event_date"].strftime("%Y-%m-%d"), "n_events": n_events,
         "supply_loss_pct": float(top["supply_loss_pct"]),
         "actual_price_move_pct": (after - before) / before * 100.0,
         "price_window": "WTI nearest daily price 5 days before vs 30 days after the event (same method as phase1_analysis.py)",

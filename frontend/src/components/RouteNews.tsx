@@ -46,11 +46,21 @@ export default function RouteNews({ routeId }: { routeId: string }) {
 
   useEffect(() => {
     let cancelled = false;
-    getRouteNews(routeId)
-      .then((news) => !cancelled && setState({ kind: "ready", news }))
-      .catch((e: Error) => !cancelled && setState({ kind: "error", message: e.message }));
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let polls = 0;
+    const load = () =>
+      getRouteNews(routeId)
+        .then((news) => {
+          if (cancelled) return;
+          setState({ kind: "ready", news });
+          // The backend answered instantly with the last cached result while it fetches a new one: check again shortly.
+          if (news.refreshing && polls++ < 5) timer = setTimeout(load, 20000);
+        })
+        .catch((e: Error) => !cancelled && setState({ kind: "error", message: e.message }));
+    load();
     return () => {
       cancelled = true;
+      if (timer) clearTimeout(timer);
     };
   }, [routeId]);
 

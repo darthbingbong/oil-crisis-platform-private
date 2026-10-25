@@ -126,15 +126,29 @@ def test_importer_shortfall_uses_given_shares_only():
     assert all(x["reserve_cover_days"] is None for x in r)  # not sourced, never invented
 
 
-def test_macro_ranges_are_ranges_ordered_and_scale_with_duration():
-    full = ce.macro_ranges(10.0, 365)
-    assert full["global_gdp_growth_pp"] == pytest.approx((-0.2, -0.1))
-    assert full["global_inflation_pp"] == pytest.approx((0.4, 0.5))
-    half = ce.macro_ranges(10.0, 182.5)
-    assert half["global_inflation_pp"][0] == pytest.approx(0.2)
-    for lo, hi in (full["global_gdp_growth_pp"], full["global_inflation_pp"]):
-        assert lo <= hi
-    assert ce.macro_ranges(0.0, 100)["global_inflation_pp"] == (0.0, 0.0)
+def _items(m):
+    return {i["key"]: i for i in m["items"]}
+
+
+def test_macro_effects_use_only_cited_coefficients_and_scale_with_duration():
+    full = _items(ce.macro_ranges(10.0, 365))
+    assert set(full) == {"global_inflation_pp", "global_output_pct"}          # nothing without a verified source
+    assert (full["global_inflation_pp"]["low"], full["global_inflation_pp"]["high"]) == pytest.approx((0.4, 0.4))
+    assert (full["global_output_pct"]["low"], full["global_output_pct"]["high"]) == pytest.approx((-0.2, -0.1))
+    half = _items(ce.macro_ranges(10.0, 182.5))
+    assert half["global_inflation_pp"]["low"] == pytest.approx(0.2)
+    assert half["global_output_pct"]["low"] == pytest.approx(-0.1)
+    zero = _items(ce.macro_ranges(0.0, 100))
+    assert zero["global_inflation_pp"]["high"] == 0.0 and zero["global_output_pct"]["low"] == 0.0
+
+
+def test_a_single_point_source_stays_a_single_point_and_every_item_is_cited():
+    for i in ce.macro_ranges(10.0, 365)["items"]:
+        assert i["low"] <= i["high"]
+        assert i["is_point"] == (i["per_10pct_low"] == i["per_10pct_high"])
+        assert i["source_url"].startswith("https://") and i["year"] >= 2017 and i["quote"]
+    inflation = next(i for i in ce.macro_ranges(10.0, 365)["items"] if i["key"] == "global_inflation_pp")
+    assert inflation["is_point"] is True and "40 basis point" in inflation["quote"]    # IMF figure, no range invented
 
 
 def test_tonne_mile_change():

@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { simulate, simulateReportPreview, type ReportPreview } from "../lib/api";
 import { localSimulate } from "../lib/localFormula";
+import { encodeScenario } from "../lib/scenarioParams";
 import { useAnimatedNumber } from "../lib/useAnimatedNumber";
 import Slider from "./Slider";
 import type { RouteScenarioPrefill, RouteSummary, SimulateRequest, SimulateResponse } from "../types";
@@ -49,6 +51,12 @@ interface RouteScenario {
   detourDays: number;
   durationDays: number;
   lithiumAvailabilityPct: number;
+  /** false until the user moves the detour slider: the report then uses the route's derived default and says so. */
+  detourUserSet: boolean;
+  evSubstitutionPct: number;
+  horizonYears: number;
+  fleetConstrained: boolean;
+  baselineYear: number | null;
 }
 
 interface Props {
@@ -71,6 +79,7 @@ export default function ScenarioPanel({
   prefill = null,
   onRouteScenarioChange,
 }: Props) {
+  const navigate = useNavigate();
   const [scenario, setScenario] = useState<SimulateRequest>(DEFAULT_SCENARIO);
   const [result, setResult] = useState<SimulateResponse>(() => localSimulate(DEFAULT_SCENARIO));
   const [status, setStatus] = useState<"loading" | "live" | "offline">("loading");
@@ -79,7 +88,8 @@ export default function ScenarioPanel({
   const [previewError, setPreviewError] = useState<string | null>(null);
 
   const simulatable = useMemo(
-    () => routes.filter((r) => r.type !== "pipeline" && !r.excluded_from_calculations && r.annual_flow_bpd),
+    // pipelines have no sourced throughput, and the Cape lane is the alternate route (not something you would disrupt)
+    () => routes.filter((r) => r.type !== "pipeline" && r.type !== "sea_lane" && !r.excluded_from_calculations && r.annual_flow_bpd),
     [routes]
   );
 
@@ -91,9 +101,21 @@ export default function ScenarioPanel({
       disruptionType: prefill.disruptionType,
       blockedSharePct: prefill.blockedSharePct,
       detourDays: prefill.detourDays,
-      durationDays: DEFAULT_DURATION_DAYS,
-      lithiumAvailabilityPct: DEFAULT_LITHIUM_AVAILABILITY_PCT,
+      durationDays: prefill.durationDays ?? DEFAULT_DURATION_DAYS,
+      lithiumAvailabilityPct: prefill.lithiumAvailabilityPct ?? DEFAULT_LITHIUM_AVAILABILITY_PCT,
+      detourUserSet: prefill.detourUserSet ?? false,
+      evSubstitutionPct: prefill.evSubstitutionPct ?? 100,
+      horizonYears: prefill.horizonYears ?? 5,
+      fleetConstrained: prefill.fleetConstrained ?? true,
+      baselineYear: prefill.baselineYear ?? null,
     });
+    if (prefill.conflictIntensity !== undefined || prefill.demandChangePct !== undefined) {
+      setScenario((prev) => ({
+        ...prev,
+        conflict_intensity: prefill.conflictIntensity ?? prev.conflict_intensity,
+        demand_change_pct: prefill.demandChangePct ?? prev.demand_change_pct,
+      }));
+    }
   }, [prefill]);
 
   // Tell the globe which route is disrupted (and the alt lane for a detour).
@@ -258,7 +280,7 @@ export default function ScenarioPanel({
               onChange={(v) => patchRoute({ blockedSharePct: v })} />
           ) : (
             <Slider label="Detour (extra voyage days)" min={0} max={30} step={1} unit="d" value={routeScenario.detourDays}
-              onChange={(v) => patchRoute({ detourDays: v })} />
+              onChange={(v) => patchRoute({ detourDays: v, detourUserSet: true })} />
           )}
           <Slider label="Disruption duration" min={5} max={365} step={5} unit="d" value={routeScenario.durationDays}
             onChange={(v) => patchRoute({ durationDays: v })} />
@@ -285,6 +307,33 @@ export default function ScenarioPanel({
               </>
             )}
           </div>
+
+          <button
+            type="button"
+            data-testid="run-full-simulation"
+            disabled={!preview}
+            onClick={() =>
+              navigate(
+                `/results?${encodeScenario({
+                  route: routeScenario.routeId,
+                  type: routeScenario.disruptionType,
+                  share: routeScenario.blockedSharePct,
+                  detour: routeScenario.disruptionType === "detour" && routeScenario.detourUserSet ? routeScenario.detourDays : null,
+                  dur: routeScenario.durationDays,
+                  conf: scenario.conflict_intensity,
+                  dem: scenario.demand_change_pct,
+                  ev: routeScenario.evSubstitutionPct,
+                  li: routeScenario.lithiumAvailabilityPct,
+                  fleet: routeScenario.fleetConstrained,
+                  horizon: routeScenario.horizonYears,
+                  by: routeScenario.baselineYear,
+                })}`
+              )
+            }
+            style={{ padding: "10px 14px", borderRadius: 6, cursor: preview ? "pointer" : "not-allowed", fontWeight: 600, fontSize: 13, background: "var(--color-crude)", color: "#120a02", border: "none", opacity: preview ? 1 : 0.5 }}
+          >
+            Run full simulation
+          </button>
         </div>
       )}
 

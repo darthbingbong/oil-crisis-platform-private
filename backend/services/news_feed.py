@@ -13,6 +13,7 @@ Nothing is shared with the NewsAPI pipeline in backend/news/ (own cache, own cla
 """
 
 import asyncio
+import logging
 import os
 import re
 import threading
@@ -279,8 +280,10 @@ def _iso(epoch: float) -> str:
     return datetime.fromtimestamp(epoch, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def _response(route: dict, items: list[dict], fetched_at: float | None, *, stale: bool, status: str, message: str | None) -> dict:
+def _response(route: dict, items: list[dict], fetched_at: float | None, *, stale: bool, status: str, message: str | None,
+              refreshing: bool = False) -> dict:
     return {
+        "refreshing": refreshing,              # true: this is the last result, and a fresh fetch is running in the background
         "route_id": route["id"],
         "route_name": route["name"],
         "items": items,
@@ -305,12 +308,32 @@ def _stale_message(fetched_at: float) -> str:
     return f"The live news feed is not responding. Showing the last successful result, from {_iso(fetched_at)}."
 
 
+_refresh_in_flight: set[str] = set()
+_background_tasks: set[asyncio.Task] = set()
+logger = logging.getLogger("route_news")
+
+
+async def _refresh_in_background(route: dict, cache: TTLCache, fetch: Callable[[str], Awaitable[list[dict]]]) -> None:
+    """Refresh one route's cached headlines without anyone waiting. A failure just leaves the old (stale) entry in place."""
+    key = f"news_{route['id']}"
+    try:
+        items = normalize_articles(await fetch(build_query(query_for(route))), query_for(route))
+        cache.put(key, {"items": items})
+    except FeedError as e:
+        logger.info("background refresh of %s failed (%s); keeping the cached result", route["id"], e)
+    finally:
+        _refresh_in_flight.discard(key)
+
+
 async def get_route_news(
     route: dict,
     *,
     cache: TTLCache | None = None,
     fetch: Callable[[str], Awaitable[list[dict]]] | None = None,
+    stale_while_revalidate: bool = False,
 ) -> dict:
+    """stale_while_revalidate=True (used by the HTTP endpoint): an expired cached result is returned IMMEDIATELY, marked stale and
+    refreshing, while a background task fetches a new one. Without it (tests, warm-up) the fetch is awaited."""
     cache = cache or default_cache()
     fetch = fetch or gdelt_fetch
     rq = query_for(route)
@@ -321,6 +344,15 @@ async def get_route_news(
         p = entry["payload"]
         status = "ok" if p["items"] else "empty"
         return _response(route, p["items"], entry["fetched_at"], stale=False, status=status, message=None if p["items"] else EMPTY_MESSAGE)
+
+    if entry is not None and stale_while_revalidate and _simulation_mode == "off":
+        if key not in _refresh_in_flight:
+            _refresh_in_flight.add(key)
+            task = asyncio.create_task(_refresh_in_background(route, cache, fetch))
+            _background_tasks.add(task)
+            task.add_done_callback(_background_tasks.discard)
+        return _response(route, entry["payload"]["items"], entry["fetched_at"], stale=True, status="stale", refreshing=True,
+                         message=f"Showing the last result, from {_iso(entry['fetched_at'])}, while a fresh one is fetched.")
 
     try:
         if _simulation_mode == "fail":
@@ -338,3 +370,34 @@ async def get_route_news(
             return _response(route, entry["payload"]["items"], entry["fetched_at"], stale=True, status="stale",
                              message=_stale_message(entry["fetched_at"]))
         return _response(route, [], None, stale=False, status="unavailable", message=UNAVAILABLE_MESSAGE)
+
+
+# ---------------------------------------------------------------------------
+# Startup warm-up: fill the cache one route at a time so the first click in a demo does not wait 10 to 20 s
+# ---------------------------------------------------------------------------
+WARMUP_GAP_SECONDS = float(os.environ.get("NEWS_WARMUP_GAP", "6.0"))      # at least 6 s between routes
+WARMUP_FIRST = ("hormuz", "bab_el_mandeb", "suez", "malacca")             # the routes people click first
+
+
+async def warm_cache(routes: list[dict], *, cache: TTLCache | None = None,
+                     fetch: Callable[[str], Awaitable[list[dict]]] | None = None, gap: float | None = None,
+                     initial_delay: float = 3.0) -> dict:
+    """Fetch each route's news sequentially (never in parallel), at least `gap` seconds apart, skipping routes with a fresh cache.
+    Each fetch goes through gdelt_fetch, so the 429 back-off, retries, time budget and request spacing all apply.
+    A failure is logged and skipped; the loop carries on."""
+    cache = cache or default_cache()
+    gap = WARMUP_GAP_SECONDS if gap is None else gap
+    ordered = sorted(routes, key=lambda r: (WARMUP_FIRST.index(r["id"]) if r["id"] in WARMUP_FIRST else len(WARMUP_FIRST)))
+    await asyncio.sleep(initial_delay)
+    done, skipped, failed = [], [], []
+    for route in ordered:
+        entry = cache.get(f"news_{route['id']}")
+        if entry is not None and cache.is_fresh(entry):
+            skipped.append(route["id"])
+            continue
+        result = await get_route_news(route, cache=cache, fetch=fetch)
+        (done if result["feed_status"] in ("ok", "empty") else failed).append(route["id"])
+        logger.info("news warm-up: %s -> %s", route["id"], result["feed_status"])
+        await asyncio.sleep(gap)
+    logger.info("news warm-up finished: %d fetched, %d already fresh, %d failed", len(done), len(skipped), len(failed))
+    return {"fetched": done, "already_fresh": skipped, "failed": failed}
