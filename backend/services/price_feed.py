@@ -71,11 +71,16 @@ logger = logging.getLogger("price_feed")
 _KEY_PARAM = re.compile(r"(api_key=)[^&\s'\"\)]+", re.IGNORECASE)
 
 
+_KEY_JSON = re.compile(r'("APIKey"\s*:\s*")[^"]*(")', re.IGNORECASE)
+SECRET_ENV_NAMES = ["EIA_API_KEY"]          # environment variables whose VALUES are scrubbed from every log record (ais_feed adds its own)
+
+
 def redact(text: str, secret: str | None = None) -> str:
-    text = _KEY_PARAM.sub(r"\1REDACTED", text)
-    key = secret if secret is not None else os.environ.get("EIA_API_KEY", "")
-    if key and len(key) >= 4:
-        text = text.replace(key, "REDACTED")
+    text = _KEY_JSON.sub(r"\1REDACTED\2", _KEY_PARAM.sub(r"\1REDACTED", text))
+    secrets = [secret] if secret is not None else [os.environ.get(n, "") for n in SECRET_ENV_NAMES]
+    for key in secrets:
+        if key and len(key) >= 4:
+            text = text.replace(key, "REDACTED")
     return text
 
 

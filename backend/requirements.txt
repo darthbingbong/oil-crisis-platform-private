@@ -4,4 +4,5 @@ pandas
 joblib
 anthropic
 httpx
+websockets
 python-dotenv

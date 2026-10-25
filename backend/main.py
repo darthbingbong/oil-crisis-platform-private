@@ -53,8 +53,10 @@ from ev_lithium import (
 from refineries import capacity_at_risk_bpd, capacity_at_risk_pct_of_global, load_refineries, refineries_at_chokepoint
 from routers import news as route_news_router
 from routers import price as price_router
+from routers import vessels as vessels_router
 from routers import report as report_router
 from routers import routes as routes_router
+from services.ais_feed import get_hub
 from services.news_feed import warm_cache, warmup_enabled
 from services.route_data import all_routes
 
@@ -82,6 +84,7 @@ async def lifespan(app: FastAPI):
         warmup_task = asyncio.create_task(warm_cache(all_routes()))
     yield
     poller_task.cancel()
+    await get_hub().stop()
     if warmup_task is not None:
         warmup_task.cancel()
 
@@ -99,7 +102,8 @@ app.add_middleware(
 
 app.include_router(routes_router.router)   # /api/v1/routes, /routes/{id}, /routes/{id}/bypass
 app.include_router(report_router.router)   # POST /api/v1/simulate/report
-app.include_router(price_router.router)       # GET /api/v1/price/live and /price/history (EIA, CSV fallback)
+app.include_router(price_router.router)
+app.include_router(vessels_router.router)   # WS /ws/vessels, GET /api/v1/vessels/status
 app.include_router(route_news_router.router)  # GET /api/v1/routes/{id}/news (GDELT) + DEV-ONLY /dev/news-feed
 
 # ---------------------------------------------------------------------------
