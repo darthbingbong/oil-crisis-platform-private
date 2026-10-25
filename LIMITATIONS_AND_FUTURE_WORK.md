@@ -53,7 +53,16 @@ Items marked **(to do)** are not built yet.
 - The header's **"SIM CRUDE" price is a simulation driven by classified news** and is unrelated to the EIA series next to it (it read about $93 while EIA's latest close was $107.89). Both are labelled, but they can look contradictory side by side.
 - **WTI and Brent change** is computed between the two newest published closes, which can be several days apart across a weekend or a holiday.
 
-## 7. Not built yet
+## 7. Vessels and AIS (M7)
 
-- **(to do)** Vessel tracking with AIS (M7). The AIS limits to document then: coverage gaps, "dark fleet" vessels switching transponders off, unreliable destination fields, free-tier limits, and AIS not saying what cargo a tanker carries.
+- **Simulated vessels are an illustration, not data.** They run at a constant 14 knots on illustrative route lines, with time compressed to 6 simulated hours per second, and the number per lane is cosmetic. They are never used in any result or route statistic.
+- **The AIS adapter is unverified against the live feed.** No AISStream key was available. It follows the provider's documentation and the field names of its published OpenAPI definition, and is tested against a mock transport only. The `ShipStaticData` field names (`Type`, `Destination`, `MaximumStaticDraught`, `Name`) are not on the documentation page itself; they come from the provider's model repository. The first run with a real key should be checked, and `VERIFIED_AGAINST_LIVE_FEED` flipped only afterwards.
+- **A vessel appears only after its static message is seen**, because position reports carry no ship type. Right after startup the map can be empty for several minutes.
+- **AIS limits** (coverage gaps, transponders off, unreliable destination, free-tier limits, no cargo information) are listed in the README and the in-app info tooltip. AISStream states there is no SLA or uptime guarantee. Its terms of service page could not be found (a request to `/terms` returned 404), so the permitted uses (for example redistribution on a public site) are **not confirmed**.
+- **Flags come from the MMSI prefix** using a short table of common tanker registries; other prefixes show "not reported". This is the claimed registry, not a verified one.
+- **Clicking a vessel needs zoom or Shift**, because vessels sit on route lines that are also clickable. Alt-click selects the route.
+- **Performance numbers are from software rendering.** A real GPU should do better, but that has not been measured.
+
+## 8. Not built yet
+
 - **(to do)** A print-friendly or PDF version of the Results page.

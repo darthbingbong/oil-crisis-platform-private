@@ -291,7 +291,7 @@ export class AisVessels implements VesselSource {
       unit(v.lat, v.lon, p);
       const { e, n } = eastNorth(p), b = (v.heading_deg ?? v.course_deg ?? 0) * DEG;
       const f = [n[0] * Math.cos(b) + e[0] * Math.sin(b), n[1] * Math.cos(b) + e[1] * Math.sin(b), n[2] * Math.cos(b) + e[2] * Math.sin(b)];
-      writeInstance(out, i, p, f, radius, size, AIS, (v.speed_kn ?? 0) > 0.5 ? SIM.TRAIL_KM / SIM.EARTH_KM : 0, 0, view);
+      writeInstance(out, i, p, f, radius, size * 2, AIS, (v.speed_kn ?? 0) > 0.5 ? SIM.TRAIL_KM / SIM.EARTH_KM : 0, 0, view);
     }
   }
 

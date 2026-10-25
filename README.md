@@ -24,7 +24,9 @@
 | POST | `/api/v1/dev/news-feed` | new, DEV-ONLY | Simulate a feed failure, an empty feed, or an aged cache |
 | GET | `/api/v1/price/live` | new (M6) | Latest WTI and Brent (USD per barrel), change, `as_of`, `age_days` and `status` = `DAILY_CLOSE` (EIA answered) or `OFFLINE_FALLBACK` (last row of the local CSV). Never `LIVE` |
 | GET | `/api/v1/price/history?days=30` | new (M6) | Merged CSV + EIA daily series for the sparkline: no duplicate dates, blank holiday rows skipped |
-| GET | `/api/v1/health`, WS `/ws/vessels` | planned | Milestone M7 |
+| WS | `/ws/vessels` | new (M7) | Tanker updates from the AIS provider (server-side key). First frame is a status frame; **UNVERIFIED against the live feed**. With no key it sends the status and closes; the browser then shows simulated vessels |
+| GET | `/api/v1/vessels/status` | new (M7) | The AIS feed status as JSON |
+| GET | `/api/v1/health` | planned | Not built |
 
 **Route-collision decision: Option A.** `/api/v1/routes/{id}` returns a superset of what `/api/v1/routes/{chokepoint}`
 returned before. `backend/tests/test_routes_api.py` checks it against snapshots of the original responses
@@ -227,3 +229,44 @@ It is **dev-only**: the app ignores a custom `EIA_BASE_URL` unless `PRICE_DEV_AL
 
 `NEWS_WARMUP` (in `backend/.env` or the environment) controls whether the server fills the route-news cache at startup. **On by default** (`1`); `0`, `false`, `off` or `no` turns it off. The test suite sets it to `0` (`backend/tests/conftest.py`) so tests never call GDELT.
 Turn it off for cold-start measurements or when working offline; leave it on before a demo (see "Before a demo" above).
+
+
+## Vessels on the globe (Milestone 7)
+
+The globe shows tankers in one of two modes. **Simulated mode is the default and the fallback** (no key, feed down, or the AIS toggle off). A **SIMULATED VESSELS** badge sits over the globe and cannot be hidden. In AIS mode it reads **AIS FEED · UNVERIFIED**.
+
+**Simulated vessels (always labelled).** About 2,000 invented tankers move along the drawn route lines at 14 knots, the project's tanker speed. Real speed would look frozen, so time is compressed (1 second = 6 simulated hours); this is stated in the info tooltip.
+Vessels are spread by lane length so every lane looks evenly populated, which says nothing about real traffic. **No simulated count, flow or density is shown in any panel or on the Results page**, and a test (`backend/tests/test_ais_feed.py`) scans the route panel, Results page and report code to keep it that way.
+When a scenario disrupts a route that has an alternate lane (for example a Suez detour), its simulated vessels glide onto that lane and turn amber. With no alternate lane (a blockade) they are held in place (red). Every field a simulated vessel lacks reads "simulated".
+
+**Using it.** Zoom in and click a vessel for its panel (name, MMSI, flag, speed, course, destination, draught, and the line "cargo type not confirmed by AIS"). At the default zoom a click picks the route as before; **Shift-click** picks a vessel at any zoom and **Alt-click** always picks the route underneath, because vessels sit on the route lines.
+
+**Live AIS mode (UNVERIFIED).** `backend/services/ais_feed.py` connects server-side to AISStream.io (`wss://stream.aisstream.io/v0/stream`) and the browser receives vessels from `WS /ws/vessels`. Set `AISSTREAM_API_KEY` in `backend/.env` (free key, sign in with GitHub at https://aisstream.io). The key is sent inside the subscription message, never in a URL, never to the browser, and is redacted from logs.
+
+**It has not been run against the live feed**: no key was available. It is built from the provider's published documentation and a mock transport, and every status frame says "UNVERIFIED against the live feed" until `VERIFIED_AGAINST_LIVE_FEED` in `ais_feed.py` is changed on purpose after a real run. What it does, per the docs:
+- subscribes to one bounding box per sea route (padded 1.5 degrees);
+- keeps **tankers only (AIS ship types 80 to 89)**. Position reports do not carry the ship type, so a vessel only appears after its `ShipStaticData` message (sent every few minutes) shows it is a tanker, which can take minutes after startup;
+- dedupes by MMSI and forwards at most **one update per vessel per 10 s**;
+- turns AIS "not available" values (speed 102.3, course 360, heading 511) into "not reported", and derives the flag from the MMSI prefix (it is what the transponder claims, not a verified fact);
+- reconnects with backoff (5 s up to 5 minutes); with no key the socket sends one status frame and closes, and the browser stays on simulated vessels, saying so.
+
+`GET /api/v1/vessels/status` returns the same status as JSON.
+
+### What AIS can and cannot tell you
+- **Coverage has gaps.** Free feeds rely on receivers near coasts; open-ocean stretches can be empty.
+- **Vessels can switch their transponder off**, especially around the Gulf and in sanctioned trades ("dark fleet"). A missing ship is not an absent ship, and counts from AIS are lower bounds.
+- **Destination is typed in by the crew** and is often stale, abbreviated or wrong. The panel labels it "self-reported, unreliable".
+- **Free tiers are limited.** AISStream allows 3 subscribed connections per account (and 3 per IP), one subscription change per second, and states it has no SLA or uptime guarantee. It documents bandwidth limits for uncompressed connections from September 2026.
+- **AIS does not say what a tanker carries**, or whether it is loaded. Types 80 to 89 only mean "tanker". Draught is self-reported.
+
+### Performance (software WebGL, so a lower bound)
+Measured with `frontend/e2e/vessels_fps.mjs` in headless Chromium on the CPU (SwiftShader), three rounds, 8 seconds each:
+
+| Setup | fps |
+|---|---|
+| No routes, no vessels | 34.7 to 39.2 |
+| All routes, no vessels | 31.1 to 34.2 |
+| All routes + 2,000 vessels | 31.0 to 34.0 |
+
+The first version (cones, updated every frame) measured **19.3 fps**, under the 20 fps line, so it was fixed before moving on: one-triangle arrowheads, vessels on the far side of the globe are not drawn, and the simulation updates at 20 Hz (motion is about 6 px per second, so this is not visible). Earlier baselines were 33.6 fps without routes and 30.3 with routes.
+The drawing is a single `InstancedMesh` plus one `LineSegments` for the trails.
