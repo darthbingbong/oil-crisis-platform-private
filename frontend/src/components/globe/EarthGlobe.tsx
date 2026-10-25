@@ -4,12 +4,17 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type Dispatch,
   type SetStateAction,
 } from "react";
 import { Vector3, type Group } from "three";
+import { useVesselStream } from "../../hooks/useVesselStream";
+import { AisVessels, VesselSim, buildLanes, type Scenario, type VesselInfo, type VesselSource } from "../../lib/vesselSim";
+import { VesselControls, VesselPanel, type VesselMode } from "../VesselUi";
+import VesselLayer from "./VesselLayer";
 import { latLngToVector3 } from "../../lib/geo";
 import { ROUTE_TYPE_LABEL, formatMbpd, routeMidpoint } from "../../lib/routeGeometry";
 import { useReducedMotion } from "../../lib/useReducedMotion";
@@ -54,6 +59,13 @@ interface RotatingGlobeProps {
   setFocusedId: Dispatch<SetStateAction<string | null>>;
   onActivate: (loc: Location) => void;
   interactive: boolean;
+  vessels: {
+    source: VesselSource | null;
+    scenario: Scenario | null;
+    selected: number | null;
+    onSelect: (i: number | null) => void;
+    onTick: (info: VesselInfo | null) => void;
+  };
   routeLayer: {
     routes: RouteSummary[];
     hoveredRouteId: string | null;
@@ -84,6 +96,7 @@ function RotatingGlobe({
   setFocusedId,
   onActivate,
   interactive,
+  vessels,
   routeLayer,
 }: RotatingGlobeProps) {
   useFrame((_, delta) => {
@@ -117,6 +130,17 @@ function RotatingGlobe({
         onHover={routeLayer.onHover}
         onSelect={routeLayer.onSelect}
       />
+      {vessels.source && (
+        <VesselLayer
+          source={vessels.source}
+          scenario={vessels.scenario}
+          paused={reducedMotion}
+          interactive={interactive}
+          selected={vessels.selected}
+          onSelect={vessels.onSelect}
+          onTick={vessels.onTick}
+        />
+      )}
     </group>
   );
 }
@@ -134,6 +158,16 @@ function DebugBridge({ groupRef }: { groupRef: React.RefObject<Group | null> }) 
         if (!g) return null;
         const v = g.localToWorld(latLngToVector3(lat, lng, EARTH_RADIUS * 1.004)).project(camera);
         return { x: ((v.x + 1) / 2) * size.width, y: ((1 - v.y) / 2) * size.height, front: v.z < 1 };
+      },
+      /** Turn the globe AND tilt the camera so (lat, lng) is dead centre at distance `dist`. */
+      look(lat: number, lng: number, dist: number) {
+        const g = groupRef.current;
+        if (!g) return;
+        const p = latLngToVector3(lat, lng, 1);
+        g.rotation.y = Math.atan2(camera.position.x, camera.position.z) - Math.atan2(p.x, p.z);
+        g.updateMatrixWorld(true);
+        camera.position.copy(g.localToWorld(p.clone()).normalize().multiplyScalar(dist));
+        camera.lookAt(0, 0, 0);
       },
       face(lat: number, lng: number) {
         const g = groupRef.current;
@@ -239,6 +273,24 @@ export default function EarthGlobe({
   const [activeLocation, setActiveLocation] = useState<Location | null>(null);
   const [travelTargetLocal, setTravelTargetLocal] = useState<Vector3 | null>(null);
 
+  const [vesselMode, setVesselMode] = useState<VesselMode>("simulated");
+  const [selectedVessel, setSelectedVessel] = useState<number | null>(null);
+  const [vesselInfo, setVesselInfo] = useState<VesselInfo | null>(null);
+  const stream = useVesselStream(vesselMode === "ais");
+  const sim = useMemo(() => {
+    const lanes = buildLanes(routes);
+    return lanes.length ? new VesselSim(lanes, 2000) : null;
+  }, [routes]);
+  const ais = useMemo(() => new AisVessels(stream.vessels), [stream.vessels]);
+  const showingAis = vesselMode === "ais" && stream.status?.state === "streaming";
+  // DEV-only switch for performance comparisons (?vessels=0). Production builds always draw the vessel layer.
+  const vesselsOff = import.meta.env.DEV && new URLSearchParams(window.location.search).get("vessels") === "0";
+  const vesselSource: VesselSource | null = vesselsOff ? null : showingAis ? ais : sim;
+  const vesselScenario = useMemo<Scenario | null>(
+    () => (disruptedRouteId ? { disruptedId: disruptedRouteId, altId: altRouteId } : null),
+    [disruptedRouteId, altRouteId]
+  );
+
   const rotatingGroupRef = useRef<Group>(null);
   const savedCamera = useRef<{ position: Vector3; distance: number } | null>(null);
   const reducedMotion = useReducedMotion();
@@ -319,6 +371,13 @@ export default function EarthGlobe({
             setFocusedId={setFocusedId}
             onActivate={handleActivate}
             interactive={interactive}
+            vessels={{
+              source: vesselSource,
+              scenario: showingAis ? null : vesselScenario,
+              selected: selectedVessel,
+              onSelect: setSelectedVessel,
+              onTick: setVesselInfo,
+            }}
             routeLayer={{
               routes,
               hoveredRouteId: hoveredRoute?.id ?? null,
@@ -366,6 +425,18 @@ export default function EarthGlobe({
           />
         )}
       </Canvas>
+
+      <VesselControls
+        mode={vesselMode}
+        setMode={(m) => { setVesselMode(m); setSelectedVessel(null); setVesselInfo(null); }}
+        showingAis={showingAis}
+        phase={stream.phase}
+        status={stream.status}
+        aisCount={stream.vessels.length}
+      />
+      {selectedVessel !== null && vesselInfo && phase === "idle" && (
+        <VesselPanel info={vesselInfo} onClose={() => { setSelectedVessel(null); setVesselInfo(null); }} />
+      )}
 
       {hoveredRouteData && hoveredRoute && (
         <div

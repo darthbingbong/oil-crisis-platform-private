@@ -288,3 +288,31 @@ def test_the_frontend_never_contains_the_ais_key_or_its_env_name():
             if p.is_file() and p.suffix in (".ts", ".tsx", ".js", ".css", ".html", ".json", ".map"):
                 text = p.read_text(encoding="utf-8", errors="ignore")
                 assert "AISSTREAM_API_KEY" not in text and not any(s in text for s in secrets), p
+
+
+# ------------------------------------------------------------------ simulated vessels must never become route statistics
+SRC = BACKEND.parent / "frontend" / "src"
+
+
+def test_no_route_panel_or_results_code_mentions_vessels():
+    offenders = []
+    files = [SRC / "components" / "RoutePanel.tsx", SRC / "pages" / "Results.tsx", SRC / "components" / "ChokepointPanel.tsx"]
+    files += list((SRC / "components" / "results").rglob("*.tsx"))
+    for p in files:
+        if p.exists() and re.search(r"vessel|tanker count|ships? per", p.read_text(encoding="utf-8"), re.I):
+            offenders.append(str(p.relative_to(SRC)))
+    assert not offenders, offenders
+
+
+def test_the_backend_report_and_route_payloads_have_no_vessel_fields():
+    for name in ("report.py", "route_data.py"):
+        text = (BACKEND / "services" / name).read_text(encoding="utf-8")
+        assert "vessel" not in text.lower(), name
+    assert "vessel" not in (BACKEND / "routers" / "routes.py").read_text(encoding="utf-8").lower()
+
+
+def test_the_simulated_badge_is_unconditional_in_simulated_mode():
+    ui = (SRC / "components" / "VesselUi.tsx").read_text(encoding="utf-8")
+    assert '"SIMULATED VESSELS"' in ui and "showingAis ? " in ui          # the only alternative text is the AIS-feed one
+    sim = (SRC / "lib" / "vesselSim.ts").read_text(encoding="utf-8")
+    assert "invented for illustration" in sim and "(simulated)" in sim
