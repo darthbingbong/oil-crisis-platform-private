@@ -1,0 +1,34 @@
+{
+  "chart": {
+    "title": "Share of new cars sold that are electric",
+    "subtitle": "Electric cars include fully battery-electric and plug-in hybrids.",
+    "citation": "International Energy Agency. Global EV Outlook 2026.",
+    "originalChartUrl": "https://ourworldindata.org/grapher/electric-car-sales-share?v=1&csvType=full&useColumnShortNames=false",
+    "selection": [
+      "World",
+      "Norway",
+      "United Kingdom",
+      "European Union (27)",
+      "China",
+      "United States"
+    ]
+  },
+  "columns": {
+    "Share of new cars that are electric": {
+      "titleShort": "Share of new cars that are electric",
+      "titleLong": "Share of new cars that are electric",
+      "shortUnit": "%",
+      "unit": "%",
+      "timespan": "2010-2025",
+      "type": "Numeric",
+      "owidVariableId": 820022,
+      "shortName": "ev_sales_share",
+      "lastUpdated": "2026-06-15",
+      "citationShort": "International Energy Agency. Global EV Outlook 2025. – processed by Our World in Data",
+      "citationLong": "International Energy Agency. Global EV Outlook 2025. – processed by Our World in Data. “Share of new cars that are electric” [dataset]. International Energy Agency. Global EV Outlook 2025., “electric_cars_iea” [original data].",
+      "fullMetadata": "https://api.ourworldindata.org/v1/indicators/820022.metadata.json"
+    }
+  },
+  "dateDownloaded": "2026-08-24",
+  "activeFilters": {}
+}

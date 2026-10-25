@@ -1,0 +1,30 @@
+{
+  "chart": {
+    "title": "Crude oil prices",
+    "subtitle": "Global crude oil prices, measured in US dollars per cubic meter. This data is not adjusted for inflation.",
+    "citation": "Energy Institute based on S&P Global Platts - Statistical Review of World Energy (2026)",
+    "originalChartUrl": "https://ourworldindata.org/grapher/crude-oil-prices?v=1&csvType=full&useColumnShortNames=false",
+    "selection": [
+      "World"
+    ]
+  },
+  "columns": {
+    "Oil price - Crude prices since 1861 (current US$)": {
+      "titleShort": "Oil price - Crude prices since 1861",
+      "titleLong": "Oil price - Crude prices since 1861",
+      "shortUnit": "$",
+      "unit": "current US$ per cubic meter",
+      "timespan": "1861-2025",
+      "type": "Numeric",
+      "owidVariableId": 1295352,
+      "shortName": "oil_price_crude_current_dollars_per_m3",
+      "lastUpdated": "2026-06-30",
+      "nextUpdate": "2027-06-30",
+      "citationShort": "Energy Institute based on S&P Global Platts - Statistical Review of World Energy (2026) – with major processing by Our World in Data",
+      "citationLong": "Energy Institute based on S&P Global Platts - Statistical Review of World Energy (2026) – with major processing by Our World in Data. “Oil price - Crude prices since 1861” [dataset]. Energy Institute, “Statistical Review of World Energy” [original data].",
+      "fullMetadata": "https://api.ourworldindata.org/v1/indicators/1295352.metadata.json"
+    }
+  },
+  "dateDownloaded": "2026-08-24",
+  "activeFilters": {}
+}

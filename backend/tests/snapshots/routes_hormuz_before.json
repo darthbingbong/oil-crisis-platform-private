@@ -1,0 +1,36 @@
+{
+    "chokepoint": "hormuz",
+    "capacity_at_risk_bpd": 6190000.0,
+    "affected_hubs": [
+        "Ras Tanura",
+        "Jamnagar",
+        "Kharg Island",
+        "Ras Laffan"
+    ],
+    "bypass_options": [
+        {
+            "via": "Petroline (East-West Pipeline)",
+            "route_type": "pipeline",
+            "capacity_bpd": 5000000.0,
+            "extra_transit_days": 0.0,
+            "notes": "Saudi Arabia: Persian Gulf fields to Yanbu on the Red Sea. Only carries Saudi crude; near-zero extra transit time since it was headed toward Red Sea/Suez shipping lanes anyway. Estimate."
+        },
+        {
+            "via": "ADCOP (Abu Dhabi Crude Oil Pipeline)",
+            "route_type": "pipeline",
+            "capacity_bpd": 1500000.0,
+            "extra_transit_days": 0.0,
+            "notes": "UAE: Habshan fields to Fujairah on the Gulf of Oman, entirely outside Hormuz. Near-zero extra transit time. Estimate."
+        },
+        {
+            "via": "Cape of Good Hope diversion",
+            "route_type": "cape_diversion",
+            "capacity_bpd": null,
+            "extra_transit_days": 12.0,
+            "notes": "No pipeline exists for Iranian (Kharg Island) or Qatari (Ras Laffan) crude -- only option is sailing around Africa instead of through Hormuz. Unlimited capacity (any tanker can do it) but adds ~10-14 days transit for Persian Gulf-to-Europe/Americas routes. Estimate."
+        }
+    ],
+    "fast_bypass_capacity_bpd": 6500000.0,
+    "uncovered_capacity_bpd": 0.0,
+    "explanation": "6,190,000 bpd depends on hormuz. Pipeline/alternate-strait bypasses (Petroline (East-West Pipeline), ADCOP (Abu Dhabi Crude Oil Pipeline)) can absorb all of it with little to no added transit time."
+}

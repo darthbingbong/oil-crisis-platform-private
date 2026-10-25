@@ -1,0 +1,28 @@
+{
+    "chokepoint": "malacca",
+    "capacity_at_risk_bpd": 2940000.0,
+    "affected_hubs": [
+        "Ulsan",
+        "Yeosu",
+        "Singapore (Jurong/Pulau Bukom)"
+    ],
+    "bypass_options": [
+        {
+            "via": "Lombok/Makassar Strait",
+            "route_type": "alternate_strait",
+            "capacity_bpd": 8000000.0,
+            "extra_transit_days": 2.0,
+            "notes": "Indonesia: deeper-water alternate south of Malacca, used by very large crude carriers (VLCCs) too big for some Malacca shallows. Real route, not a diversion -- adds only ~1-2 days. Estimate."
+        },
+        {
+            "via": "Sunda Strait",
+            "route_type": "alternate_strait",
+            "capacity_bpd": 2000000.0,
+            "extra_transit_days": 1.0,
+            "notes": "Indonesia: shallower alternate, mainly smaller vessels. Adds ~1 day. Estimate."
+        }
+    ],
+    "fast_bypass_capacity_bpd": 10000000.0,
+    "uncovered_capacity_bpd": 0.0,
+    "explanation": "2,940,000 bpd depends on malacca. Pipeline/alternate-strait bypasses (Lombok/Makassar Strait, Sunda Strait) can absorb all of it with little to no added transit time."
+}

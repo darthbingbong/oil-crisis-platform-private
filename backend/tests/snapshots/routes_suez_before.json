@@ -1,0 +1,26 @@
+{
+    "chokepoint": "suez",
+    "capacity_at_risk_bpd": 2500000.0,
+    "affected_hubs": [
+        "Sidi Kerir"
+    ],
+    "bypass_options": [
+        {
+            "via": "SUMED Pipeline",
+            "route_type": "pipeline",
+            "capacity_bpd": 2500000.0,
+            "extra_transit_days": 0.0,
+            "notes": "Egypt: Ain Sukhna (Red Sea) to Sidi Kerir (Mediterranean), the standard overland bypass when the Canal itself is blocked or congested. Near-zero extra transit time. Estimate."
+        },
+        {
+            "via": "Cape of Good Hope diversion",
+            "route_type": "cape_diversion",
+            "capacity_bpd": null,
+            "extra_transit_days": 9.0,
+            "notes": "For traffic the SUMED pipeline can't absorb (its throughput is well below Suez's ~9M bpd total oil flow). Unlimited capacity but adds ~8-10 days for Asia/Gulf-to-Europe routes. Estimate (2021 Ever Given blockage precedent)."
+        }
+    ],
+    "fast_bypass_capacity_bpd": 2500000.0,
+    "uncovered_capacity_bpd": 0.0,
+    "explanation": "2,500,000 bpd depends on suez. Pipeline/alternate-strait bypasses (SUMED Pipeline) can absorb all of it with little to no added transit time."
+}

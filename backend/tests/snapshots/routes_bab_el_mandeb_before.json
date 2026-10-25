@@ -1,0 +1,17 @@
+{
+    "chokepoint": "bab el-mandeb",
+    "capacity_at_risk_bpd": 0.0,
+    "affected_hubs": [],
+    "bypass_options": [
+        {
+            "via": "Cape of Good Hope diversion",
+            "route_type": "cape_diversion",
+            "capacity_bpd": null,
+            "extra_transit_days": 12.0,
+            "notes": "No pipeline crosses this strait -- it's the only chokepoint in this set with no bypass pipeline at all. Ships divert around Africa instead of transiting the Red Sea/Suez corridor. Unlimited capacity but adds ~10-14 days. Estimate (2023-2024 Houthi Red Sea attacks precedent, see events.csv)."
+        }
+    ],
+    "fast_bypass_capacity_bpd": 0.0,
+    "uncovered_capacity_bpd": 0.0,
+    "explanation": "No tracked refinery/export capacity depends on bab el-mandeb."
+}
