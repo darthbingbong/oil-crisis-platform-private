@@ -1,0 +1,80 @@
+"""Every constant the calculation engine uses, with its source or a flag that it is an assumption.
+
+All values live in one frozen dataclass so the engine stays pure (it receives a CalcConfig)
+and so tests can override any value:  dataclasses.replace(DEFAULT_CONFIG, gal_per_vehicle_year=500).
+Items marked ASSUMPTION are not sourced; the Results page must show them as assumptions.
+"""
+
+from dataclasses import dataclass
+
+EIA_CHOKEPOINTS_URL = "https://www.eia.gov/international/content/analysis/special_topics/World_Oil_Transit_Chokepoints"
+ICCT_URL = "https://theicct.org/wp-content/uploads/2024/02/ID-85-%E2%80%93-EV-supply-chain-Report-Letter-70112-v3.pdf"
+IEA_GEVO_URL = "https://www.iea.org/reports/global-ev-outlook-2026"
+USGS_LITHIUM_URL = "https://pubs.usgs.gov/periodicals/mcs2026/mcs2026-lithium.pdf"
+IMF_RULE_URL = "https://www.bloomberg.com/news/articles/2026-03-06/imf-says-ready-to-help-economies-squeezed-by-mideast-oil-shock"
+
+
+@dataclass(frozen=True)
+class CalcConfig:
+    # --- supply and price -------------------------------------------------
+    # EIA world total oil supply, 2024 (Table 1, World Oil Transit Chokepoints, STEO Feb 2026).
+    global_supply_bpd: float = 103_300_000.0
+    # Phase 1 validated formula  %dP = %dS / |Ed|. Ed = -0.15 (borrowed textbook short-run value).
+    # Must equal the 'elasticity' stored in data/price_surge_baseline.joblib (checked by a test).
+    elasticity_abs: float = 0.15
+    # Leave-one-out MAE of the formula on 21 daily-resolution events (phase1_analysis.py: 13.09).
+    price_band_pp: float = 13.09
+    # ASSUMPTION: price decays exponentially toward baseline after the disruption ends.
+    # Half-life default = duration/2 clamped to [min, max] days (short disruptions fade fast).
+    half_life_min_days: float = 7.0
+    half_life_max_days: float = 60.0
+    trajectory_days: int = 180
+
+    # --- fleet and detour -------------------------------------------------
+    # Project tanker speed (brief section 4.5).
+    tanker_knots: float = 14.0
+
+    # --- EV substitution --------------------------------------------------
+    # 1 barrel = 42 gal crude; typical refinery yields ~19.5 gal gasoline (project brief; matches ev_lithium.py).
+    gasoline_gal_per_bbl: float = 19.5
+    # ASSUMPTION: 500 gal of gasoline per vehicle-year (a US-style figure; the global average is lower,
+    # which would make the EV counts HIGHER). From the project brief.
+    gal_per_vehicle_year: float = 500.0
+    # IEA Global EV Outlook 2026: electric car sales "exceed 20 million in 2025"; almost 22 million produced.
+    current_global_ev_sales_per_year: float = 20_000_000.0
+    current_global_ev_production_per_year: float = 22_000_000.0
+    horizons_years: tuple = (1, 3, 5)
+
+    # --- lithium ----------------------------------------------------------
+    # USGS reports lithium CONTENT; LCE = Li x 5.323 (Li2CO3 molar mass / 2 Li; stoichiometry).
+    lce_per_t_li: float = 5.323
+    # Project assumption from the brief: 0.008 t LCE per EV (about 8 kg). UNSOURCED, and low.
+    lce_t_per_ev_project: float = 0.008
+    # Sourced case: NMC-811 cathodes contain about 0.10 kg Li per kWh (ICCT, Feb 2024, p.17).
+    li_kg_per_kwh: float = 0.10
+    # IEA GEVO 2026: average BEV battery in 2025 'below 60 kWh' in China, 'close to 70 kWh' in the EU,
+    # 90 kWh in the US. 60 kWh is used as a typical global pack (China is the largest market).
+    typical_pack_kwh: float = 60.0
+    # Which case the Results page calls the headline: "sourced" or "project".
+    lithium_headline_case: str = "sourced"
+    # USGS MCS 2026 world mine production, tonnes lithium content (2025 estimate), excl. US.
+    world_li_production_t_li: float = 290_000.0
+    world_li_reserves_t_li: float = 37_000_000.0
+
+    # --- macro rules of thumb (indicative) --------------------------------
+    # IMF (Mar 2026): a 10% oil price rise sustained through most of a year adds ~0.4 pp to global
+    # headline inflation (World Bank WP 10648 gives ~0.5 pp over 2-3 years) and cuts global output
+    # by 0.1-0.2%. Values below are PER +10% OIL PRICE, as (low, high). Source sentences differ on
+    # whether the growth effect is in % or pp; treated as pp of growth.
+    gdp_growth_pp_per_10pct: tuple = (-0.2, -0.1)
+    inflation_pp_per_10pct: tuple = (0.4, 0.5)
+    # IMF MENAP regional outlook 2026: for the average oil-importing economy a 10% rise gives
+    # about -0.5 pp output and +1.0 pp inflation (single points, no range published).
+    importer_gdp_pp_per_10pct: tuple = (-0.5, -0.5)
+    importer_inflation_pp_per_10pct: tuple = (1.0, 1.0)
+    # ASSUMPTION: the IMF coefficients are for a shock lasting about a year, so effects are scaled
+    # by min(duration_days, 365) / 365.
+    macro_full_effect_days: float = 365.0
+
+
+DEFAULT_CONFIG = CalcConfig()

@@ -107,10 +107,36 @@ def test_alt_route_ids_resolve(routes):
 
 
 def test_share_matches_eia_world_maritime_total(routes, routes_doc):
-    total = routes_doc["_meta"]["global_reference"]["world_maritime_oil_trade_bpd"]
+    by_year = routes_doc["_meta"]["global_reference"]["world_maritime_oil_trade_bpd_by_year"]
     for r in routes:
         if r.type != "pipeline":
+            total = by_year[str(r.model_extra["baseline_year"])]
             assert r.share_of_global_seaborne_oil_pct == pytest.approx(r.annual_flow_bpd / total * 100, abs=0.1), r.id
+            assert r.annual_flow_bpd == r.model_extra["flow_by_year_bpd"][str(r.model_extra["baseline_year"])], r.id
+
+
+def test_suez_and_bab_default_to_2023_and_store_both_years(routes):
+    for rid in ("suez", "bab_el_mandeb"):
+        r = next(x for x in routes if x.id == rid)
+        assert r.model_extra["baseline_year"] == 2023
+        assert {"2023", "2024"} <= set(r.model_extra["flow_by_year_bpd"])
+        assert r.model_extra["flow_by_year_bpd"]["2024"] < r.model_extra["flow_by_year_bpd"]["2023"]
+
+
+def test_voyage_days_are_derived_from_distance_at_14_knots(routes):
+    for r in routes:
+        d = r.model_extra.get("voyage_derivation")
+        if d and r.baseline_voyage_days:
+            assert d["is_estimate"] is True
+            assert r.baseline_voyage_days == pytest.approx(d["distance_nm"] / (14 * 24), abs=0.06), r.id
+
+
+def test_druzhba_is_excluded_and_cpc_not_summed(routes):
+    dz = next(r for r in routes if r.id == "druzhba")
+    assert dz.model_extra["excluded_from_calculations"] is True and dz.capacity_bpd is None
+    cpc = next(r for r in routes if r.id == "cpc")
+    assert cpc.capacity_bpd == 1340000 and cpc.model_extra["capacity_upper_bpd"] == 1661315
+    assert cpc.is_estimate
 
 
 def test_hormuz_group_shares_are_consistent(routes):

@@ -14,11 +14,12 @@ Endpoints, matching the original project spec plus the refinery/GIS layer:
     GET  /api/v1/refineries/at-risk/{chokepoint} -- capacity dependent on one
                                                   chokepoint (Hormuz, Suez,
                                                   Malacca, Bab el-Mandeb)
-    GET  /api/v1/routes/{chokepoint}          -- bypass routes for one
-                                                  chokepoint (real pipelines/
-                                                  alternate straits), and how
-                                                  much at-risk capacity they
-                                                  can actually absorb
+    GET  /api/v1/routes, /routes/{id}, /routes/{id}/bypass
+                                              -- route layer, see routers/routes.py
+                                                  (/routes/{id} is a superset of
+                                                  the original bypass response)
+    POST /api/v1/simulate/report              -- full scenario report, see
+                                                  routers/report.py
 
 Run this with:  uvicorn main:app --reload
 Then open:      http://127.0.0.1:8000/docs
@@ -44,7 +45,8 @@ from pydantic import BaseModel, Field
 
 from ev_lithium import DEFAULT_GLOBAL_DAILY_CRUDE_PRODUCTION_BBL, supply_shock_to_ev_feasibility
 from refineries import capacity_at_risk_bpd, capacity_at_risk_pct_of_global, load_refineries, refineries_at_chokepoint
-from routing import load_bypass_routes, recommend_reroute
+from routers import report as report_router
+from routers import routes as routes_router
 
 from news import db as news_db
 from news import price_engine
@@ -78,6 +80,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(routes_router.router)   # /api/v1/routes, /routes/{id}, /routes/{id}/bypass
+app.include_router(report_router.router)   # POST /api/v1/simulate/report
+
 # ---------------------------------------------------------------------------
 # Load the Phase 1 artifacts once, when the server starts (not per-request --
 # that would be slow and pointless, since nothing in these files changes)
@@ -87,7 +92,6 @@ ELASTICITY = baseline["elasticity"]
 
 events_df = pd.read_csv("data/events.csv", parse_dates=["event_date"])
 refineries_df = load_refineries()
-bypass_routes_df = load_bypass_routes()
 
 # Chokepoints this platform tracks -- must match CHOKEPOINT_COORDS keys.
 KNOWN_CHOKEPOINTS = {"hormuz", "bab el-mandeb", "suez", "malacca"}
@@ -160,24 +164,6 @@ class ChokepointRisk(BaseModel):
     capacity_at_risk_bpd: float
     pct_of_global_daily_production: float
     affected_hubs: list[str]
-
-
-class BypassOption(BaseModel):
-    via: str
-    route_type: str
-    capacity_bpd: float | None
-    extra_transit_days: float
-    notes: str
-
-
-class RouteRecommendation(BaseModel):
-    chokepoint: str
-    capacity_at_risk_bpd: float
-    affected_hubs: list[str]
-    bypass_options: list[BypassOption]
-    fast_bypass_capacity_bpd: float
-    uncovered_capacity_bpd: float
-    explanation: str
 
 
 # ---------------------------------------------------------------------------
@@ -339,41 +325,6 @@ def get_chokepoint_risk(chokepoint: str):
         capacity_at_risk_bpd=round(capacity, 0),
         pct_of_global_daily_production=round(pct, 4),
         affected_hubs=list(at_risk_df["name"]),
-    )
-
-
-@app.get("/api/v1/routes/{chokepoint}", response_model=RouteRecommendation)
-def get_route_recommendation(chokepoint: str):
-    """
-    Documented bypass routes for one chokepoint (real pipelines like
-    Petroline/ADCOP/SUMED, or alternate straits like Lombok/Sunda), and how
-    much of that chokepoint's at-risk capacity they can actually absorb vs
-    what's left with only the slow Cape-of-Good-Hope option. See
-    routing.py's KNOWN SIMPLIFICATION note: bypass capacity is pooled per
-    chokepoint, not matched to which specific hub's crude it serves.
-    """
-    if chokepoint.lower() not in KNOWN_CHOKEPOINTS:
-        raise HTTPException(status_code=404, detail=f"Unknown chokepoint '{chokepoint}'. Known: {sorted(KNOWN_CHOKEPOINTS)}")
-
-    result = recommend_reroute(refineries_df, bypass_routes_df, chokepoint)
-
-    return RouteRecommendation(
-        chokepoint=result.chokepoint,
-        capacity_at_risk_bpd=round(result.capacity_at_risk_bpd, 0),
-        affected_hubs=result.affected_hubs,
-        bypass_options=[
-            BypassOption(
-                via=o.via,
-                route_type=o.route_type,
-                capacity_bpd=o.capacity_bpd,
-                extra_transit_days=o.extra_transit_days,
-                notes=o.notes,
-            )
-            for o in result.bypass_options
-        ],
-        fast_bypass_capacity_bpd=round(result.fast_bypass_capacity_bpd, 0),
-        uncovered_capacity_bpd=round(result.uncovered_capacity_bpd, 0),
-        explanation=result.explanation,
     )
 
 
