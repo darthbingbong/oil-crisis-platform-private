@@ -5,6 +5,7 @@ import { TOKENS } from "../lib/constants";
 import { ROUTE_COLORS, ROUTE_TYPE_LABEL, formatMbpd } from "../lib/routeGeometry";
 import type { RouteDetail, RouteScenarioPrefill, RouteSummary } from "../types";
 import CurrentConditionsNote from "./CurrentConditionsNote";
+import RouteNews from "./RouteNews";
 
 interface Props {
   route: RouteSummary;
@@ -234,6 +235,8 @@ export default function RoutePanel({ route, visible, onClose, onSimulate }: Prop
           {isPipeline && detail.bypass_note && <p className="text-xs" style={{ color: "var(--color-ash)", margin: 0 }}>{detail.bypass_note}</p>}
         </>
       )}
+
+      <RouteNews routeId={route.id} />
 
       {canSimulate && detail && (
         <div

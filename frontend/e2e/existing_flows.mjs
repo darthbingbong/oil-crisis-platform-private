@@ -1,5 +1,5 @@
 import { chromium } from "playwright-core";
-import os from "node:os"; import path from "node:path"; import fs from "node:fs";
+import os from "node:os"; import path from "node:path";
 const OUT = process.env.SHOT_DIR;
 const exe = path.join(os.homedir(), "AppData/Local/ms-playwright/chromium-1243/chrome-win64/chrome.exe");
 const b = await chromium.launch({ executablePath: exe, args: ["--use-angle=swiftshader","--enable-unsafe-swiftshader","--ignore-gpu-blocklist"] });

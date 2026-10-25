@@ -92,3 +92,38 @@ Hover shows a tooltip, click flies the camera to the route and opens its panel (
 "if closed" stat, current-conditions note with EIA links), and "Simulate disruption on this route" pre-fills the scenario controls.
 Route geometry is illustrative. Druzhba shows n/a. Routes with no sourced importer data say "not available" rather than showing an empty chart.
 Screenshots from a real browser run are in `docs/m3_screenshots/`; the scripts that produced them are in `frontend/e2e/`.
+
+## Route news (Milestone 4)
+
+`GET /api/v1/routes/{id}/news` returns recent headlines for one route: **headline, source, published time, link and a tag** (`attack`,
+`sanctions`, `disruption`, `shipping`, `general`). No article text is requested, stored or shown. The route panel's "Recent news" section
+shows them, with the feed's honest state: normal, **STALE** (live feed down, last cached result with its original time), empty, or unavailable.
+
+**Source and terms.** GDELT DOC 2.0 (free, no key). GDELT's terms allow unrestricted academic and commercial use and redistribution *if* the
+GDELT Project is cited with a link to https://www.gdeltproject.org/ (the panel shows that attribution as a link). **NewsAPI is not used for route news:**
+its free Developer plan is "for development and testing in a development environment only" and "cannot be used in a staging or production
+environment (including internally)", is limited to 100 requests/day with a 24-hour article delay and one month of history, and shares a quota with
+the existing classification pipeline. (That existing pipeline does use the Developer key, which is worth reviewing before any public demo.)
+
+**What the live API is really like** (measured, not assumed): from this machine the TLS handshake alone takes about 10 s and a full answer 12 to 15 s,
+so timeouts are generous and the panel says "this feed can take 10 to 20 seconds". GDELT answers HTTP 429 ("Please limit requests to one every
+5 seconds") often, even when requests are spaced further apart, so the client waits 15 s after a 429, retries twice within a 60 s budget,
+and keeps requests at least 6 s apart. A result is cached for 20 minutes (memory plus `backend/data/cache/`, git-ignored).
+
+**Quality controls** (GDELT keyword search is noisy; on a real Hormuz query 75 raw records became 2 headlines):
+per-route queries (name and aliases AND context words, English only); the **headline itself must name the route**; broad terms such as "Houthi"
+count only with a shipping or oil word beside them (otherwise Yemen war stories flood the Red Sea route); near-duplicate (syndicated) headlines
+are removed; titles are cleaned of trailing publisher names and tokenizer spacing; newest first, at most 12.
+
+**Classifier.** `services/news_classifier.py`, a pure function (priority attack, sanctions, disruption, shipping, general; whole-word matching).
+I inspected the existing NewsAPI classifier first and did **not** reuse it: its tag set (`chokepoint_disruption`, `supply_outage`, `opec_decision`,
+`sanctions`, `ev_lithium_supply`, `conflict_escalation`, `other`) has no "attack" or "shipping" tag, it logs every call, and its public entry point can
+call the Claude API. Nothing else is shared with that pipeline (own cache, own code, no API key, no quota).
+Checked against 34 real headlines by eye (`backend/tests/test_news_real_headlines.py` pins 22 of them): about 31 are tagged sensibly. Known
+limits: a keyword tagger cannot see negation ("Egypt will **not** attack Yemen" is tagged `attack`, recorded as a strict expected failure), and
+recall is deliberately low because the headline must name the route.
+
+**Failure handling, proven.** `POST /api/v1/dev/news-feed` (DEV-ONLY) simulates a feed failure (`fail`) or an empty feed (`empty`) and can age the cache.
+With `fail` and an aged cache the backend returned the same 2 headlines with `stale: true` and the original 07:02 UTC time; with nothing cached it
+said so; with `empty` it showed the empty message. Screenshots: `docs/m4_screenshots/` (`11_news_normal`, `12_news_stale`,
+`13_news_unavailable_nothing_cached`, `14_news_empty`), produced by `frontend/e2e/news_states.mjs`.

@@ -1,0 +1,2260 @@
+{
+  "fetched_at": "2026-10-25T06:52:09Z",
+  "feed": "gdelt",
+  "routes": {
+    "hormuz": {
+      "query": "(\"Strait of Hormuz\" OR Hormuz) (oil OR tanker OR tankers OR crude OR shipping OR vessel OR blockade) sourcelang:english",
+      "raw": 75,
+      "english": 75,
+      "mention_route": 12,
+      "after_dedupe": 2,
+      "items": [
+        {
+          "title": "Nigerian Oil Near US$115 a Barrel on Hormuz Attacks",
+          "source": "riotimesonline.com",
+          "published_at": "2026-10-24T18:00:00Z",
+          "url": "https://www.riotimesonline.com/nigerian-oil-bonny-light-115-barrel-2026/",
+          "tag": "attack"
+        },
+        {
+          "title": "IRGC claims full control over Hormuz as US contemplates fresh strikes on Iran",
+          "source": "nigeriasun.com",
+          "published_at": "2026-10-24T15:15:00Z",
+          "url": "http://www.nigeriasun.com/news/279395973/irgc-claims-full-control-over-hormuz-as-us-contemplates-fresh-strikes-on-iran",
+          "tag": "attack"
+        }
+      ],
+      "all_mentions": [
+        {
+          "title": "Nigerian Oil Near US$115 a Barrel on Hormuz Attacks",
+          "source": "riotimesonline.com",
+          "published_at": "2026-10-24T18:00:00Z",
+          "url": "https://www.riotimesonline.com/nigerian-oil-bonny-light-115-barrel-2026/",
+          "tag": "attack"
+        },
+        {
+          "title": "IRGC claims full control over Hormuz as US contemplates fresh strikes on Iran",
+          "source": "nigeriasun.com",
+          "published_at": "2026-10-24T15:15:00Z",
+          "url": "http://www.nigeriasun.com/news/279395973/irgc-claims-full-control-over-hormuz-as-us-contemplates-fresh-strikes-on-iran",
+          "tag": "attack"
+        }
+      ],
+      "raw_records": [
+        {
+          "title": "Iran has ramped up efforts to target US personnel , intelligence memo warns - International",
+          "url": "https://www.dailymirror.lk/international/Iran-has-ramped-up-efforts-to-target-US-personnel-intelligence-memo-warns/107-353345",
+          "seendate": "20261025T053000Z",
+          "domain": "dailymirror.lk",
+          "language": "English"
+        },
+        {
+          "title": "Trump keeps Iran strike option open , says deal possible ; Tehran accuses US of derailing talks",
+          "url": "https://www.newindianexpress.com/world/2026/Oct/25/trump-keeps-iran-strike-option-open-says-deal-possible-tehran-accuses-us-of-derailing-talks",
+          "seendate": "20261025T053000Z",
+          "domain": "newindianexpress.com",
+          "language": "English"
+        },
+        {
+          "title": "  Maybe tomorrow : Trump hints at fresh Iran strikes , says  beautiful agreement  still possible",
+          "url": "https://www.moneycontrol.com/world/maybe-tomorrow-trump-hints-at-fresh-iran-strikes-says-beautiful-agreement-still-possible-article-14059372.html",
+          "seendate": "20261025T044500Z",
+          "domain": "moneycontrol.com",
+          "language": "English"
+        },
+        {
+          "title": "  There a possibility ...: Trump says US could strike Iran  maybe tomorrow ; doesnt rule out  big beautiful  deal",
+          "url": "http://www.asiabulletin.com/news/279397042/there-a-possibility-trump-says-us-could-strike-iran-maybe-tomorrow-doesnt-rule-out-big-beautiful-deal",
+          "seendate": "20261025T033000Z",
+          "domain": "asiabulletin.com",
+          "language": "English"
+        },
+        {
+          "title": "Trump Says US Could Strike Iran Soon , Hints at Deal",
+          "url": "https://www.deccanchronicle.com/west-asia/trump-says-us-could-strike-iran-soon-hints-at-deal-1998635",
+          "seendate": "20261025T033000Z",
+          "domain": "deccanchronicle.com",
+          "language": "English"
+        },
+        {
+          "title": "APPO Seeks Stronger African Oil Firms As IOCs Secure Exploration Deals",
+          "url": "https://leadership.ng/appo-seeks-stronger-african-oil-firms-as-iocs-secure-exploration-deals/",
+          "seendate": "20261024T233000Z",
+          "domain": "leadership.ng",
+          "language": "English"
+        },
+        {
+          "title": "Fuel Oil Becomes Asia Next Cost Shock",
+          "url": "https://oilprice.com/Energy/Crude-Oil/Fuel-Oil-Becomes-Asias-Next-Cost-Shock.html",
+          "seendate": "20261024T220000Z",
+          "domain": "oilprice.com",
+          "language": "English"
+        },
+        {
+          "title": "Israelis hold final rally against Netanyahu before election , and other Mideast news",
+          "url": "http://www.goskagit.com/news/ap_business/israelis-hold-final-rally-against-netanyahu-before-election-and-other-mideast-news/article_ba3182fc-309f-50cd-813f-a6c58db3b89a.html",
+          "seendate": "20261024T220000Z",
+          "domain": "goskagit.com",
+          "language": "English"
+        },
+        {
+          "title": "Israelis hold final rally against Netanyahu before election , and other Mideast news",
+          "url": "https://www.chicagotribune.com/2026/10/24/israelis-hold-rally-against-netanyahu-before-election/",
+          "seendate": "20261024T210000Z",
+          "domain": "chicagotribune.com",
+          "language": "English"
+        },
+        {
+          "title": "Israelis hold final rally against Netanyahu before election , and other Mideast news",
+          "url": "https://www.aol.com/articles/israel-imposes-closures-across-west-074809000.html",
+          "seendate": "20261024T210000Z",
+          "domain": "aol.com",
+          "language": "English"
+        },
+        {
+          "title": "Iran remains open to talks with US under Pakistan - brokered deal , envoy says",
+          "url": "https://www.pressdemocrat.com/2026/10/24/iran-remains-open-to-talks-with-us-under-pakistan-brokered-deal-envoy-says/",
+          "seendate": "20261024T210000Z",
+          "domain": "pressdemocrat.com",
+          "language": "English"
+        },
+        {
+          "title": "Realignment - get used to that word , youre going to be reading it A LOT",
+          "url": "https://www.dailykos.com/stories/2026/10/24/800116464/community/realignment-get-used-to-that-word-youre-going-to-be-reading-it-a-lot/",
+          "seendate": "20261024T191500Z",
+          "domain": "dailykos.com",
+          "language": "English"
+        },
+        {
+          "title": "Israelis hold final rally against Netanyahu before election , and other Mideast news",
+          "url": "https://www.2news.com/news/national/israelis-hold-final-rally-against-netanyahu-before-election-and-other-mideast-news/article_006dfb03-a070-5ab1-a7d4-5bb4ea17288d.html",
+          "seendate": "20261024T191500Z",
+          "domain": "2news.com",
+          "language": "English"
+        },
+        {
+          "title": "Israelis hold final rally against Netanyahu before election , and other Mideast news",
+          "url": "https://www.weny.com/wires/israelis-hold-final-rally-against-netanyahu-before-election-and-other-mideast-news/article_70acb3ca-d153-567e-8eb9-e1c75e36ff5d.html",
+          "seendate": "20261024T191500Z",
+          "domain": "weny.com",
+          "language": "English"
+        },
+        {
+          "title": "Israel imposes closures across a West Bank city after attacks , and other Mideast news",
+          "url": "https://www.wfmj.com/news/consumer/israel-imposes-closures-across-a-west-bank-city-after-attacks-and-other-mideast-news/article_2d686e85-c015-51e0-9b72-6b2d1af38381.html",
+          "seendate": "20261024T191500Z",
+          "domain": "wfmj.com",
+          "language": "English"
+        },
+        {
+          "title": "Israelis hold final rally against Netanyahu before election , and other Mideast news",
+          "url": "http://www.rockymounttelegram.com/news/national/israelis-hold-final-rally-against-netanyahu-before-election-and-other-mideast-news/article_c677460c-243a-57e6-be86-bfce0c6db81b.html",
+          "seendate": "20261024T191500Z",
+          "domain": "rockymounttelegram.com",
+          "language": "English"
+        },
+        {
+          "title": "Inflation , earnings reports and the mood of consumers and the Federal Reserve fill out a busy week",
+          "url": "http://www.idahostatejournal.com/news/national/inflation-earnings-reports-and-the-mood-of-consumers-and-the-federal-reserve-fill-out-a/article_c6bfe07e-b9fb-5695-b36d-b762a28ea441.html",
+          "seendate": "20261024T180000Z",
+          "domain": "idahostatejournal.com",
+          "language": "English"
+        },
+        {
+          "title": "U . S . Senate candidate Peltola calls the economy  the only plot line that matters  ",
+          "url": "https://www.adn.com/politics/2026/10/24/us-senate-candidate-peltola-calls-the-economy-the-only-plot-line-that-matters/",
+          "seendate": "20261024T180000Z",
+          "domain": "adn.com",
+          "language": "English"
+        },
+        {
+          "title": "Israel imposes closures across a West Bank city after attacks , and other Mideast news",
+          "url": "https://www.erienewsnow.com/news/national/israel-imposes-closures-across-a-west-bank-city-after-attacks-and-other-mideast-news/article_6c7f1e5e-ebd0-59a7-90f2-a13f6b460e0d.html",
+          "seendate": "20261024T180000Z",
+          "domain": "erienewsnow.com",
+          "language": "English"
+        },
+        {
+          "title": "Global petrol market in turmoil ; crude oil hits $117",
+          "url": "https://dailythepatriot.com/global-petrol-market-in-turmoil-crude-oil-hits-117/",
+          "seendate": "20261024T180000Z",
+          "domain": "dailythepatriot.com",
+          "language": "English"
+        },
+        {
+          "title": "Nigerian Oil Near US$115 a Barrel on Hormuz Attacks",
+          "url": "https://www.riotimesonline.com/nigerian-oil-bonny-light-115-barrel-2026/",
+          "seendate": "20261024T180000Z",
+          "domain": "riotimesonline.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.coloradostar.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T180000Z",
+          "domain": "coloradostar.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.venezuelastar.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T180000Z",
+          "domain": "venezuelastar.com",
+          "language": "English"
+        },
+        {
+          "title": "Every Day We  Wake Up Poorer : Iranians Battle Economic Woes",
+          "url": "http://www.bangladeshsun.com/news/279394881/every-day-we-wake-up-poorer-iranians-battle-economic-woes",
+          "seendate": "20261024T171500Z",
+          "domain": "bangladeshsun.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.bangladeshsun.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T171500Z",
+          "domain": "bangladeshsun.com",
+          "language": "English"
+        },
+        {
+          "title": "Iran says wont allow US warships to get close as Trump ponders new attacks | US - Israel war on Iran News",
+          "url": "https://www.aljazeera.com/news/2026/10/24/iran-says-wont-allow-us-warships-to-get-close-as-trump-ponders-new-attacks",
+          "seendate": "20261024T171500Z",
+          "domain": "aljazeera.com",
+          "language": "English"
+        },
+        {
+          "title": "Iran remains open to talks with US under Pakistan - brokered deal , envoy says",
+          "url": "http://www.stardem.com/ap/world/iran-remains-open-to-talks-with-us-under-pakistan-brokered-deal-envoy-says/article_c7376a83-73f1-5b86-a08c-57d3a3fbf6e1.html",
+          "seendate": "20261024T171500Z",
+          "domain": "stardem.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.newyorkstatesman.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T171500Z",
+          "domain": "newyorkstatesman.com",
+          "language": "English"
+        },
+        {
+          "title": "India holds 40 pc of global rice exports , key to world food security : Experts",
+          "url": "https://morungexpress.com/india-holds-40-pc-of-global-rice-exports-key-to-world-food-security-experts",
+          "seendate": "20261024T171500Z",
+          "domain": "morungexpress.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.austinglobe.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T161500Z",
+          "domain": "austinglobe.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.sandiegosun.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T161500Z",
+          "domain": "sandiegosun.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.taiwansun.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T161500Z",
+          "domain": "taiwansun.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.oklahomacitysun.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T161500Z",
+          "domain": "oklahomacitysun.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.mainemirror.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T161500Z",
+          "domain": "mainemirror.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.greekherald.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T160000Z",
+          "domain": "greekherald.com",
+          "language": "English"
+        },
+        {
+          "title": "California Diesel Averages $8 . 242 as Tandon Blames Iran War",
+          "url": "https://econotimes.com/California-Diesel-Averages-8-242-as-Tandon-Blames-Iran-War-1762567",
+          "seendate": "20261024T160000Z",
+          "domain": "econotimes.com",
+          "language": "English"
+        },
+        {
+          "title": "U . S . Orders Non - Emergency Diplomats to Leave Saudi Arabia Following Houthi Strikes – NaturalNews . com",
+          "url": "https://www.naturalnews.com/2026-10-24-us-orders-non-emergency-diplomats-leave-saudi.html",
+          "seendate": "20261024T154500Z",
+          "domain": "naturalnews.com",
+          "language": "English"
+        },
+        {
+          "title": "Trump Claims Ignorance as His Ambassador Threatens Strikes on Iran This Weekend",
+          "url": "https://truthout.org/articles/trump-claims-ignorance-as-his-ambassador-threatens-strikes-on-iran-this-weekend/",
+          "seendate": "20261024T154500Z",
+          "domain": "truthout.org",
+          "language": "English"
+        },
+        {
+          "title": "US reduces embassy staffing in Mideast amid Iran plots",
+          "url": "https://www.stripes.com/theaters/middle_east/2026-10-24/us-departure-orders-mideast-23247077.html",
+          "seendate": "20261024T154500Z",
+          "domain": "stripes.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.africaleader.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T154500Z",
+          "domain": "africaleader.com",
+          "language": "English"
+        },
+        {
+          "title": "Iran says wont allow US warships to get close as Trump ponders new attacks - Grenada Chronicle – Daily Grenada And Caribbean News",
+          "url": "https://grenadachronicle.com/iran-says-wont-allow-us-warships-to-get-close-as-trump-ponders-new-attacks/",
+          "seendate": "20261024T154500Z",
+          "domain": "grenadachronicle.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.argentinastar.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T153000Z",
+          "domain": "argentinastar.com",
+          "language": "English"
+        },
+        {
+          "title": "Inflation , earnings reports and the mood of consumers and the Federal Reserve fill out a busy week",
+          "url": "http://www.dailyadvance.com/news/national/inflation-earnings-reports-and-the-mood-of-consumers-and-the-federal-reserve-fill-out-a/article_55c4e0d2-cdde-51c0-863b-49afb57d0d66.html",
+          "seendate": "20261024T153000Z",
+          "domain": "dailyadvance.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.irishsun.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T153000Z",
+          "domain": "irishsun.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.srilankasource.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T153000Z",
+          "domain": "srilankasource.com",
+          "language": "English"
+        },
+        {
+          "title": "Israel imposes closures across a West Bank city after attacks , and other Mideast news",
+          "url": "https://www.yakimaherald.com/news/nation_and_world/nation/israel-imposes-closures-across-a-west-bank-city-after-attacks-and-other-mideast-news/article_91c9fa46-9009-543a-9163-024e380c1130.html",
+          "seendate": "20261024T153000Z",
+          "domain": "yakimaherald.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.nigeriasun.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T151500Z",
+          "domain": "nigeriasun.com",
+          "language": "English"
+        },
+        {
+          "title": "IRGC claims full control over Hormuz as US contemplates fresh strikes on Iran",
+          "url": "http://www.nigeriasun.com/news/279395973/irgc-claims-full-control-over-hormuz-as-us-contemplates-fresh-strikes-on-iran",
+          "seendate": "20261024T151500Z",
+          "domain": "nigeriasun.com",
+          "language": "English"
+        },
+        {
+          "title": "US double game in Ukraine as Trump pressures Zelensky while the CIA coordinates strikes",
+          "url": "https://www.bankingnews.gr/diethni/articles/906990/us-double-game-in-ukraine-as-trump-pressures-zelensky-while-the-cia-coordinates-strikes",
+          "seendate": "20261024T151500Z",
+          "domain": "bankingnews.gr",
+          "language": "English"
+        },
+        {
+          "title": "IRGC claims full control over Hormuz as US contemplates fresh strikes on Iran",
+          "url": "http://www.cambodiantimes.com/news/279395973/irgc-claims-full-control-over-hormuz-as-us-contemplates-fresh-strikes-on-iran",
+          "seendate": "20261024T150000Z",
+          "domain": "cambodiantimes.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.texasguardian.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T150000Z",
+          "domain": "texasguardian.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.cambodiantimes.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T150000Z",
+          "domain": "cambodiantimes.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.israelherald.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T150000Z",
+          "domain": "israelherald.com",
+          "language": "English"
+        },
+        {
+          "title": "IRGC claims full control over Hormuz as US contemplates fresh strikes on Iran",
+          "url": "http://www.texasguardian.com/news/279395973/irgc-claims-full-control-over-hormuz-as-us-contemplates-fresh-strikes-on-iran",
+          "seendate": "20261024T150000Z",
+          "domain": "texasguardian.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.ohiostandard.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T150000Z",
+          "domain": "ohiostandard.com",
+          "language": "English"
+        },
+        {
+          "title": "On Egypt visit , UN chief Guterres says",
+          "url": "http://www.israelherald.com/news/279396017/on-egypt-visit-un-chief-guterres-says-we-need-to-stop-the-widening-of-war",
+          "seendate": "20261024T150000Z",
+          "domain": "israelherald.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.britainnews.net/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T150000Z",
+          "domain": "britainnews.net",
+          "language": "English"
+        },
+        {
+          "title": "IRGC claims full control over Hormuz as US contemplates fresh strikes on Iran",
+          "url": "http://www.israelherald.com/news/279395973/irgc-claims-full-control-over-hormuz-as-us-contemplates-fresh-strikes-on-iran",
+          "seendate": "20261024T150000Z",
+          "domain": "israelherald.com",
+          "language": "English"
+        },
+        {
+          "title": "IRGC claims full control over Hormuz as US contemplates fresh strikes on Iran",
+          "url": "http://www.britainnews.net/news/279395973/irgc-claims-full-control-over-hormuz-as-us-contemplates-fresh-strikes-on-iran",
+          "seendate": "20261024T150000Z",
+          "domain": "britainnews.net",
+          "language": "English"
+        },
+        {
+          "title": "Every Day We  Wake Up Poorer : Iranians Battle Economic Woes",
+          "url": "http://www.cambodiantimes.com/news/279394881/every-day-we-wake-up-poorer-iranians-battle-economic-woes",
+          "seendate": "20261024T150000Z",
+          "domain": "cambodiantimes.com",
+          "language": "English"
+        },
+        {
+          "title": "IRGC claims full control over Hormuz as US contemplates fresh strikes on Iran",
+          "url": "http://www.ohiostandard.com/news/279395973/irgc-claims-full-control-over-hormuz-as-us-contemplates-fresh-strikes-on-iran",
+          "seendate": "20261024T150000Z",
+          "domain": "ohiostandard.com",
+          "language": "English"
+        },
+        {
+          "title": "IRGC claims full control over Hormuz as US contemplates fresh strikes on Iran",
+          "url": "http://www.brazilsun.com/news/279395973/irgc-claims-full-control-over-hormuz-as-us-contemplates-fresh-strikes-on-iran",
+          "seendate": "20261024T144500Z",
+          "domain": "brazilsun.com",
+          "language": "English"
+        },
+        {
+          "title": "IRGC claims full control over Hormuz as US contemplates fresh strikes on Iran",
+          "url": "http://www.azerbaijannews.net/news/279395973/irgc-claims-full-control-over-hormuz-as-us-contemplates-fresh-strikes-on-iran",
+          "seendate": "20261024T144500Z",
+          "domain": "azerbaijannews.net",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.trinidadtimes.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T144500Z",
+          "domain": "trinidadtimes.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.myanmarnews.net/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T144500Z",
+          "domain": "myanmarnews.net",
+          "language": "English"
+        },
+        {
+          "title": "Iran says wont allow US warships to get close as Trump ponders new attacks - Dominican Republic Post – Caribbean News , Business , Travel & Culture",
+          "url": "https://dominicanrepublicpost.com/iran-says-wont-allow-us-warships-to-get-close-as-trump-ponders-new-attacks/",
+          "seendate": "20261024T144500Z",
+          "domain": "dominicanrepublicpost.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.calcuttanews.net/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T144500Z",
+          "domain": "calcuttanews.net",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.batonrougepost.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T144500Z",
+          "domain": "batonrougepost.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.azerbaijannews.net/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T144500Z",
+          "domain": "azerbaijannews.net",
+          "language": "English"
+        },
+        {
+          "title": "On Egypt visit , UN chief Guterres says",
+          "url": "http://www.azerbaijannews.net/news/279396017/on-egypt-visit-un-chief-guterres-says-we-need-to-stop-the-widening-of-war",
+          "seendate": "20261024T144500Z",
+          "domain": "azerbaijannews.net",
+          "language": "English"
+        },
+        {
+          "title": "IRGC claims full control over Hormuz as US contemplates fresh strikes on Iran",
+          "url": "http://www.myanmarnews.net/news/279395973/irgc-claims-full-control-over-hormuz-as-us-contemplates-fresh-strikes-on-iran",
+          "seendate": "20261024T144500Z",
+          "domain": "myanmarnews.net",
+          "language": "English"
+        },
+        {
+          "title": "IRGC claims full control over Hormuz as US contemplates fresh strikes on Iran",
+          "url": "http://www.batonrougepost.com/news/279395973/irgc-claims-full-control-over-hormuz-as-us-contemplates-fresh-strikes-on-iran",
+          "seendate": "20261024T144500Z",
+          "domain": "batonrougepost.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.brazilsun.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T144500Z",
+          "domain": "brazilsun.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.bignewsnetwork.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T141500Z",
+          "domain": "bignewsnetwork.com",
+          "language": "English"
+        },
+        {
+          "title": "IRGC claims full control over Hormuz as US contemplates fresh strikes on Iran",
+          "url": "http://www.laosnews.net/news/279395973/irgc-claims-full-control-over-hormuz-as-us-contemplates-fresh-strikes-on-iran",
+          "seendate": "20261024T141500Z",
+          "domain": "laosnews.net",
+          "language": "English"
+        }
+      ]
+    },
+    "bab_el_mandeb": {
+      "query": "(\"Bab el-Mandeb\" OR \"Bab al-Mandab\" OR \"Red Sea\") (tanker OR shipping OR oil OR Houthi OR vessel OR Suez) sourcelang:english",
+      "raw": 75,
+      "english": 75,
+      "mention_route": 2,
+      "after_dedupe": 2,
+      "items": [
+        {
+          "title": "Ethiopia Calls for Shared Red Sea Security",
+          "source": "riotimesonline.com",
+          "published_at": "2026-10-24T15:00:00Z",
+          "url": "https://www.riotimesonline.com/ethiopia-calls-for-shared-red-sea-security-2026/",
+          "tag": "general"
+        },
+        {
+          "title": "Middle East mayhem: Oil prices jump US$3 on Houthi attacks, oil spill, highest settlement since April",
+          "source": "thestar.com.my",
+          "published_at": "2026-10-24T12:45:00Z",
+          "url": "https://www.thestar.com.my/aseanplus/aseanplus-news/2026/10/24/middle-east-mayhem-oil-prices-jump-us3-on-houthi-attacks-oil-spill-highest-settlement-since-april",
+          "tag": "attack"
+        }
+      ],
+      "all_mentions": [
+        {
+          "title": "Ethiopia Calls for Shared Red Sea Security",
+          "source": "riotimesonline.com",
+          "published_at": "2026-10-24T15:00:00Z",
+          "url": "https://www.riotimesonline.com/ethiopia-calls-for-shared-red-sea-security-2026/",
+          "tag": "general"
+        },
+        {
+          "title": "Middle East mayhem : Oil prices jump US$3 on Houthi attacks , oil spill , highest settlement since April",
+          "source": "thestar.com.my",
+          "published_at": "2026-10-24T12:45:00Z",
+          "url": "https://www.thestar.com.my/aseanplus/aseanplus-news/2026/10/24/middle-east-mayhem-oil-prices-jump-us3-on-houthi-attacks-oil-spill-highest-settlement-since-april",
+          "tag": "attack"
+        }
+      ],
+      "raw_records": [
+        {
+          "title": "Saudi - led coalition says it intercepted missiles aimed at Taif and Yanbu",
+          "url": "https://paktribune.com/saudi-led-coalition-says-it-intercepted-missiles-aimed-at-taif-and-yanbu/",
+          "seendate": "20261025T033000Z",
+          "domain": "paktribune.com",
+          "language": "English"
+        },
+        {
+          "title": "Turkiye to tell Yemen FM Houthi attacks on civilians  unacceptable  – The Frontier Post",
+          "url": "https://thefrontierpost.com/turkiye-to-tell-yemen-fm-houthi-attacks-on-civilians-unacceptable/",
+          "seendate": "20261024T190000Z",
+          "domain": "thefrontierpost.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.coloradostar.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T180000Z",
+          "domain": "coloradostar.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.venezuelastar.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T180000Z",
+          "domain": "venezuelastar.com",
+          "language": "English"
+        },
+        {
+          "title": "India can emerge as",
+          "url": "http://www.bangladeshsun.com/news/279394204/india-can-emerge-as-strong-and-reliable-global-rice-trade-hub-amid-geopolitical-tensions-iref-president-prem-garg",
+          "seendate": "20261024T171500Z",
+          "domain": "bangladeshsun.com",
+          "language": "English"
+        },
+        {
+          "title": "Ballistic missile attacks rock Yemen Aden",
+          "url": "https://morungexpress.com/ballistic-missile-attacks-rock-yemens-aden",
+          "seendate": "20261024T171500Z",
+          "domain": "morungexpress.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.bangladeshsun.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T171500Z",
+          "domain": "bangladeshsun.com",
+          "language": "English"
+        },
+        {
+          "title": "Iran says wont allow US warships to get close as Trump ponders new attacks | US - Israel war on Iran News",
+          "url": "https://www.aljazeera.com/news/2026/10/24/iran-says-wont-allow-us-warships-to-get-close-as-trump-ponders-new-attacks",
+          "seendate": "20261024T171500Z",
+          "domain": "aljazeera.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.newyorkstatesman.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T171500Z",
+          "domain": "newyorkstatesman.com",
+          "language": "English"
+        },
+        {
+          "title": "India holds 40 pc of global rice exports , key to world food security : Experts",
+          "url": "https://morungexpress.com/india-holds-40-pc-of-global-rice-exports-key-to-world-food-security-experts",
+          "seendate": "20261024T171500Z",
+          "domain": "morungexpress.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.austinglobe.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T161500Z",
+          "domain": "austinglobe.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.sandiegosun.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T161500Z",
+          "domain": "sandiegosun.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.taiwansun.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T161500Z",
+          "domain": "taiwansun.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.oklahomacitysun.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T161500Z",
+          "domain": "oklahomacitysun.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.mainemirror.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T161500Z",
+          "domain": "mainemirror.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.greekherald.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T160000Z",
+          "domain": "greekherald.com",
+          "language": "English"
+        },
+        {
+          "title": "U . S . Orders Non - Emergency Diplomats to Leave Saudi Arabia Following Houthi Strikes – NaturalNews . com",
+          "url": "https://www.naturalnews.com/2026-10-24-us-orders-non-emergency-diplomats-leave-saudi.html",
+          "seendate": "20261024T154500Z",
+          "domain": "naturalnews.com",
+          "language": "English"
+        },
+        {
+          "title": "US issues travel advisories across Middle East citing Houthi threat",
+          "url": "https://www.al-monitor.com/originals/2026/10/us-issues-travel-advisories-across-middle-east-citing-houthi-threat",
+          "seendate": "20261024T154500Z",
+          "domain": "al-monitor.com",
+          "language": "English"
+        },
+        {
+          "title": "Coalition intercepts two Houthi ballistic missiles on Saudi cities",
+          "url": "https://www.samaa.tv/2087359044-coalition-intercepts-two-houthi-ballistic-missiles-on-saudi-cities",
+          "seendate": "20261024T154500Z",
+          "domain": "samaa.tv",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.africaleader.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T154500Z",
+          "domain": "africaleader.com",
+          "language": "English"
+        },
+        {
+          "title": "Iran says wont allow US warships to get close as Trump ponders new attacks - Grenada Chronicle – Daily Grenada And Caribbean News",
+          "url": "https://grenadachronicle.com/iran-says-wont-allow-us-warships-to-get-close-as-trump-ponders-new-attacks/",
+          "seendate": "20261024T154500Z",
+          "domain": "grenadachronicle.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.argentinastar.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T153000Z",
+          "domain": "argentinastar.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.irishsun.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T153000Z",
+          "domain": "irishsun.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.srilankasource.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T153000Z",
+          "domain": "srilankasource.com",
+          "language": "English"
+        },
+        {
+          "title": "Israel imposes closures across a West Bank city after attacks , and other Mideast news",
+          "url": "https://www.yakimaherald.com/news/nation_and_world/nation/israel-imposes-closures-across-a-west-bank-city-after-attacks-and-other-mideast-news/article_91c9fa46-9009-543a-9163-024e380c1130.html",
+          "seendate": "20261024T153000Z",
+          "domain": "yakimaherald.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.nigeriasun.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T151500Z",
+          "domain": "nigeriasun.com",
+          "language": "English"
+        },
+        {
+          "title": "Arab News | Turkiye to tell Yemen FM Houthi attacks on civilians  unacceptable  ",
+          "url": "https://www.arabnews.com/middle-east/turkiye-to-tell-yemen-fm-houthi-attacks-on-civilians-unacceptable-3008072",
+          "seendate": "20261024T151500Z",
+          "domain": "arabnews.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.texasguardian.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T150000Z",
+          "domain": "texasguardian.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.cambodiantimes.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T150000Z",
+          "domain": "cambodiantimes.com",
+          "language": "English"
+        },
+        {
+          "title": "Ethiopia Calls for Shared Red Sea Security",
+          "url": "https://www.riotimesonline.com/ethiopia-calls-for-shared-red-sea-security-2026/",
+          "seendate": "20261024T150000Z",
+          "domain": "riotimesonline.com",
+          "language": "English"
+        },
+        {
+          "title": "India can emerge as",
+          "url": "http://www.cambodiantimes.com/news/279394204/india-can-emerge-as-strong-and-reliable-global-rice-trade-hub-amid-geopolitical-tensions-iref-president-prem-garg",
+          "seendate": "20261024T150000Z",
+          "domain": "cambodiantimes.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.israelherald.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T150000Z",
+          "domain": "israelherald.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.ohiostandard.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T150000Z",
+          "domain": "ohiostandard.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.britainnews.net/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T150000Z",
+          "domain": "britainnews.net",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.trinidadtimes.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T144500Z",
+          "domain": "trinidadtimes.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.myanmarnews.net/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T144500Z",
+          "domain": "myanmarnews.net",
+          "language": "English"
+        },
+        {
+          "title": "Iran says wont allow US warships to get close as Trump ponders new attacks - Dominican Republic Post – Caribbean News , Business , Travel & Culture",
+          "url": "https://dominicanrepublicpost.com/iran-says-wont-allow-us-warships-to-get-close-as-trump-ponders-new-attacks/",
+          "seendate": "20261024T144500Z",
+          "domain": "dominicanrepublicpost.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.calcuttanews.net/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T144500Z",
+          "domain": "calcuttanews.net",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.batonrougepost.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T144500Z",
+          "domain": "batonrougepost.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.azerbaijannews.net/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T144500Z",
+          "domain": "azerbaijannews.net",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.brazilsun.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T144500Z",
+          "domain": "brazilsun.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.bignewsnetwork.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T141500Z",
+          "domain": "bignewsnetwork.com",
+          "language": "English"
+        },
+        {
+          "title": "Saudi coalition intercepts Houthi missiles targeting cities",
+          "url": "https://www.middle-east-online.com/en/saudi-coalition-intercepts-houthi-missiles-targeting-cities",
+          "seendate": "20261024T141500Z",
+          "domain": "middle-east-online.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.middleeaststar.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T141500Z",
+          "domain": "middleeaststar.com",
+          "language": "English"
+        },
+        {
+          "title": "India can emerge as",
+          "url": "http://www.laosnews.net/news/279394204/india-can-emerge-as-strong-and-reliable-global-rice-trade-hub-amid-geopolitical-tensions-iref-president-prem-garg",
+          "seendate": "20261024T141500Z",
+          "domain": "laosnews.net",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.orlandoecho.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T141500Z",
+          "domain": "orlandoecho.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.laosnews.net/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T141500Z",
+          "domain": "laosnews.net",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.afghanistansun.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T141500Z",
+          "domain": "afghanistansun.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.afghanistannews.net/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T141500Z",
+          "domain": "afghanistannews.net",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.kenyastar.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T140000Z",
+          "domain": "kenyastar.com",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.theusnews.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T134500Z",
+          "domain": "theusnews.com",
+          "language": "English"
+        },
+        {
+          "title": "Saudi - led coalition says it intercepted Houthi ballistic missiles",
+          "url": "https://www.cnbc.com/2026/10/24/saudi-led-coalition-says-it-intercepted-houthi-ballistic-missiles-.html",
+          "seendate": "20261024T134500Z",
+          "domain": "cnbc.com",
+          "language": "English"
+        },
+        {
+          "title": "Heavy airstrikes hit Houthi - held Sanaa , Mocha amid escalating Yemen conflict - Xinhua",
+          "url": "https://english.news.cn/20261024/0c87c8852af143fdae880c934a6d2f59/c.html",
+          "seendate": "20261024T134500Z",
+          "domain": "english.news.cn",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.sierraleonetimes.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T134500Z",
+          "domain": "sierraleonetimes.com",
+          "language": "English"
+        },
+        {
+          "title": "India can emerge as",
+          "url": "http://www.bruneinews.net/news/279394204/india-can-emerge-as-strong-and-reliable-global-rice-trade-hub-amid-geopolitical-tensions-iref-president-prem-garg",
+          "seendate": "20261024T134500Z",
+          "domain": "bruneinews.net",
+          "language": "English"
+        },
+        {
+          "title": "  US objective is no more oil , nuclear issues , its total destruction of Iran : Foreign Affairs Expert Waiel Awwad",
+          "url": "http://www.caribbeanherald.com/news/279396249/us-objective-is-no-more-oil-nuclear-issues-its-total-destruction-of-iran-foreign-affairs-expert-waiel-awwad",
+          "seendate": "20261024T133000Z",
+          "domain": "caribbeanherald.com",
+          "language": "English"
+        },
+        {
+          "title": "Fidan to meet Yemeni FM as fighting threatens key shipping routes",
+          "url": "https://www.dailysabah.com/politics/diplomacy/fidan-to-meet-yemeni-fm-as-fighting-threatens-key-shipping-routes",
+          "seendate": "20261024T131500Z",
+          "domain": "dailysabah.com",
+          "language": "English"
+        },
+        {
+          "title": "What Australia Fuel Security Reserve Fixes and What It Leaves Exposed  | Peak Oil News and Message Boards",
+          "url": "https://peakoil.com/publicpolicy/what-australias-fuel-security-reserve-fixes-and-what-it-leaves-exposed",
+          "seendate": "20261024T131500Z",
+          "domain": "peakoil.com",
+          "language": "English"
+        },
+        {
+          "title": "R4 , European countries call for dialogue to address conflicts",
+          "url": "https://www.radio.gov.pk/24-10-2026/r4-european-countries-call-for-dialogue-to-address-regional-conflicts",
+          "seendate": "20261024T124500Z",
+          "domain": "radio.gov.pk",
+          "language": "English"
+        },
+        {
+          "title": "Saudi - led coalition says it intercepted Houthi missiles targeting cities",
+          "url": "https://www.theglobeandmail.com/world/article-saudi-led-coalition-says-it-intercepted-houthi-missiles-targeting/",
+          "seendate": "20261024T124500Z",
+          "domain": "theglobeandmail.com",
+          "language": "English"
+        },
+        {
+          "title": "Middle East mayhem : Oil prices jump US$3 on Houthi attacks , oil spill , highest settlement since April",
+          "url": "https://www.thestar.com.my/aseanplus/aseanplus-news/2026/10/24/middle-east-mayhem-oil-prices-jump-us3-on-houthi-attacks-oil-spill-highest-settlement-since-april",
+          "seendate": "20261024T124500Z",
+          "domain": "thestar.com.my",
+          "language": "English"
+        },
+        {
+          "title": "Yemen Taiz faces water crisis as Houthis tighten siege",
+          "url": "https://www.siasat.com/yemens-taiz-faces-water-crisis-as-houthis-tighten-siege-3563644/",
+          "seendate": "20261024T123000Z",
+          "domain": "siasat.com",
+          "language": "English"
+        },
+        {
+          "title": "Saudi civil defence issues  potential danger  warning for Makkah , Jeddah",
+          "url": "https://www.thedailystar.net/news/world/middle-east/news/saudi-civil-defence-issues-potential-danger-warning-makkah-jeddah-4306281",
+          "seendate": "20261024T123000Z",
+          "domain": "thedailystar.net",
+          "language": "English"
+        },
+        {
+          "title": "Saudi civil defence issues  potential danger  warnings for Mecca , Jeddah",
+          "url": "https://www.freemalaysiatoday.com/category/world/2026/10/24/saudi-civil-defence-issues-potential-danger-warnings-for-mecca-jeddah",
+          "seendate": "20261024T121500Z",
+          "domain": "freemalaysiatoday.com",
+          "language": "English"
+        },
+        {
+          "title": "14 Indians Safe After Yemen Boat Incident - TeluguPeople . com News",
+          "url": "https://www.telugupeople.com/news/news.asp?newsId=109049",
+          "seendate": "20261024T121500Z",
+          "domain": "telugupeople.com",
+          "language": "English"
+        },
+        {
+          "title": "Drinking water supplies dwindle in Yemeni city besieged by Houthi rebels",
+          "url": "https://www.wcsufm.org/latest-from-npr/2026-10-24/drinking-water-supplies-dwindle-in-yemeni-city-besieged-by-houthi-rebels",
+          "seendate": "20261024T121500Z",
+          "domain": "wcsufm.org",
+          "language": "English"
+        },
+        {
+          "title": "Drinking water supplies dwindle in Yemeni city besieged by Houthi rebels",
+          "url": "https://www.wkms.org/npr-news/2026-10-24/drinking-water-supplies-dwindle-in-yemeni-city-besieged-by-houthi-rebels",
+          "seendate": "20261024T121500Z",
+          "domain": "wkms.org",
+          "language": "English"
+        },
+        {
+          "title": "Drinking water supplies dwindle in Yemeni city besieged by Houthi rebels",
+          "url": "https://www.wkyufm.org/news/2026-10-24/drinking-water-supplies-dwindle-in-yemeni-city-besieged-by-houthi-rebels",
+          "seendate": "20261024T120000Z",
+          "domain": "wkyufm.org",
+          "language": "English"
+        },
+        {
+          "title": "Drinking water supplies dwindle in Yemeni city besieged by Houthi rebels",
+          "url": "https://www.krwg.org/national-news/2026-10-24/drinking-water-supplies-dwindle-in-yemeni-city-besieged-by-houthi-rebels",
+          "seendate": "20261024T114500Z",
+          "domain": "krwg.org",
+          "language": "English"
+        },
+        {
+          "title": "Drinking water supplies dwindle in Yemeni city besieged by Houthi rebels",
+          "url": "https://www.wemu.org/npr-national-news/2026-10-24/drinking-water-supplies-dwindle-in-yemeni-city-besieged-by-houthi-rebels",
+          "seendate": "20261024T114500Z",
+          "domain": "wemu.org",
+          "language": "English"
+        },
+        {
+          "title": "Drinking water supplies dwindle in Yemeni city besieged by Houthi rebels",
+          "url": "https://www.ualrpublicradio.org/npr-news/2026-10-24/drinking-water-supplies-dwindle-in-yemeni-city-besieged-by-houthi-rebels",
+          "seendate": "20261024T114500Z",
+          "domain": "ualrpublicradio.org",
+          "language": "English"
+        },
+        {
+          "title": "Drinking water supplies dwindle in Yemeni city besieged by Houthi rebels",
+          "url": "https://www.kasu.org/2026-10-24/drinking-water-supplies-dwindle-in-yemeni-city-besieged-by-houthi-rebels",
+          "seendate": "20261024T114500Z",
+          "domain": "kasu.org",
+          "language": "English"
+        },
+        {
+          "title": "Drinking water supplies dwindle in Yemeni city besieged by Houthi rebels",
+          "url": "https://www.kwit.org/2026-10-24/drinking-water-supplies-dwindle-in-yemeni-city-besieged-by-houthi-rebels",
+          "seendate": "20261024T114500Z",
+          "domain": "kwit.org",
+          "language": "English"
+        },
+        {
+          "title": "Drinking water supplies dwindle in Yemeni city besieged by Houthi rebels",
+          "url": "https://www.kazu.org/npr-news/2026-10-24/drinking-water-supplies-dwindle-in-yemeni-city-besieged-by-houthi-rebels",
+          "seendate": "20261024T114500Z",
+          "domain": "kazu.org",
+          "language": "English"
+        },
+        {
+          "title": "Drinking water supplies dwindle in Yemeni city besieged by Houthi rebels",
+          "url": "https://www.publicradiotulsa.org/npr-national-news/2026-10-24/drinking-water-supplies-dwindle-in-yemeni-city-besieged-by-houthi-rebels",
+          "seendate": "20261024T113000Z",
+          "domain": "publicradiotulsa.org",
+          "language": "English"
+        }
+      ]
+    },
+    "suez": {
+      "query": "(\"Suez Canal\" OR SUMED) (shipping OR tanker OR oil OR transit OR vessel) sourcelang:english",
+      "raw": 75,
+      "english": 75,
+      "mention_route": 9,
+      "after_dedupe": 6,
+      "items": [
+        {
+          "title": "Sri Lanka Hambantota port eyes new opportunities from return of Suez container traffic",
+          "source": "srilankasource.com",
+          "published_at": "2026-10-23T11:00:00Z",
+          "url": "http://www.srilankasource.com/news/279393825/sri-lanka-hambantota-port-eyes-new-opportunities-from-return-of-suez-container-traffic",
+          "tag": "shipping"
+        },
+        {
+          "title": "Hambantota Port Poised to Reap Benefits as Global Shipping Returns to Suez Canal Route",
+          "source": "lankanewspapers.com",
+          "published_at": "2026-10-23T01:00:00Z",
+          "url": "https://www.lankanewspapers.com/2026/10/23/hambantota-port-poised-to-reap-benefits-as-global-shipping-returns-to-suez-canal-route",
+          "tag": "shipping"
+        },
+        {
+          "title": "HIPG sees stronger opportunities as container shipping return to Suez gathers pace",
+          "source": "hellenicshippingnews.com",
+          "published_at": "2026-10-23T00:00:00Z",
+          "url": "https://www.hellenicshippingnews.com/hipg-sees-stronger-opportunities-as-container-shippings-return-to-suez-gathers-pace/",
+          "tag": "shipping"
+        },
+        {
+          "title": "Hapag - Lloyd expects more shipping services to return to Suez Canal | Hellenic Shipping News Worldwide",
+          "source": "hellenicshippingnews.com",
+          "published_at": "2026-10-22T23:30:00Z",
+          "url": "https://www.hellenicshippingnews.com/hapag-lloyd-expects-more-shipping-services-to-return-to-suez-canal/",
+          "tag": "shipping"
+        },
+        {
+          "title": "Sri Lanka Hambantota Port Sees Bunker Demand Opportunity as Suez Return Gathers Pace",
+          "source": "shipandbunker.com",
+          "published_at": "2026-10-22T09:30:00Z",
+          "url": "https://shipandbunker.com/news/apac/856926-sri-lankas-hambantota-port-sees-bunker-demand-opportunity-as-suez-return-gathers-pace",
+          "tag": "shipping"
+        },
+        {
+          "title": "Container Lines Shift 63 % of Far East - Europe Capacity Back to Suez Canal: Alphaliner",
+          "source": "shipandbunker.com",
+          "published_at": "2026-10-21T12:00:00Z",
+          "url": "https://shipandbunker.com/news/emea/932812-container-lines-shift-63-of-far-east-europe-capacity-back-to-suez-canal-alphaliner",
+          "tag": "general"
+        }
+      ],
+      "all_mentions": [
+        {
+          "title": "Sri Lanka Hambantota port eyes new opportunities from return of Suez container traffic",
+          "source": "srilankasource.com",
+          "published_at": "2026-10-23T11:00:00Z",
+          "url": "http://www.srilankasource.com/news/279393825/sri-lanka-hambantota-port-eyes-new-opportunities-from-return-of-suez-container-traffic",
+          "tag": "shipping"
+        },
+        {
+          "title": "Sri Lanka Hambantota port eyes new opportunities from return of Suez container traffic - Xinhua",
+          "source": "english.news.cn",
+          "published_at": "2026-10-23T06:00:00Z",
+          "url": "https://english.news.cn/20261023/013ca4f3a3b7453dbd3c32c2d0846704/c.html",
+          "tag": "shipping"
+        },
+        {
+          "title": "Hambantota Port Poised to Reap Benefits as Global Shipping Returns to Suez Canal Route",
+          "source": "lankanewspapers.com",
+          "published_at": "2026-10-23T01:00:00Z",
+          "url": "https://www.lankanewspapers.com/2026/10/23/hambantota-port-poised-to-reap-benefits-as-global-shipping-returns-to-suez-canal-route",
+          "tag": "shipping"
+        },
+        {
+          "title": "HIPG sees stronger opportunities as container shipping return to Suez gathers pace",
+          "source": "hellenicshippingnews.com",
+          "published_at": "2026-10-23T00:00:00Z",
+          "url": "https://www.hellenicshippingnews.com/hipg-sees-stronger-opportunities-as-container-shippings-return-to-suez-gathers-pace/",
+          "tag": "shipping"
+        },
+        {
+          "title": "Hapag - Lloyd expects more shipping services to return to Suez Canal | Hellenic Shipping News Worldwide",
+          "source": "hellenicshippingnews.com",
+          "published_at": "2026-10-22T23:30:00Z",
+          "url": "https://www.hellenicshippingnews.com/hapag-lloyd-expects-more-shipping-services-to-return-to-suez-canal/",
+          "tag": "shipping"
+        },
+        {
+          "title": "Sri Lanka Hambantota Port Sees Bunker Demand Opportunity as Suez Return Gathers Pace",
+          "source": "shipandbunker.com",
+          "published_at": "2026-10-22T09:30:00Z",
+          "url": "https://shipandbunker.com/news/apac/856926-sri-lankas-hambantota-port-sees-bunker-demand-opportunity-as-suez-return-gathers-pace",
+          "tag": "shipping"
+        },
+        {
+          "title": "Container Lines Shift 63 % of Far East - Europe Capacity Back to Suez Canal : Alphaliner",
+          "source": "shipandbunker.com",
+          "published_at": "2026-10-21T12:00:00Z",
+          "url": "https://shipandbunker.com/news/emea/932812-container-lines-shift-63-of-far-east-europe-capacity-back-to-suez-canal-alphaliner",
+          "tag": "general"
+        }
+      ],
+      "raw_records": [
+        {
+          "title": "Ethiopia Calls for Shared Red Sea Security",
+          "url": "https://www.riotimesonline.com/ethiopia-calls-for-shared-red-sea-security-2026/",
+          "seendate": "20261024T150000Z",
+          "domain": "riotimesonline.com",
+          "language": "English"
+        },
+        {
+          "title": "Fidan to meet Yemeni FM as fighting threatens key shipping routes",
+          "url": "https://www.dailysabah.com/politics/diplomacy/fidan-to-meet-yemeni-fm-as-fighting-threatens-key-shipping-routes",
+          "seendate": "20261024T131500Z",
+          "domain": "dailysabah.com",
+          "language": "English"
+        },
+        {
+          "title": "14 Indians Safe After Yemen Boat Incident - TeluguPeople . com News",
+          "url": "https://www.telugupeople.com/news/news.asp?newsId=109049",
+          "seendate": "20261024T121500Z",
+          "domain": "telugupeople.com",
+          "language": "English"
+        },
+        {
+          "title": "Northern Sea Route revenue is blocked by sanctions , not technology",
+          "url": "https://english.pravda.ru/russia/170665-northern-sea-route-sanctions-revenue-barrier/",
+          "seendate": "20261024T090000Z",
+          "domain": "english.pravda.ru",
+          "language": "English"
+        },
+        {
+          "title": "Ethiopia Intelligence Chief Warns of Red Sea Militarisation , Foreign Rivalries",
+          "url": "https://chimpreports.com/ethiopia-intelligence-chief-warns-of-red-sea-militarisation-foreign-rivalries/",
+          "seendate": "20261024T060000Z",
+          "domain": "chimpreports.com",
+          "language": "English"
+        },
+        {
+          "title": "Middle Corridor offers new route for global trade , but can it deliver ? ",
+          "url": "https://www.azernews.az/analysis/266077.html",
+          "seendate": "20261024T050000Z",
+          "domain": "azernews.az",
+          "language": "English"
+        },
+        {
+          "title": "The Existential Crisis Of Statehood : Proliferation And Operational Impacts Of Proxy Warfare In Middle Eastern Conflicts - Analysis",
+          "url": "https://www.eurasiareview.com/24102026-the-existential-crisis-of-statehood-proliferation-and-operational-impacts-of-proxy-warfare-in-middle-eastern-conflicts-analysis/",
+          "seendate": "20261024T011500Z",
+          "domain": "eurasiareview.com",
+          "language": "English"
+        },
+        {
+          "title": "Daily Gold Trading Report - Friday , October 23 , 2026",
+          "url": "https://www.investorideas.com/news/2026/mining/10231-daily-gold-trading-report-friday-october-23-2026.asp",
+          "seendate": "20261024T004500Z",
+          "domain": "investorideas.com",
+          "language": "English"
+        },
+        {
+          "title": "Sri Lanka Hambantota port eyes new opportunities from return of Suez container traffic",
+          "url": "http://www.srilankasource.com/news/279393825/sri-lanka-hambantota-port-eyes-new-opportunities-from-return-of-suez-container-traffic",
+          "seendate": "20261023T110000Z",
+          "domain": "srilankasource.com",
+          "language": "English"
+        },
+        {
+          "title": "The backstory : How a battle in Egypt desert turned the tide of World War II",
+          "url": "https://timesofindia.indiatimes.com/world/rest-of-world/the-backstory-how-a-battle-in-egypts-desert-turned-the-tide-of-world-war-ii/articleshow/135142321.cms",
+          "seendate": "20261023T110000Z",
+          "domain": "timesofindia.indiatimes.com",
+          "language": "English"
+        },
+        {
+          "title": "Sri Lanka Hambantota port eyes new opportunities from return of Suez container traffic",
+          "url": "http://www.bignewsnetwork.com/news/279393825/sri-lanka-hambantota-port-eyes-new-opportunities-from-return-of-suez-container-traffic",
+          "seendate": "20261023T061500Z",
+          "domain": "bignewsnetwork.com",
+          "language": "English"
+        },
+        {
+          "title": "Sri Lanka Hambantota port eyes new opportunities from return of Suez container traffic - Xinhua",
+          "url": "https://english.news.cn/20261023/013ca4f3a3b7453dbd3c32c2d0846704/c.html",
+          "seendate": "20261023T060000Z",
+          "domain": "english.news.cn",
+          "language": "English"
+        },
+        {
+          "title": "Sri Lanka Hambantota port eyes new opportunities from return of Suez container traffic - Xinhua",
+          "url": "https://english.news.cn/asiapacific/20261023/28f5813165c84515873d8901d91d06b9/c.html",
+          "seendate": "20261023T060000Z",
+          "domain": "english.news.cn",
+          "language": "English"
+        },
+        {
+          "title": "UK deploys RAF jets to support Saudi Arabia war on Yemen - World Socialist Web Site",
+          "url": "https://www.wsws.org/en/articles/2026/10/22/oqym-o22.html",
+          "seendate": "20261023T010000Z",
+          "domain": "wsws.org",
+          "language": "English"
+        },
+        {
+          "title": "Hambantota Port Poised to Reap Benefits as Global Shipping Returns to Suez Canal Route",
+          "url": "https://www.lankanewspapers.com/2026/10/23/hambantota-port-poised-to-reap-benefits-as-global-shipping-returns-to-suez-canal-route",
+          "seendate": "20261023T010000Z",
+          "domain": "lankanewspapers.com",
+          "language": "English"
+        },
+        {
+          "title": "HIPG sees stronger opportunities as container shipping return to Suez gathers pace",
+          "url": "https://www.hellenicshippingnews.com/hipg-sees-stronger-opportunities-as-container-shippings-return-to-suez-gathers-pace/",
+          "seendate": "20261023T000000Z",
+          "domain": "hellenicshippingnews.com",
+          "language": "English"
+        },
+        {
+          "title": "Hapag - Lloyd expects more shipping services to return to Suez Canal | Hellenic Shipping News Worldwide",
+          "url": "https://www.hellenicshippingnews.com/hapag-lloyd-expects-more-shipping-services-to-return-to-suez-canal/",
+          "seendate": "20261022T233000Z",
+          "domain": "hellenicshippingnews.com",
+          "language": "English"
+        },
+        {
+          "title": "Drum - Tidbit",
+          "url": "https://www.postcourier.com.pg/drum231026/",
+          "seendate": "20261022T224500Z",
+          "domain": "postcourier.com.pg",
+          "language": "English"
+        },
+        {
+          "title": "14 Indians aboard yacht targeted off Yemen coast",
+          "url": "https://www.tribuneindia.com/news/india/14-indians-aboard-yacht-targeted-off-yemen-coast/",
+          "seendate": "20261022T171500Z",
+          "domain": "tribuneindia.com",
+          "language": "English"
+        },
+        {
+          "title": "Iran says 7 tankers damaged in Strait of Hormuz , and other Mideast news",
+          "url": "https://www.union-bulletin.com/news/national/iran-says-7-tankers-damaged-in-strait-of-hormuz-and-other-mideast-news/article_d1416fe1-54e3-5c5a-bac4-5674dbbcdbc9.html",
+          "seendate": "20261022T153000Z",
+          "domain": "union-bulletin.com",
+          "language": "English"
+        },
+        {
+          "title": "Sri Lanka Hambantota Port Sees Bunker Demand Opportunity as Suez Return Gathers Pace",
+          "url": "https://shipandbunker.com/news/apac/856926-sri-lankas-hambantota-port-sees-bunker-demand-opportunity-as-suez-return-gathers-pace",
+          "seendate": "20261022T093000Z",
+          "domain": "shipandbunker.com",
+          "language": "English"
+        },
+        {
+          "title": "Sissi says Egypt to  defend Saudi territory  and will not attack Yemen",
+          "url": "https://www.koreaherald.com/article/10911378",
+          "seendate": "20261022T051500Z",
+          "domain": "koreaherald.com",
+          "language": "English"
+        },
+        {
+          "title": "Turkey Is Rebuilding Its Military Influence Across The Middle East",
+          "url": "https://www.armstrongeconomics.com/world-news/war/turkey-is-rebuilding-its-military-influence-across-the-middle-east/",
+          "seendate": "20261022T043000Z",
+          "domain": "armstrongeconomics.com",
+          "language": "English"
+        },
+        {
+          "title": "Like united kingdom , France , Egypt joins Saudi Arabia - Houthi rebels war",
+          "url": "https://dailytrust.com/like-uk-france-egypt-joins-saudi-arabia-houthi-rebels-war/",
+          "seendate": "20261022T034500Z",
+          "domain": "dailytrust.com",
+          "language": "English"
+        },
+        {
+          "title": "Three killed in attacks on Aramco oil field , Saudi airport",
+          "url": "https://www.moneycontrol.com/world/three-killed-in-attacks-on-aramco-oil-field-saudi-airport-article-14057073.html",
+          "seendate": "20261022T031500Z",
+          "domain": "moneycontrol.com",
+          "language": "English"
+        },
+        {
+          "title": "Two killed in attack on Aramco oil field in Saudi eastern region",
+          "url": "https://www.businesstimes.com.sg/international/two-killed-attack-aramco-oil-field-saudi-eastern-region",
+          "seendate": "20261022T004500Z",
+          "domain": "businesstimes.com.sg",
+          "language": "English"
+        },
+        {
+          "title": "Sisi says Egypt will  defend Saudi territory  but will not attack Yemen",
+          "url": "https://www.freemalaysiatoday.com/category/highlight/2026/10/22/sisi-says-egypt-will-defend-saudi-territory-but-will-not-attack-yemen",
+          "seendate": "20261022T003000Z",
+          "domain": "freemalaysiatoday.com",
+          "language": "English"
+        },
+        {
+          "title": "US  orders diplomats & families to leave Middle East embassie amid fears of escalation",
+          "url": "https://www.the-sun.com/news/17187015/",
+          "seendate": "20261022T003000Z",
+          "domain": "the-sun.com",
+          "language": "English"
+        },
+        {
+          "title": "Panama Canal Sets Record for Annual Tonnage Driven by Shifts in Trade",
+          "url": "https://maritime-executive.com/article/panama-canal-sets-record-for-annual-tonnage-driven-by-shifts-in-trade",
+          "seendate": "20261021T230000Z",
+          "domain": "maritime-executive.com",
+          "language": "English"
+        },
+        {
+          "title": "Drum - Tidbit",
+          "url": "https://www.postcourier.com.pg/drum221026/",
+          "seendate": "20261021T224500Z",
+          "domain": "postcourier.com.pg",
+          "language": "English"
+        },
+        {
+          "title": "Understanding the Houthi Movement and Yemen Conflict | From Saudi Arabia to Bangladesh : The far - reaching costs of Middle Eastern instability | The Daily Star",
+          "url": "https://www.thedailystar.net/slow-reads/geopolitical-insights/news/saudi-arabia-bangladesh-the-far-reaching-costs-middle-eastern-instability-4304301",
+          "seendate": "20261021T221500Z",
+          "domain": "thedailystar.net",
+          "language": "English"
+        },
+        {
+          "title": "Russia Northern Sea Route Workaround Supplying Asian Buyers · EMSNow",
+          "url": "https://www.emsnow.com/russias-northern-sea-route-workaround-supplying-asian-buyers/",
+          "seendate": "20261021T221500Z",
+          "domain": "emsnow.com",
+          "language": "English"
+        },
+        {
+          "title": "Somalia Says Somaliland Visa Row Is Over , 21 Oct 2026",
+          "url": "https://www.riotimesonline.com/somalia-somaliland-visa-row-ends-2026/",
+          "seendate": "20261021T204500Z",
+          "domain": "riotimesonline.com",
+          "language": "English"
+        },
+        {
+          "title": "Sisi says Egypt to  defend Saudi territory  and will not attack Yemen",
+          "url": "https://arynews.tv/sisi-says-egypt-to-defend-saudi-territory-and-will-not-attack-yemen",
+          "seendate": "20261021T184500Z",
+          "domain": "arynews.tv",
+          "language": "English"
+        },
+        {
+          "title": "JetBlue and Virgin Voyages cruises team up for adults - only deal",
+          "url": "https://nypost.com/2026/10/21/lifestyle/jetblue-and-virgin-voyages-cruises-team-up-for-adults-only-deal/",
+          "seendate": "20261021T184500Z",
+          "domain": "nypost.com",
+          "language": "English"
+        },
+        {
+          "title": "EU Aspides Commander Warns of Volatile Red Sea Security Landscape",
+          "url": "https://english.globalarabnetwork.com/2026/10/21/eu-aspides-commander-warns-of-volatile-red-sea-security-landscape/",
+          "seendate": "20261021T184500Z",
+          "domain": "english.globalarabnetwork.com",
+          "language": "English"
+        },
+        {
+          "title": "Gujarat CM meets Western Naval Command chief , discusses security of state coastline",
+          "url": "https://www.prokerala.com/news/articles/a1827114.html",
+          "seendate": "20261021T130000Z",
+          "domain": "prokerala.com",
+          "language": "English"
+        },
+        {
+          "title": "Container Lines Shift 63 % of Far East - Europe Capacity Back to Suez Canal : Alphaliner",
+          "url": "https://shipandbunker.com/news/emea/932812-container-lines-shift-63-of-far-east-europe-capacity-back-to-suez-canal-alphaliner",
+          "seendate": "20261021T120000Z",
+          "domain": "shipandbunker.com",
+          "language": "English"
+        },
+        {
+          "title": "US dollar jumps by 60 piasters in Egyptian banks",
+          "url": "https://www.egyptindependent.com/us-dollar-jumps-by-60-piasters-in-egyptian-banks/",
+          "seendate": "20261021T084500Z",
+          "domain": "egyptindependent.com",
+          "language": "English"
+        },
+        {
+          "title": "Ethiopia Warns Eritrea of Severe Consequences",
+          "url": "https://www.riotimesonline.com/ethiopia-abiy-warns-eritrea-ports-2026/",
+          "seendate": "20261021T083000Z",
+          "domain": "riotimesonline.com",
+          "language": "English"
+        },
+        {
+          "title": "Fashion Cant Keep Reacting to the Next Crisis",
+          "url": "https://wwd.com/sourcing-journal/sustainability/fashion-geopolitical-climate-risk-vf-corp-olam-agri-1239377855/",
+          "seendate": "20261021T044500Z",
+          "domain": "wwd.com",
+          "language": "English"
+        },
+        {
+          "title": "Japan exports rise 16 . 7 % on chip demand | The Straits Times",
+          "url": "https://www.straitstimes.com/business/japans-september-exports-rise-16-7-helped-by-chip-demand",
+          "seendate": "20261021T013000Z",
+          "domain": "straitstimes.com",
+          "language": "English"
+        },
+        {
+          "title": "HMM Adds $1 . 4B Order to Already Record Containership Orderbook",
+          "url": "https://maritime-executive.com/article/hmm-adds-1-4b-order-to-already-record-containership-orderbook",
+          "seendate": "20261020T233000Z",
+          "domain": "maritime-executive.com",
+          "language": "English"
+        },
+        {
+          "title": "Egypt Troops Vote on Saudi Defence 26 Oct",
+          "url": "https://www.riotimesonline.com/egypt-saudi-troops-parliament-vote-2026/",
+          "seendate": "20261020T203000Z",
+          "domain": "riotimesonline.com",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.ledburyreporter.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T181500Z",
+          "domain": "ledburyreporter.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK to Deploy Fighter Jets Over Saudi Arabia for Defensive Missions",
+          "url": "https://kashmirlife.net/uk-to-deploy-fighter-jets-over-saudi-arabia-for-defensive-missions-457537/",
+          "seendate": "20261020T174500Z",
+          "domain": "kashmirlife.net",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.ealingtimes.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T173000Z",
+          "domain": "ealingtimes.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.clydebankpost.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T173000Z",
+          "domain": "clydebankpost.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.elystandard.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T173000Z",
+          "domain": "elystandard.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.eastlondonadvertiser.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T173000Z",
+          "domain": "eastlondonadvertiser.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.denbighshirefreepress.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T171500Z",
+          "domain": "denbighshirefreepress.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.glasgowtimes.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T171500Z",
+          "domain": "glasgowtimes.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.irvinetimes.com/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T170000Z",
+          "domain": "irvinetimes.com",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.dunmowbroadcast.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T170000Z",
+          "domain": "dunmowbroadcast.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.chelmsfordcitynews.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T170000Z",
+          "domain": "chelmsfordcitynews.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.hillingdontimes.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T170000Z",
+          "domain": "hillingdontimes.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.bridgwatermercury.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T170000Z",
+          "domain": "bridgwatermercury.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.warringtonguardian.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T170000Z",
+          "domain": "warringtonguardian.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "Houthi attacks undermine Saudi Arabia economic ambitions",
+          "url": "https://www.al-monitor.com/originals/2026/10/houthi-attacks-undermine-saudi-arabias-economic-ambitions",
+          "seendate": "20261020T164500Z",
+          "domain": "al-monitor.com",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.malverngazette.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T163000Z",
+          "domain": "malverngazette.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.halsteadgazette.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T163000Z",
+          "domain": "halsteadgazette.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.newhamrecorder.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T163000Z",
+          "domain": "newhamrecorder.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.wiltsglosstandard.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T161500Z",
+          "domain": "wiltsglosstandard.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.chesterstandard.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T161500Z",
+          "domain": "chesterstandard.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.witneygazette.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T161500Z",
+          "domain": "witneygazette.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.borehamwoodtimes.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T161500Z",
+          "domain": "borehamwoodtimes.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.edp24.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T161500Z",
+          "domain": "edp24.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.clactonandfrintongazette.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T160000Z",
+          "domain": "clactonandfrintongazette.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.cotswoldjournal.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T160000Z",
+          "domain": "cotswoldjournal.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.wisbechstandard.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T160000Z",
+          "domain": "wisbechstandard.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.penarthtimes.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T153000Z",
+          "domain": "penarthtimes.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.salisburyjournal.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T153000Z",
+          "domain": "salisburyjournal.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.chardandilminsternews.co.uk/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T153000Z",
+          "domain": "chardandilminsternews.co.uk",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.bicesteradvertiser.net/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T153000Z",
+          "domain": "bicesteradvertiser.net",
+          "language": "English"
+        },
+        {
+          "title": "UK fighter jets to help defend Saudi Arabia against Houthi attacks",
+          "url": "https://www.peeblesshirenews.com/news/national/26652973.uk-fighter-jets-help-defend-saudi-arabia-houthi-attacks/",
+          "seendate": "20261020T153000Z",
+          "domain": "peeblesshirenews.com",
+          "language": "English"
+        }
+      ]
+    },
+    "malacca": {
+      "query": "(\"Strait of Malacca\" OR \"Malacca Strait\") (tanker OR shipping OR oil OR piracy OR vessel) sourcelang:english",
+      "raw": 7,
+      "english": 7,
+      "mention_route": 0,
+      "after_dedupe": 0,
+      "items": [],
+      "all_mentions": [],
+      "raw_records": [
+        {
+          "title": "Gibbon trafficking pushes rehabilitation centers to the max in North Sumatra",
+          "url": "https://news.mongabay.com/2025/11/gibbon-trafficking-pushes-rehabilitation-centers-to-the-max-in-north-sumatra/",
+          "seendate": "20261024T153000Z",
+          "domain": "news.mongabay.com",
+          "language": "English"
+        },
+        {
+          "title": "Indonesia makes two major drug busts worth millions of dollars",
+          "url": "https://www.freemalaysiatoday.com/category/nation/2026/10/24/indonesia-makes-two-major-drug-busts-worth-millions-of-dollars",
+          "seendate": "20261024T141500Z",
+          "domain": "freemalaysiatoday.com",
+          "language": "English"
+        },
+        {
+          "title": "The sinking of HMS Valerian",
+          "url": "https://www.royalgazette.com/opinion-writer/opinion/article/20261024/the-sinking-of-hms-valerian/",
+          "seendate": "20261024T113000Z",
+          "domain": "royalgazette.com",
+          "language": "English"
+        },
+        {
+          "title": "Historic Russia and China energy deal Sila Baikala reroutes gas and shifts world order",
+          "url": "https://www.bankingnews.gr/diethni/articles/906952/historic-russia-and-china-energy-deal-sila-baikala-reroutes-gas-and-shifts-world-order",
+          "seendate": "20261024T113000Z",
+          "domain": "bankingnews.gr",
+          "language": "English"
+        },
+        {
+          "title": "Police probe local syndicate links after Indonesia seizes tanker carrying $250m ketamine off Sumatra",
+          "url": "https://www.asiaone.com/asia/police-probe-local-syndicate-links-after-indonesia-seizes-tanker-carrying-250m-ketamine",
+          "seendate": "20261024T083000Z",
+          "domain": "asiaone.com",
+          "language": "English"
+        },
+        {
+          "title": "CPO prices seen staying above RM4 , 600 in November , says MPOC",
+          "url": "https://www.thestar.com.my/business/business-news/2026/10/22/malaysia-crude-palm-oil-prices-to-stay-above-rm4600-per-ton-in-november-mpoc-says",
+          "seendate": "20261022T031500Z",
+          "domain": "thestar.com.my",
+          "language": "English"
+        },
+        {
+          "title": "Oman Stayed Neutral . Its Ports Couldnt . ",
+          "url": "https://www.moroccoworldnews.com/2026/10/342759/oman-stayed-neutral-its-ports-couldnt/",
+          "seendate": "20261018T191500Z",
+          "domain": "moroccoworldnews.com",
+          "language": "English"
+        }
+      ]
+    },
+    "turkish_straits": {
+      "query": "(Bosphorus OR Bosporus OR \"Turkish Straits\" OR Dardanelles) (tanker OR oil OR shipping OR vessel) sourcelang:english",
+      "raw": 7,
+      "english": 7,
+      "mention_route": 0,
+      "after_dedupe": 0,
+      "items": [],
+      "all_mentions": [],
+      "raw_records": [
+        {
+          "title": "European and Middle Eastern foreign ministers urge restraint at Istanbul talks",
+          "url": "https://www.thenationalnews.com/news/mena/2026/10/23/european-and-middle-eastern-foreign-ministers-urge-restraint-at-istanbul-talks/",
+          "seendate": "20261024T050000Z",
+          "domain": "thenationalnews.com",
+          "language": "English"
+        },
+        {
+          "title": "European , Middle East foreign ministers push for peace at Istanbul talks",
+          "url": "https://www.freemalaysiatoday.com/category/highlight/2026/10/24/european-middle-east-foreign-ministers-push-for-peace-at-istanbul-talks",
+          "seendate": "20261023T230000Z",
+          "domain": "freemalaysiatoday.com",
+          "language": "English"
+        },
+        {
+          "title": "Turkey Is Rebuilding Its Military Influence Across The Middle East",
+          "url": "https://www.armstrongeconomics.com/world-news/war/turkey-is-rebuilding-its-military-influence-across-the-middle-east/",
+          "seendate": "20261022T043000Z",
+          "domain": "armstrongeconomics.com",
+          "language": "English"
+        },
+        {
+          "title": "Archaeologists Found a 2 , 100 - Year - Old Warrior Buried With a Gold Coin to Pay His Way Into the Afterlife",
+          "url": "https://www.zmescience.com/science/news-science/ancient-warrior-gold-coin-afterlife/",
+          "seendate": "20261021T163000Z",
+          "domain": "zmescience.com",
+          "language": "English"
+        },
+        {
+          "title": "A White House feud with a Turkish twist : A whirlwind romance , a Trumpist wedding and missing millions",
+          "url": "https://english.elpais.com/lifestyle/2026-10-20/a-white-house-feud-with-a-turkish-twist-a-whirlwind-romance-a-trumpist-wedding-and-missing-millions.html",
+          "seendate": "20261020T213000Z",
+          "domain": "english.elpais.com",
+          "language": "English"
+        },
+        {
+          "title": "Russian Military Freighters May Be Slipping Intelligence Officers Ashore",
+          "url": "https://maritime-executive.com/editorials/russian-military-freighters-may-be-slipping-intelligence-officers-ashore",
+          "seendate": "20261020T204500Z",
+          "domain": "maritime-executive.com",
+          "language": "English"
+        },
+        {
+          "title": "Is Russia Probing NATO Weakness in the Black Sea ? ",
+          "url": "https://maritime-executive.com/article/is-russia-probing-nato-weakness-in-the-black-sea",
+          "seendate": "20261019T041500Z",
+          "domain": "maritime-executive.com",
+          "language": "English"
+        }
+      ]
+    },
+    "danish_straits": {
+      "query": "(\"Danish Straits\" OR \"Great Belt\" OR Oresund) (tanker OR oil OR \"shadow fleet\" OR sanctions OR Baltic) sourcelang:english",
+      "raw": 1,
+      "english": 1,
+      "mention_route": 0,
+      "after_dedupe": 0,
+      "items": [],
+      "all_mentions": [],
+      "raw_records": [
+        {
+          "title": "Ethiopia : Prisoner of History , Not Geography",
+          "url": "https://allafrica.com/stories/202610200686.html",
+          "seendate": "20261020T210000Z",
+          "domain": "allafrica.com",
+          "language": "English"
+        }
+      ]
+    },
+    "druzhba": {
+      "query": "(\"Druzhba pipeline\" OR Druzhba) (oil OR Hungary OR Slovakia OR Ukraine OR Russia) sourcelang:english",
+      "raw": 3,
+      "english": 3,
+      "mention_route": 0,
+      "after_dedupe": 0,
+      "items": [],
+      "all_mentions": [],
+      "raw_records": [
+        {
+          "title": "Slovakia to Resume Discussing Energy Supplies With Russia",
+          "url": "https://www.theepochtimes.com/world/slovakia-to-resume-discussing-energy-supplies-with-russia-6107018",
+          "seendate": "20261021T194500Z",
+          "domain": "theepochtimes.com",
+          "language": "English"
+        },
+        {
+          "title": "Ukrainian Drone Strike Sparks Fire at Oil Transit Hub in Tambov Region",
+          "url": "https://www.themoscowtimes.com/2026/10/20/ukrainian-drone-strike-sparks-fire-at-oil-transit-hub-in-tambov-region-a94026",
+          "seendate": "20261020T090000Z",
+          "domain": "themoscowtimes.com",
+          "language": "English"
+        },
+        {
+          "title": "Trump likely to waive new Russian oil sanctions due today : analysts | Hellenic Shipping News Worldwide",
+          "url": "https://www.hellenicshippingnews.com/trump-likely-to-waive-new-russian-oil-sanctions-due-today-analysts/",
+          "seendate": "20261019T111500Z",
+          "domain": "hellenicshippingnews.com",
+          "language": "English"
+        }
+      ]
+    },
+    "cpc": {
+      "query": "(\"Caspian Pipeline Consortium\" OR \"CPC pipeline\") (Kazakhstan OR Novorossiysk OR oil OR crude) sourcelang:english",
+      "raw": 3,
+      "english": 3,
+      "mention_route": 0,
+      "after_dedupe": 0,
+      "items": [],
+      "all_mentions": [],
+      "raw_records": [
+        {
+          "title": "Kazakhstan oil deliveries to IEA members to rise 21 . 9 % in 2026",
+          "url": "https://www.trend.az/casia/kazakhstan/4237684.html",
+          "seendate": "20261021T230000Z",
+          "domain": "trend.az",
+          "language": "English"
+        },
+        {
+          "title": "Kazakhstan Reaffirms Russian Energy Ties as Ukrainian Drones Hit Oil Exports",
+          "url": "https://jamestown.org/kazakhstan-reaffirms-russian-energy-ties-as-ukrainian-drones-hit-oil-exports/",
+          "seendate": "20261021T213000Z",
+          "domain": "jamestown.org",
+          "language": "English"
+        },
+        {
+          "title": "With Hormuz Closed , Central Asia Plays Every Side And Gains Leverage | Peak Oil News and Message Boards",
+          "url": "https://peakoil.com/publicpolicy/with-hormuz-closed-central-asia-plays-every-side-and-gains-leverage",
+          "seendate": "20261019T034500Z",
+          "domain": "peakoil.com",
+          "language": "English"
+        }
+      ]
+    },
+    "btc": {
+      "query": "(\"Baku-Tbilisi-Ceyhan\" OR \"BTC pipeline\") (oil OR Azerbaijan OR Ceyhan OR pipeline) sourcelang:english",
+      "error": "FeedError: HTTP 429: 'Please limit requests to one every 5 seconds or contact kalev.leetaru5@gmail.com for large'",
+      "items": []
+    },
+    "east_west": {
+      "query": "(\"East-West pipeline\" OR Petroline) (Saudi OR Aramco OR Yanbu OR oil) sourcelang:english",
+      "raw": 37,
+      "english": 37,
+      "mention_route": 1,
+      "after_dedupe": 1,
+      "items": [
+        {
+          "title": "Saudi Arabia faces Houthi Attacks targeting Riyadh Airport, Dammam, Yanbu Oil Hub, Rabigh Refinery",
+          "source": "en.dailypakistan.com.pk",
+          "published_at": "2026-10-25T05:30:00Z",
+          "url": "https://en.dailypakistan.com.pk/25-Oct-2026/saudi-arabia-faces-houthi-attacks-targeting-riyadh-airport-dammam-yanbu-oil-hub-rabigh-refinery",
+          "tag": "attack"
+        }
+      ],
+      "all_mentions": [
+        {
+          "title": "Saudi Arabia faces Houthi Attacks targeting Riyadh Airport , Dammam , Yanbu Oil Hub , Rabigh Refinery",
+          "source": "en.dailypakistan.com.pk",
+          "published_at": "2026-10-25T05:30:00Z",
+          "url": "https://en.dailypakistan.com.pk/25-Oct-2026/saudi-arabia-faces-houthi-attacks-targeting-riyadh-airport-dammam-yanbu-oil-hub-rabigh-refinery",
+          "tag": "attack"
+        }
+      ],
+      "raw_records": [
+        {
+          "title": "Saudi Arabia faces Houthi Attacks targeting Riyadh Airport , Dammam , Yanbu Oil Hub , Rabigh Refinery",
+          "url": "https://en.dailypakistan.com.pk/25-Oct-2026/saudi-arabia-faces-houthi-attacks-targeting-riyadh-airport-dammam-yanbu-oil-hub-rabigh-refinery",
+          "seendate": "20261025T053000Z",
+          "domain": "en.dailypakistan.com.pk",
+          "language": "English"
+        },
+        {
+          "title": "Saudi Arabia : Riyadh Airport announces resumption of operations at T1 , T2 following closure after Houthi attacks",
+          "url": "http://www.calcuttanews.net/news/279397055/saudi-arabia-riyadh-airport-announces-resumption-of-operations-at-t1-t2-following-closure-after-houthi-attacks",
+          "seendate": "20261025T033000Z",
+          "domain": "calcuttanews.net",
+          "language": "English"
+        },
+        {
+          "title": "Saudi Arabia : Riyadh Airport announces resumption of operations at T1 , T2 following closure after Houthi attacks",
+          "url": "http://www.middleeaststar.com/news/279397055/saudi-arabia-riyadh-airport-announces-resumption-of-operations-at-t1-t2-following-closure-after-houthi-attacks",
+          "seendate": "20261025T033000Z",
+          "domain": "middleeaststar.com",
+          "language": "English"
+        },
+        {
+          "title": "Riyadh Airport Resumes Operation Following Closure After Attacks",
+          "url": "https://www.deccanchronicle.com/west-asia/riyadh-airport-resumes-operation-following-closure-after-attacks-1998633",
+          "seendate": "20261025T033000Z",
+          "domain": "deccanchronicle.com",
+          "language": "English"
+        },
+        {
+          "title": "  Houthis targeted airports , refineries across Saudi Arabia : Military spokesperson Yahya Saree ; warns airlines against resuming operations",
+          "url": "https://news.webindia123.com/news/Articles/World/20261025/4514788.html",
+          "seendate": "20261024T233000Z",
+          "domain": "news.webindia123.com",
+          "language": "English"
+        },
+        {
+          "title": "Iraq reportedly believes Israel struck Iranian weapons bound for militias",
+          "url": "https://www.jpost.com/middle-east/article-912720",
+          "seendate": "20261024T220000Z",
+          "domain": "jpost.com",
+          "language": "English"
+        },
+        {
+          "title": "Houthis Announce Massive Missile Attack On Saudi Territory , Including East - West Pipeline",
+          "url": "https://www.zerohedge.com/geopolitical/houthis-announce-massive-missile-attack-saudi-territory-including-east-west-pipeline",
+          "seendate": "20261024T210000Z",
+          "domain": "zerohedge.com",
+          "language": "English"
+        },
+        {
+          "title": "Houthis say they attacked Saudi oil sites ; strikes reported in Aden",
+          "url": "https://whbl.com/2026/10/24/houthis-say-they-attacked-saudi-oil-sites-strikes-reported-on-yemens-aden/",
+          "seendate": "20261024T191500Z",
+          "domain": "whbl.com",
+          "language": "English"
+        },
+        {
+          "title": "U . S . Orders Non - Emergency Diplomats to Leave Saudi Arabia Following Houthi Strikes – NaturalNews . com",
+          "url": "https://www.naturalnews.com/2026-10-24-us-orders-non-emergency-diplomats-leave-saudi.html",
+          "seendate": "20261024T154500Z",
+          "domain": "naturalnews.com",
+          "language": "English"
+        },
+        {
+          "title": "October 23 , 2026 Traffic in the Strait of Hormuz",
+          "url": "https://intlxpatr.com/2026/10/23/october-23-2026-traffic-in-the-strait-of-hormuz/",
+          "seendate": "20261024T003000Z",
+          "domain": "intlxpatr.com",
+          "language": "English"
+        },
+        {
+          "title": "Iran says 7 oil tankers were attacked in the Strait of Hormuz as fears grow of a return to war",
+          "url": "https://www.kfyrtv.com/2026/10/22/iran-says-7-oil-tankers-were-attacked-strait-hormuz-fears-grow-return-war/",
+          "seendate": "20261023T063000Z",
+          "domain": "kfyrtv.com",
+          "language": "English"
+        },
+        {
+          "title": "Iran War Updates : Trump accuses Iran of lying about strikes on ships to drive up oil prices before midterm – Ya Libnan",
+          "url": "https://yalibnan.com/2026/10/23/iran-war-updatestrump-accuses-iran-of-lying-about-strikes-on-ships-to-drive-up-oil-prices-before-midterm/",
+          "seendate": "20261023T050000Z",
+          "domain": "yalibnan.com",
+          "language": "English"
+        },
+        {
+          "title": "Iran says 7 oil tankers were attacked in the Strait of Hormuz as fears grow of a return to war",
+          "url": "https://www.kmvt.com/2026/10/22/iran-says-7-oil-tankers-were-attacked-strait-hormuz-fears-grow-return-war/",
+          "seendate": "20261023T011500Z",
+          "domain": "kmvt.com",
+          "language": "English"
+        },
+        {
+          "title": "The soaring cost of shipping is lifting the price of oil for consumers | Hellenic Shipping News Worldwide",
+          "url": "https://www.hellenicshippingnews.com/the-soaring-cost-of-shipping-is-lifting-the-price-of-oil-for-consumers/",
+          "seendate": "20261022T233000Z",
+          "domain": "hellenicshippingnews.com",
+          "language": "English"
+        },
+        {
+          "title": "Iran says 7 oil tankers attacked in Strait of Hormuz",
+          "url": "https://japantoday.com/category/world/iran-says-7-oil-tankers-are-on-fire-or-damaged-in-a-key-strait-as-fears-grow-of-a-return-to-war",
+          "seendate": "20261022T224500Z",
+          "domain": "japantoday.com",
+          "language": "English"
+        },
+        {
+          "title": "Iran says 7 oil tankers attacked in the Strait of Hormuz as fears grow of a return to war",
+          "url": "https://www.nbcnews.com/world/iran/iran-says-7-oil-tankers-attacked-strait-hormuz-fears-grow-return-war-rcna605108",
+          "seendate": "20261022T220000Z",
+          "domain": "nbcnews.com",
+          "language": "English"
+        },
+        {
+          "title": "Iran says 7 tankers damaged in Strait of Hormuz , and other Mideast news - Las Vegas Sun News",
+          "url": "https://lasvegassun.com/news/2026/oct/22/iran-says-7-tankers-damaged-in-strait-of-hormuz-an/",
+          "seendate": "20261022T210000Z",
+          "domain": "lasvegassun.com",
+          "language": "English"
+        },
+        {
+          "title": "Oil Futures For 2027 Have Jumped Almost 20 %. Traders Believe Relief Could Take Longer Than Expected . ",
+          "url": "https://www.ibtimes.com/oil-futures-2027-have-jumped-almost-20-traders-believe-relief-could-take-longer-expected-3808878",
+          "seendate": "20261022T191500Z",
+          "domain": "ibtimes.com",
+          "language": "English"
+        },
+        {
+          "title": "Physical Crude Oil  Desensitized  While Futures Remain in Panic : Amid U . S .- Iran Tensions , Who Is Paying for  Resilience  Behind the Oil Price Gap ? ",
+          "url": "https://peakoil.com/publicpolicy/physical-crude-oil-desensitized-while-futures-remain-in-panic-amid-u-s-iran-tensions-who-is-paying-for-resilience-behind-the-oil-price-gap",
+          "seendate": "20261022T041500Z",
+          "domain": "peakoil.com",
+          "language": "English"
+        },
+        {
+          "title": "How and why the world is making Hormuz moot",
+          "url": "https://www.theglobeandmail.com/investing/investment-ideas/article-how-and-why-the-world-is-making-hormuz-moot/",
+          "seendate": "20261022T000000Z",
+          "domain": "theglobeandmail.com",
+          "language": "English"
+        },
+        {
+          "title": " 「 戰爭 」、「 反戰 」、 與 「 和平 」-- 開欄文 - 時事論壇",
+          "url": "https://city.udn.com/2976/7272703?raid=7299419",
+          "seendate": "20261021T130000Z",
+          "domain": "city.udn.com",
+          "language": "English"
+        },
+        {
+          "title": "Amid US pressure , Iraq closes southern border crossing with Iran",
+          "url": "http://www.jpost.com/middle-east/iran-news/article-912385",
+          "seendate": "20261021T100000Z",
+          "domain": "jpost.com",
+          "language": "English"
+        },
+        {
+          "title": "Jaishankar , Rubio , UAE minister talk energy ties amid West Asia crisis",
+          "url": "https://dailypioneer.com/india/jaishankar-rubio-uae-minister-talk-energy-ties-amid-west-asia-crisis",
+          "seendate": "20261021T021500Z",
+          "domain": "dailypioneer.com",
+          "language": "English"
+        },
+        {
+          "title": "American Pravda : The Fall of Saudi Arabia ? – The Greanville Post",
+          "url": "https://www.greanvillepost.com/american-pravda-the-fall-of-saudi-arabia/",
+          "seendate": "20261021T013000Z",
+          "domain": "greanvillepost.com",
+          "language": "English"
+        },
+        {
+          "title": "The Real Oil Tax Hits EVERY Barrel",
+          "url": "https://www.energyandcapital.com/the-real-oil-tax-hits-every-barrel/",
+          "seendate": "20261020T224500Z",
+          "domain": "energyandcapital.com",
+          "language": "English"
+        },
+        {
+          "title": "As Macron visits Gulf , can France forge its own energy - for - security future ? - Dominican Republic Post – Caribbean News , Business , Travel & Culture",
+          "url": "https://dominicanrepublicpost.com/as-macron-visits-gulf-can-france-forge-its-own-energy-for-security-future/",
+          "seendate": "20261020T200000Z",
+          "domain": "dominicanrepublicpost.com",
+          "language": "English"
+        },
+        {
+          "title": "The Strait Of Hormuz Could Become Redundant In Five Years as Countries Build Alternatives , HSBC CEO Says",
+          "url": "https://www.ibtimes.com/strait-hormuz-could-become-redundant-five-years-countries-build-alternatives-hsbc-ceo-says-3808775",
+          "seendate": "20261020T184500Z",
+          "domain": "ibtimes.com",
+          "language": "English"
+        },
+        {
+          "title": "Can Strait of Hormuz become  redundant  in 5 years as Iran war drags on ? Here are the alternate routes for Gulf states",
+          "url": "https://www.livemint.com/news/world/can-strait-of-hormuz-become-redundant-in-5-years-as-iran-war-drags-on-here-are-the-alternate-routes-for-gulf-states-11792496619136.html",
+          "seendate": "20261020T140000Z",
+          "domain": "livemint.com",
+          "language": "English"
+        },
+        {
+          "title": "Saudi oil pipelines and Egypt energy links protect regimes , not just trade",
+          "url": "https://www.ynetnews.com/opinions-analysis/article/sy5qipv3fe",
+          "seendate": "20261020T071500Z",
+          "domain": "ynetnews.com",
+          "language": "English"
+        },
+        {
+          "title": "How Conflict in the Middle East is Impacting Maritime | Hellenic Shipping News Worldwide",
+          "url": "https://www.hellenicshippingnews.com/how-conflict-in-the-middle-east-is-impacting-maritime-3/",
+          "seendate": "20261019T231500Z",
+          "domain": "hellenicshippingnews.com",
+          "language": "English"
+        },
+        {
+          "title": "Abdul El - Sayed Is Straight Up Lying About the Origin of His Own Name",
+          "url": "https://hotair.com/generalissimo/2026/10/19/abdul-el-sayed-is-straight-up-lying-about-the-origin-of-his-own-name-n3820073",
+          "seendate": "20261019T213000Z",
+          "domain": "hotair.com",
+          "language": "English"
+        },
+        {
+          "title": "EIA Sees Smaller Oil Crunch in 2026  | Peak Oil News and Message Boards",
+          "url": "https://peakoil.com/production/eia-sees-smaller-oil-crunch-in-2026",
+          "seendate": "20261019T134500Z",
+          "domain": "peakoil.com",
+          "language": "English"
+        },
+        {
+          "title": "What Will Happen to the Oil Price Over the Next Few Quarters ? ",
+          "url": "https://www.rigzone.com/news/what_will_happen_to_the_oil_price_over_the_next_few_quarters-19-oct-2026-184871-article/",
+          "seendate": "20261019T103000Z",
+          "domain": "rigzone.com",
+          "language": "English"
+        },
+        {
+          "title": "Saudi Arabia At The Breaking Point",
+          "url": "https://www.zerohedge.com/geopolitical/saudi-arabia-breaking-point",
+          "seendate": "20261019T034500Z",
+          "domain": "zerohedge.com",
+          "language": "English"
+        },
+        {
+          "title": "Defending Saudi Arabia is essential to protecting the global economy",
+          "url": "https://weeklyblitz.net/2026/10/19/defending-saudi-arabia-is-essential-to-protecting-the-global-economy/",
+          "seendate": "20261018T191500Z",
+          "domain": "weeklyblitz.net",
+          "language": "English"
+        },
+        {
+          "title": "Arab News | Saudi energy investments helped cushion global economy from shocks , finance minister says",
+          "url": "https://www.arabnews.com/business/saudi-energy-investments-helped-cushion-global-economy-from-shocks-finance-minister-says-3006987",
+          "seendate": "20261018T130000Z",
+          "domain": "arabnews.com",
+          "language": "English"
+        },
+        {
+          "title": "Iran Says Two Supertankers Hit Mines in Hormuz",
+          "url": "https://www.hngn.com/articles/273540/20261018/iran-says-two-supertankers-hit-mines-hormuz.htm",
+          "seendate": "20261018T100000Z",
+          "domain": "hngn.com",
+          "language": "English"
+        }
+      ]
+    }
+  }
+}

@@ -203,6 +203,33 @@ export interface RouteDetail extends RouteSummary {
   explanation?: string;
 }
 
+export type NewsTag = "attack" | "sanctions" | "disruption" | "shipping" | "general";
+
+/** Headline, source, date and link only (never article text). */
+export interface NewsItem {
+  title: string;
+  source: string;
+  published_at: string;
+  url: string;
+  tag: NewsTag;
+}
+
+/** GET /api/v1/routes/{id}/news. stale=true means the live feed failed and this is the last cached result. */
+export interface RouteNews {
+  route_id: string;
+  route_name: string;
+  items: NewsItem[];
+  count: number;
+  stale: boolean;
+  feed: "gdelt";
+  feed_status: "ok" | "empty" | "stale" | "unavailable";
+  last_updated: string | null;
+  message: string | null;
+  cache_ttl_seconds: number;
+  timespan: string;
+  attribution: string;
+}
+
 /** What "Simulate disruption on this route" hands to the scenario controls. */
 export interface RouteScenarioPrefill {
   routeId: string;

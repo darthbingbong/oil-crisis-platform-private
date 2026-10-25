@@ -8,6 +8,7 @@ import type {
   ConflictEvent,
   RefineryHub,
   RouteDetail,
+  RouteNews,
   RoutesResponse,
   SimulateRequest,
   SimulateResponse,
@@ -50,6 +51,10 @@ export function getRoutes(): Promise<RoutesResponse> {
 
 export function getRouteDetail(id: string): Promise<RouteDetail> {
   return fetchJson<RouteDetail>(`/routes/${encodeURIComponent(id)}`);
+}
+
+export function getRouteNews(id: string): Promise<RouteNews> {
+  return fetchJson<RouteNews>(`/routes/${encodeURIComponent(id)}/news`);
 }
 
 export interface ReportRequest {

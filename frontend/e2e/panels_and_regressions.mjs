@@ -118,7 +118,6 @@ async function backToOverview(page) {
   await page.waitForTimeout(1800);
 
   // existing /refineries/at-risk flow via the sidebar ChokepointPanel
-  const sidebar = page.locator("text=Hormuz").first();
   const chokeBtn = page.getByRole("button", { name: /^Hormuz/i }).first();
   console.log("ChokepointPanel Hormuz button count:", await chokeBtn.count());
   const atRisk = page.waitForResponse((r) => r.url().includes("/refineries/at-risk/"), { timeout: 8000 }).catch(() => null);
