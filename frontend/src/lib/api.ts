@@ -6,6 +6,8 @@
 import type {
   ChokepointRisk,
   ConflictEvent,
+  PriceHistory,
+  PriceLive,
   RefineryHub,
   ReportResponse,
   RouteDetail,
@@ -115,4 +117,12 @@ export function simulateReportPreview(req: ReportRequest): Promise<ReportPreview
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(req),
   });
+}
+
+export function getPriceLive(): Promise<PriceLive> {
+  return fetchJson<PriceLive>("/price/live");
+}
+
+export function getPriceHistory(days = 30): Promise<PriceHistory> {
+  return fetchJson<PriceHistory>(`/price/history?days=${days}`);
 }

@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import CurrentConditionsNote from "../components/CurrentConditionsNote";
 import { BarrelsChart, EvChart, ImporterChart, LithiumChart, PriceChart } from "../components/results/Charts";
 import EconomyPanel from "../components/results/EconomyPanel";
+import PriceTicker from "../components/PriceTicker";
 import KpiStrip from "../components/results/KpiStrip";
 import LithiumControl from "../components/results/LithiumControl";
 import ReportSection from "../components/results/ReportSection";
@@ -87,7 +88,8 @@ export default function Results() {
   if (!parsed.ok) {
     return (
       <main style={{ minHeight: "100vh" }}>
-        {topBar}
+        <PriceTicker />
+      {topBar}
         <div style={wrap}>
           <Card title="This link does not describe a scenario" testId="results-invalid" tone="alarm">
             <p style={{ margin: "0 0 10px" }}>Nothing was calculated, because the address has a problem:</p>
@@ -103,6 +105,7 @@ export default function Results() {
 
   return (
     <main style={{ minHeight: "100vh", paddingBottom: 80 }}>
+      <PriceTicker />
       {topBar}
       <div style={wrap}>
         {state.kind === "loading" && (

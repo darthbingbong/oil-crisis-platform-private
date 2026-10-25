@@ -1,0 +1,106 @@
+{
+  "_meta": {
+    "description": "Saved copy of real GDELT headlines (headline, source, date, link, tag; no article text) for demo use when the live feed is down. Always shown labelled DEMO SNAPSHOT with its date; never presented as live.",
+    "built_by": "backend/tools/prewarm_news.py",
+    "attribution": "Headline metadata from the GDELT Project (https://www.gdeltproject.org/). Headlines link to the publishers; article text is not stored or shown."
+  },
+  "routes": {
+    "hormuz": {
+      "fetched_at": "2026-10-25T07:35:54Z",
+      "items": [
+        {
+          "title": "Nigerian Oil Near US$115 a Barrel on Hormuz Attacks",
+          "source": "riotimesonline.com",
+          "published_at": "2026-10-24T18:00:00Z",
+          "url": "https://www.riotimesonline.com/nigerian-oil-bonny-light-115-barrel-2026/",
+          "tag": "attack"
+        },
+        {
+          "title": "IRGC claims full control over Hormuz as US contemplates fresh strikes on Iran",
+          "source": "nigeriasun.com",
+          "published_at": "2026-10-24T15:15:00Z",
+          "url": "http://www.nigeriasun.com/news/279395973/irgc-claims-full-control-over-hormuz-as-us-contemplates-fresh-strikes-on-iran",
+          "tag": "attack"
+        }
+      ]
+    },
+    "bab_el_mandeb": {
+      "fetched_at": "2026-10-25T07:36:51Z",
+      "items": [
+        {
+          "title": "Ethiopia Calls for Shared Red Sea Security",
+          "source": "riotimesonline.com",
+          "published_at": "2026-10-24T15:00:00Z",
+          "url": "https://www.riotimesonline.com/ethiopia-calls-for-shared-red-sea-security-2026/",
+          "tag": "general"
+        },
+        {
+          "title": "Middle East mayhem: Oil prices jump US$3 on Houthi attacks, oil spill, highest settlement since April",
+          "source": "thestar.com.my",
+          "published_at": "2026-10-24T12:45:00Z",
+          "url": "https://www.thestar.com.my/aseanplus/aseanplus-news/2026/10/24/middle-east-mayhem-oil-prices-jump-us3-on-houthi-attacks-oil-spill-highest-settlement-since-april",
+          "tag": "attack"
+        }
+      ]
+    },
+    "suez": {
+      "fetched_at": "2026-10-25T07:38:19Z",
+      "items": [
+        {
+          "title": "Sri Lanka Hambantota port eyes new opportunities from return of Suez container traffic",
+          "source": "srilankasource.com",
+          "published_at": "2026-10-23T11:00:00Z",
+          "url": "http://www.srilankasource.com/news/279393825/sri-lanka-hambantota-port-eyes-new-opportunities-from-return-of-suez-container-traffic",
+          "tag": "shipping"
+        },
+        {
+          "title": "Hambantota Port Poised to Reap Benefits as Global Shipping Returns to Suez Canal Route",
+          "source": "lankanewspapers.com",
+          "published_at": "2026-10-23T01:00:00Z",
+          "url": "https://www.lankanewspapers.com/2026/10/23/hambantota-port-poised-to-reap-benefits-as-global-shipping-returns-to-suez-canal-route",
+          "tag": "shipping"
+        },
+        {
+          "title": "HIPG sees stronger opportunities as container shipping return to Suez gathers pace",
+          "source": "hellenicshippingnews.com",
+          "published_at": "2026-10-23T00:00:00Z",
+          "url": "https://www.hellenicshippingnews.com/hipg-sees-stronger-opportunities-as-container-shippings-return-to-suez-gathers-pace/",
+          "tag": "shipping"
+        },
+        {
+          "title": "Hapag - Lloyd expects more shipping services to return to Suez Canal",
+          "source": "hellenicshippingnews.com",
+          "published_at": "2026-10-22T23:30:00Z",
+          "url": "https://www.hellenicshippingnews.com/hapag-lloyd-expects-more-shipping-services-to-return-to-suez-canal/",
+          "tag": "shipping"
+        },
+        {
+          "title": "Sri Lanka Hambantota Port Sees Bunker Demand Opportunity as Suez Return Gathers Pace",
+          "source": "shipandbunker.com",
+          "published_at": "2026-10-22T09:30:00Z",
+          "url": "https://shipandbunker.com/news/apac/856926-sri-lankas-hambantota-port-sees-bunker-demand-opportunity-as-suez-return-gathers-pace",
+          "tag": "shipping"
+        },
+        {
+          "title": "Container Lines Shift 63 % of Far East - Europe Capacity Back to Suez Canal: Alphaliner",
+          "source": "shipandbunker.com",
+          "published_at": "2026-10-21T12:00:00Z",
+          "url": "https://shipandbunker.com/news/emea/932812-container-lines-shift-63-of-far-east-europe-capacity-back-to-suez-canal-alphaliner",
+          "tag": "general"
+        }
+      ]
+    },
+    "east_west": {
+      "fetched_at": "2026-10-25T07:43:42Z",
+      "items": [
+        {
+          "title": "Saudi Arabia faces Houthi Attacks targeting Riyadh Airport, Dammam, Yanbu Oil Hub, Rabigh Refinery",
+          "source": "en.dailypakistan.com.pk",
+          "published_at": "2026-10-25T05:30:00Z",
+          "url": "https://en.dailypakistan.com.pk/25-Oct-2026/saudi-arabia-faces-houthi-attacks-targeting-riyadh-airport-dammam-yanbu-oil-hub-rabigh-refinery",
+          "tag": "attack"
+        }
+      ]
+    }
+  }
+}

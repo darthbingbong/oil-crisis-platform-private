@@ -4,6 +4,7 @@ import AlertFeed from "../components/AlertFeed";
 import ChokepointPanel from "../components/ChokepointPanel";
 import EarthGlobe from "../components/globe/EarthGlobe";
 import Header from "../components/Header";
+import PriceTicker from "../components/PriceTicker";
 import HistoricalChart from "../components/HistoricalChart";
 import ScenarioPanel from "../components/ScenarioPanel";
 import { mockConflicts } from "../data/mockConflicts";
@@ -105,6 +106,7 @@ export default function Dashboard() {
 
   return (
     <div className="h-screen flex flex-col bg-void">
+      <PriceTicker />
       <Header backendStatus={backendStatus} priceState={priceState} streamStatus={streamStatus} />
       <main className="flex-1 flex flex-col overflow-y-auto lg:grid lg:grid-cols-[1fr_400px] lg:overflow-hidden gap-0">
         <div className="flex flex-col lg:min-h-0">

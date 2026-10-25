@@ -52,6 +52,7 @@ from ev_lithium import (
 )
 from refineries import capacity_at_risk_bpd, capacity_at_risk_pct_of_global, load_refineries, refineries_at_chokepoint
 from routers import news as route_news_router
+from routers import price as price_router
 from routers import report as report_router
 from routers import routes as routes_router
 from services.news_feed import warm_cache
@@ -98,6 +99,7 @@ app.add_middleware(
 
 app.include_router(routes_router.router)   # /api/v1/routes, /routes/{id}, /routes/{id}/bypass
 app.include_router(report_router.router)   # POST /api/v1/simulate/report
+app.include_router(price_router.router)       # GET /api/v1/price/live and /price/history (EIA, CSV fallback)
 app.include_router(route_news_router.router)  # GET /api/v1/routes/{id}/news (GDELT) + DEV-ONLY /dev/news-feed
 
 # ---------------------------------------------------------------------------

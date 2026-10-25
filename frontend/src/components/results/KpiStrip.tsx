@@ -42,7 +42,7 @@ export default function KpiStrip({ report }: { report: ReportResponse }) {
           testId="kpi-deficit"
           label="Lithium deficit"
           value={`${fmtCompact(k.lithium_deficit_t_lce)} t`}
-          sub={`over ${k.horizon_years} years vs the supply cap`}
+          sub={`${report.scenario.lithium_availability_pct}% availability over ${k.horizon_years} years (cap ${fmtCompact(report.sections.lithium.chart.cases.sourced.supply_cap_over_horizon_t_lce)} t)`}
           color={k.lithium_deficit_t_lce > 0 ? "var(--color-alarm)" : "var(--color-bone)"}
         />
       </div>

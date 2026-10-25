@@ -70,6 +70,15 @@ export default function RouteNews({ routeId }: { routeId: string }) {
         <div className="section-label">Recent news</div>
         {state.kind === "ready" && state.news.last_updated && (
           <div className="flex items-center gap-2">
+            {state.news.snapshot && (
+              <span
+                data-testid="news-snapshot-badge"
+                className="section-label"
+                style={{ padding: "1px 6px", border: "1px solid var(--color-crude)", color: "var(--color-crude)", borderRadius: 3 }}
+              >
+                demo snapshot
+              </span>
+            )}
             {state.news.stale && (
               <span
                 data-testid="news-stale-badge"
@@ -80,7 +89,7 @@ export default function RouteNews({ routeId }: { routeId: string }) {
               </span>
             )}
             <span data-testid="news-updated" className="data-readout text-[10px]" style={{ color: "var(--color-ash)" }}>
-              updated {fmtUtc(state.news.last_updated)}
+              {state.news.snapshot ? "fetched" : "updated"} {fmtUtc(state.news.last_updated)}
             </span>
           </div>
         )}
@@ -109,7 +118,7 @@ export default function RouteNews({ routeId }: { routeId: string }) {
             <p
               data-testid="news-message"
               className="text-xs"
-              style={{ color: state.news.stale || state.news.feed_status === "unavailable" ? "var(--color-crude)" : "var(--color-ash)", margin: "0 0 8px" }}
+              style={{ color: state.news.stale || state.news.snapshot || state.news.feed_status === "unavailable" ? "var(--color-crude)" : "var(--color-ash)", margin: "0 0 8px" }}
             >
               {state.news.message}
             </p>

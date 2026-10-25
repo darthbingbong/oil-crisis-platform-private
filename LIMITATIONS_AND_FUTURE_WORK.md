@@ -44,7 +44,16 @@ Items marked **(to do)** are not built yet.
 - Oil-importer-specific (MENAP) and World Bank figures that appeared in early search results were **removed** because no primary source could be verified. Sector effects (airlines, energy equities, tanker rates) are qualitative, labelled "no sourced coefficient"; only the derived tanker tonne-mile increase is a number.
 - Effects are scaled linearly to the price move and to duration over 365 days (an assumption: the source gives no figure for shorter shocks), and use the central price estimate, so true uncertainty is wider, and beyond the validated range the price itself is an extrapolation.
 
-## 6. Not built yet
+## 6. Oil price (M6)
 
-- **(to do)** Live oil price and the ticker (M6), vessel tracking with AIS (M7). The AIS limits to document then: coverage gaps, "dark fleet" vessels switching transponders off, unreliable destination fields, free-tier limits, and AIS not saying what cargo a tanker carries.
+- **EIA spot prices are daily closes published weekly**, so the newest point is typically several days old (5 days on 25 Oct 2026) and never fresher than the last Wednesday release. There is no free real-time source in this project, so nothing is labelled LIVE.
+- **The offline fallback is 68 days old** (2026-08-18) and far below the real price at the time of writing (WTI 86.48 in the CSV against 107.89 on 20 Oct per EIA's table). The ticker always shows the age and `OFFLINE_FALLBACK`, but a presenter should not read it as a current price.
+- **The success path has been verified against the documented reply shape and a mock server, not against a live EIA key**: none was available. The first run with a real key should be checked (the request shape and the real latency with a key are unconfirmed; only the keyless 403 reply was observed live: 0.74 to 0.78 s).
+- **EIA's rate limits are not published as numbers** in the API documentation, so the server caches for 15 minutes and the browser polls every 10.
+- The header's **"SIM CRUDE" price is a simulation driven by classified news** and is unrelated to the EIA series next to it (it read about $93 while EIA's latest close was $107.89). Both are labelled, but they can look contradictory side by side.
+- **WTI and Brent change** is computed between the two newest published closes, which can be several days apart across a weekend or a holiday.
+
+## 7. Not built yet
+
+- **(to do)** Vessel tracking with AIS (M7). The AIS limits to document then: coverage gaps, "dark fleet" vessels switching transponders off, unreliable destination fields, free-tier limits, and AIS not saying what cargo a tanker carries.
 - **(to do)** A print-friendly or PDF version of the Results page.

@@ -13,6 +13,7 @@ Nothing is shared with the NewsAPI pipeline in backend/news/ (own cache, own cla
 """
 
 import asyncio
+import json
 import logging
 import os
 import re
@@ -281,16 +282,17 @@ def _iso(epoch: float) -> str:
 
 
 def _response(route: dict, items: list[dict], fetched_at: float | None, *, stale: bool, status: str, message: str | None,
-              refreshing: bool = False) -> dict:
+              refreshing: bool = False, snapshot: bool = False) -> dict:
     return {
         "refreshing": refreshing,              # true: this is the last result, and a fresh fetch is running in the background
+        "snapshot": snapshot,                  # true: a saved DEMO SNAPSHOT of real headlines, NOT live and NOT from this session's cache
         "route_id": route["id"],
         "route_name": route["name"],
         "items": items,
         "count": len(items),
         "stale": stale,
         "feed": "gdelt",
-        "feed_status": status,                 # ok | empty | stale | unavailable
+        "feed_status": status,                 # ok | empty | stale | snapshot | unavailable
         "last_updated": _iso(fetched_at) if fetched_at is not None else None,
         "message": message,
         "cache_ttl_seconds": CACHE_TTL_SECONDS,
@@ -302,6 +304,47 @@ def _response(route: dict, items: list[dict], fetched_at: float | None, *, stale
 EMPTY_MESSAGE = ("No recent headlines found for this route in the last 7 days. GDELT was reachable; nothing matching in English "
                  "mentioned this route in its headline.")
 UNAVAILABLE_MESSAGE = "The news feed is not responding and nothing has been cached yet. Try again in a few minutes."
+
+
+# ---------------------------------------------------------------------------
+# DEMO SNAPSHOT: a saved copy of REAL headlines (with the date they were fetched), used only when the live feed fails and nothing
+# better is cached, so a route does not show blank during a presentation. It is always labelled as a snapshot, never as live.
+# Built by tools/prewarm_news.py from real fetched results; it is not invented or edited by hand.
+# ---------------------------------------------------------------------------
+SNAPSHOT_PATH = DATA_DIR / "news_demo_snapshot.json"
+
+
+def load_snapshot() -> dict:
+    try:
+        data = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def snapshot_for(route_id: str) -> dict | None:
+    """The saved headlines for a route, or None if it has none (an empty list is not worth showing as a snapshot)."""
+    entry = (load_snapshot().get("routes") or {}).get(route_id)
+    return entry if entry and entry.get("items") and entry.get("fetched_at") else None
+
+
+def _snapshot_message(fetched_at_iso: str) -> str:
+    return (f"DEMO SNAPSHOT: the live news feed is not responding, so this is a saved copy of real headlines fetched on {fetched_at_iso[:10]} "
+            f"({fetched_at_iso}). It is not live.")
+
+
+def write_snapshot_from_cache(routes: list[dict], cache: "TTLCache | None" = None, path: Path | None = None) -> dict:
+    """Save every route's cached REAL headlines (non-empty only) with their own fetched-at time. Returns the data written."""
+    cache = cache or default_cache()
+    out = {"_meta": {"description": "Saved copy of real GDELT headlines (headline, source, date, link, tag; no article text) for demo use when the "
+                                    "live feed is down. Always shown labelled DEMO SNAPSHOT with its date; never presented as live.",
+                     "built_by": "backend/tools/prewarm_news.py", "attribution": ATTRIBUTION}, "routes": {}}
+    for r in routes:
+        entry = cache.get(f"news_{r['id']}")
+        if entry and entry["payload"]["items"]:
+            out["routes"][r["id"]] = {"fetched_at": _iso(entry["fetched_at"]), "items": entry["payload"]["items"]}
+    (path or SNAPSHOT_PATH).write_text(json.dumps(out, indent=2, ensure_ascii=False), encoding="utf-8")
+    return out
 
 
 def _stale_message(fetched_at: float) -> str:
@@ -366,6 +409,15 @@ async def get_route_news(
         return _response(route, items, time.time(), stale=False, status="empty" if not items else "ok",
                          message=EMPTY_MESSAGE if not items else None)   # simulated empty: not cached
     except FeedError:
+        # precedence when the live feed fails: a cached result that has headlines, then the saved demo snapshot, then an empty cached
+        # result, then "unavailable". The snapshot is labelled as such and is never marked fresh or live.
+        if entry is not None and entry["payload"]["items"]:
+            return _response(route, entry["payload"]["items"], entry["fetched_at"], stale=True, status="stale",
+                             message=_stale_message(entry["fetched_at"]))
+        snap = snapshot_for(route["id"])
+        if snap is not None:
+            epoch = datetime.strptime(snap["fetched_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
+            return _response(route, snap["items"], epoch, stale=False, status="snapshot", snapshot=True, message=_snapshot_message(snap["fetched_at"]))
         if entry is not None:
             return _response(route, entry["payload"]["items"], entry["fetched_at"], stale=True, status="stale",
                              message=_stale_message(entry["fetched_at"]))

@@ -22,7 +22,9 @@
 | POST | `/api/v1/simulate/report` | new | Full scenario report for the Results page: KPIs, six sections each with chart data, a templated 2-4 sentence summary, a one-line takeaway and cited assumptions. Rejects (422, with a plain message) pipelines, routes with no sourced figure and the Cape alternate lane |
 | GET | `/api/v1/routes/{id}/news` | new (M4) | Tagged headlines (title, source, date, link only) from GDELT; cached 20 min; `stale` / `refreshing` when the live feed is down or being refreshed |
 | POST | `/api/v1/dev/news-feed` | new, DEV-ONLY | Simulate a feed failure, an empty feed, or an aged cache |
-| GET | `/api/v1/price/*`, `/api/v1/health`, WS `/ws/vessels` | planned | Milestones M6, M7 |
+| GET | `/api/v1/price/live` | new (M6) | Latest WTI and Brent (USD per barrel), change, `as_of`, `age_days` and `status` = `DAILY_CLOSE` (EIA answered) or `OFFLINE_FALLBACK` (last row of the local CSV). Never `LIVE` |
+| GET | `/api/v1/price/history?days=30` | new (M6) | Merged CSV + EIA daily series for the sparkline: no duplicate dates, blank holiday rows skipped |
+| GET | `/api/v1/health`, WS `/ws/vessels` | planned | Milestone M7 |
 
 **Route-collision decision: Option A.** `/api/v1/routes/{id}` returns a superset of what `/api/v1/routes/{chokepoint}`
 returned before. `backend/tests/test_routes_api.py` checks it against snapshots of the original responses
@@ -165,3 +167,57 @@ labelled a soft figure, still unfolding), shows the Hormuz bypass sensitivity (4
 
 **News warm-up.** At startup the backend fetches route news one route at a time, at least 6 s apart (with the 429 back-off), so the first click in a demo does not wait
 10 to 20 s or more. Set `NEWS_WARMUP=0` to disable it. Measured: with an empty cache the first request took 44.5 s (Bab el-Mandeb) and 68.8 s then 17.6 s (Hormuz, whose first attempt failed); once cached, 0.017 s. A full warm-up pass over 14 routes fetched 5, found 2 already fresh and **7 failed** (GDELT answered 429 or timed out on every retry), so a route can still start cold; afterwards cached clicks took 14 to 24 ms, and an expired entry was shown at once (about 0.5 s, marked stale and refreshing) while a refresh ran in the background.
+
+## Before a demo: news warm-up and the demo snapshot
+
+GDELT, the free news feed, is slow (10 to 60 s per answer here) and often refuses requests (HTTP 429), and that is outside our control. Three layers keep the
+route-news panel from stalling or going blank on the day. **Run the pre-warm script a few minutes before presenting.**
+
+**1. Startup warm-up (automatic).** When the backend starts it fetches route news one route at a time, at least 6 s apart (respecting the 429 back-off),
+skipping routes whose cache is still fresh. It cannot be hurried and some routes fail: a full pass fetched 5 of 14. Set `NEWS_WARMUP=0` to turn it off.
+
+**2. The on-disk cache (automatic).** Every fetched result is saved to `backend/data/cache/route_news/` (git-ignored) with its fetched-at time, so it
+**survives a backend restart**. A result is fresh for 20 minutes; after that the panel shows it at once, marked STALE with its original time, while a refresh runs in the background.
+
+**3. The pre-warm script (run it yourself before a demo).**
+
+```
+cd backend
+python tools/prewarm_news.py --snapshot        # fetch every route (3 attempts each, 20 s apart), then save the demo snapshot
+```
+
+It prints a table of what is ready, how many headlines each route has and when they were fetched. Useful variations: `--attempts 5 --gap 30` for a bad day,
+`--only hormuz,suez` for the routes you will click, `--force` to refetch fresh routes, and `--snapshot-only` to rebuild the snapshot with no network.
+Expect 5 to 15 minutes. If a route still fails, run it again later. **Do not start the backend and the script at the same moment**, as both would hit GDELT and trip its rate limit.
+
+**The demo snapshot** (`backend/data/news_demo_snapshot.json`, committed) is a saved copy of *real* headlines with the date they were fetched. It is used only when the
+live feed fails and the cache has nothing better, so a route does not show blank in a presentation. The panel then shows an amber **DEMO SNAPSHOT** badge,
+"fetched <date>" and the sentence "this is a saved copy of real headlines ... It is not live". It is never shown as live or fresh, and a live or cached result always takes precedence over it.
+It is built only from real fetched results by the script (never edited by hand). **Today it holds 4 of 14 routes** (Hormuz, Bab el-Mandeb, Suez, East-West pipeline), the only ones GDELT has
+returned headlines for; the other routes show the plain "empty" or "unavailable" message. Re-run the pre-warm script with `--snapshot` to refresh it, and commit the file if you want the new copy kept.
+
+
+## Live oil price (Milestone 6)
+
+The ticker at the top of every page shows WTI and Brent with coloured change, a 30-day sparkline, the as-of date **and how old it is**, and a status badge.
+
+**Where the data comes from.** EIA Open Data API v2, route `petroleum/pri/spt` (daily spot prices), series **RWTC** (WTI, Cushing) and **RBRTE** (Brent, Europe), both USD per barrel.
+The key goes in the request URL (EIA does not accept a header), so it is read on the server only. Set it in `backend/.env` (see `.env.example`); register free at https://www.eia.gov/opendata/register.php.
+
+**What the numbers really are (read this before presenting).** EIA's spot prices are *daily closes* but are **published in a weekly release** (release dates on EIA's page were
+21 Oct and 28 Oct 2026, seven days apart). On 25 Oct 2026 the newest published close was **20 Oct**: 5 days old, and it is never fresher than the last Wednesday release. So nothing here is a live quote, and **nothing is ever labelled LIVE**.
+
+| Status | Meaning |
+|---|---|
+| `DAILY_CLOSE` | The EIA API call succeeded (or a success from the last 24 hours is being reused after EIA failed). The age is always shown; over 3 days old it turns orange and carries a warning. |
+| `OFFLINE_FALLBACK` | EIA could not be used (no key, rejected key, timeout, server error, rate limit, unreadable reply). Shows the **last row of `data/oil_daily_prices.csv`, with its real date (2026-08-18, 68 days old)** and the reason. |
+
+Without a key the app runs fully: the ticker shows `OFFLINE_FALLBACK` and says why. Measured on this machine: an EIA call (keyless, so it returns HTTP 403) takes about **0.74 to 0.78 s**; the timeout is 5 s with one retry (worst case about 10.5 s before falling back); results are cached 15 minutes; the browser polls every 10 minutes and backs off 30 s, 60 s ... up to 10 minutes after an error.
+
+**History and holidays.** `/price/history` merges the CSV with EIA data by date (EIA wins when both have a date), never returns a date twice, and drops dates where both prices are blank. EIA leaves a blank value on market holidays; blanks are treated as "no price" and skipped when computing the latest value and the change.
+
+**Keeping the key private.** The key is never in a response, a log line, an exception message or the frontend. `httpx` logs full request URLs at INFO (which would include `api_key=...`), so that logging is switched off and a log-record
+filter redacts any `api_key=` value and the key itself from every record. `backend/tests/test_price_feed.py` checks all of this, including a test that proves the leak is real when the protections are removed.
+
+**Demo and screenshots without a key.** `backend/tools/mock_eia_server.py` stands in for EIA (modes: `ok`, `invalid_key`, `error`, `slow`). It is **not EIA and not live**: it serves the six closes (13 to 20 Oct 2026) that EIA's public table showed, so the real adapter can be exercised over real HTTP.
+Start it, then run the backend with `EIA_BASE_URL=http://127.0.0.1:8765/v2 EIA_API_KEY=any-dummy-value`. Screenshots of every ticker state are in `docs/m6_screenshots/`, produced by `frontend/e2e/price_ticker.mjs`.

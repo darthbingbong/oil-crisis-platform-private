@@ -223,8 +223,10 @@ export interface RouteNews {
   stale: boolean;
   /** true: the last cached result is shown at once while a fresh one is fetched in the background. */
   refreshing: boolean;
+  /** true: a saved DEMO SNAPSHOT of real headlines (with its own date), NOT live and not from this session. */
+  snapshot: boolean;
   feed: "gdelt";
-  feed_status: "ok" | "empty" | "stale" | "unavailable";
+  feed_status: "ok" | "empty" | "stale" | "snapshot" | "unavailable";
   last_updated: string | null;
   message: string | null;
   cache_ttl_seconds: number;
@@ -385,4 +387,44 @@ export interface ReportResponse {
       };
     };
   };
+}
+
+// ---------------------------------------------------------------------------
+// Oil prices (backend/services/price_feed.py). Status is DAILY_CLOSE or OFFLINE_FALLBACK, never "live".
+// ---------------------------------------------------------------------------
+export type PriceStatus = "DAILY_CLOSE" | "OFFLINE_FALLBACK";
+
+export interface PriceLive {
+  wti: number | null;
+  brent: number | null;
+  change: number | null;
+  change_pct: number | null;
+  brent_change: number | null;
+  brent_change_pct: number | null;
+  as_of: string;
+  brent_as_of: string | null;
+  status: PriceStatus;
+  age_days: number;
+  age_warning: string | null;
+  source: string;
+  units: string;
+  fetched_at: string | null;
+  cached: boolean;
+  fallback_reason: string | null;
+  fallback_message: string | null;
+}
+
+export interface PricePoint {
+  date: string;
+  wti: number | null;
+  brent: number | null;
+  source: "csv" | "eia";
+}
+
+export interface PriceHistory {
+  points: PricePoint[];
+  days: number;
+  status: PriceStatus;
+  latest_date: string;
+  age_days: number;
 }

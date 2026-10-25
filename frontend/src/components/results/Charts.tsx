@@ -229,7 +229,7 @@ export function LithiumChart({ report }: { report: ReportResponse }) {
           </Bar>
           {cap > 0 && (
             <ReferenceLine y={cap} stroke={TOKENS.alarm} strokeDasharray="6 3"
-              label={{ value: `supply cap over ${report.kpis.horizon_years} years: ${fmtCompact(cap)} t`, position: "insideTopLeft", fill: TOKENS.alarm, fontSize: 11 }} />
+              label={{ value: `supply cap ${fmtCompact(cap)} t = ${report.scenario.lithium_availability_pct}% availability x ${report.kpis.horizon_years} years`, position: "insideTopLeft", dy: -16, fill: TOKENS.alarm, fontSize: 11 }} />
           )}
         </BarChart>
       </Frame>
@@ -239,6 +239,10 @@ export function LithiumChart({ report }: { report: ReportResponse }) {
         { color: TOKENS.ash, label: "project's unsourced assumption, comparison only", swatch: "box" },
         { color: TOKENS.alarm, label: "supply cap (availability x world production x years)", dashed: true },
       ]} />
+      <p data-testid="lithium-cap-formula" className="text-xs" style={{ color: TOKENS.bone, margin: "10px 0 0" }}>
+        <strong>Supply cap</strong> = {report.scenario.lithium_availability_pct}% lithium availability x {fmtInt(c.world_production_2025_t_lce)} t LCE a year (2025 world mine production) x {report.kpis.horizon_years} years ={" "}
+        <span className="data-readout">{fmtInt(cap)} t</span>. <strong>Deficit</strong> = required minus cap, for each case below.
+      </p>
       <table data-testid="lithium-table" className="text-xs" style={{ marginTop: 12, borderCollapse: "collapse", color: TOKENS.bone }}>
         <thead><tr style={{ color: TOKENS.ash, textAlign: "left" }}><th style={{ paddingRight: 24, fontWeight: 600 }}>Case</th><th style={{ paddingRight: 24, fontWeight: 600 }}>t LCE per EV</th><th style={{ paddingRight: 24, fontWeight: 600 }}>Required</th><th style={{ fontWeight: 600 }}>Deficit vs cap</th></tr></thead>
         <tbody>

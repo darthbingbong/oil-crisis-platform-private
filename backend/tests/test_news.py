@@ -4,6 +4,7 @@ No test here touches the real network: the GDELT call is injected or served by a
 """
 
 import asyncio
+import json
 
 import httpx
 import pytest
@@ -36,6 +37,7 @@ def reset_simulation(tmp_path, monkeypatch):
     """Every test starts with the simulation off and its own empty cache directory."""
     nf.set_simulation("off")
     monkeypatch.setattr(nf, "_cache", TTLCache(tmp_path / "cache", nf.CACHE_TTL_SECONDS))
+    monkeypatch.setattr(nf, "load_snapshot", lambda: {})      # tests never depend on the real demo snapshot file
     yield
     nf.set_simulation("off")
 
@@ -471,3 +473,88 @@ def test_warmup_carries_on_after_a_failed_route():
 
     out, n = run(scenario())
     assert out["failed"] == ["hormuz"] and out["fetched"] == ["bab_el_mandeb"] and n == 2
+
+
+
+# ------------------------------------------------------------------ demo snapshot and restart persistence
+SNAP = {"routes": {"hormuz": {"fetched_at": "2026-10-20T09:30:00Z", "items": [
+    {"title": "Hormuz tanker traffic slows", "source": "example.com", "published_at": "2026-10-19T08:00:00Z", "url": "https://example.com/a", "tag": "shipping"}]}}}
+
+
+def _broken():
+    async def fetch(q):
+        raise nf.FeedError("HTTP 429")
+    return fetch
+
+
+def test_snapshot_is_used_when_the_feed_fails_and_nothing_is_cached_and_is_never_called_live(monkeypatch):
+    monkeypatch.setattr(nf, "load_snapshot", lambda: SNAP)
+    r = run(nf.get_route_news(HORMUZ, cache=TTLCache(None, 1200, Clock()), fetch=_broken()))
+    assert r["feed_status"] == "snapshot" and r["snapshot"] is True and r["count"] == 1
+    assert r["stale"] is False and r["refreshing"] is False                  # not mislabelled as fresh data or as a live refresh
+    assert r["last_updated"] == "2026-10-20T09:30:00Z"                       # its own date, not "now"
+    assert "DEMO SNAPSHOT" in r["message"] and "2026-10-20" in r["message"] and "not live" in r["message"]
+
+
+def test_a_cached_result_with_headlines_beats_the_snapshot(monkeypatch):
+    monkeypatch.setattr(nf, "load_snapshot", lambda: SNAP)
+    clock = Clock()
+    cache = TTLCache(None, 1200, clock)
+
+    async def good(q):
+        return [rec("Hormuz tanker traffic slows today")]
+
+    run(nf.get_route_news(HORMUZ, cache=cache, fetch=good))
+    clock.t += 5000
+    r = run(nf.get_route_news(HORMUZ, cache=cache, fetch=_broken()))
+    assert r["feed_status"] == "stale" and r["snapshot"] is False and r["items"][0]["title"].startswith("Hormuz tanker traffic slows today")
+
+
+def test_snapshot_never_replaces_a_successful_live_fetch(monkeypatch):
+    monkeypatch.setattr(nf, "load_snapshot", lambda: SNAP)
+
+    async def good(q):
+        return [rec("Hormuz live headline today")]
+
+    r = run(nf.get_route_news(HORMUZ, cache=TTLCache(None, 1200, Clock()), fetch=good))
+    assert r["feed_status"] == "ok" and r["snapshot"] is False and r["items"][0]["title"] == "Hormuz live headline today"
+
+
+def test_routes_without_a_snapshot_still_say_unavailable(monkeypatch):
+    monkeypatch.setattr(nf, "load_snapshot", lambda: SNAP)
+    r = run(nf.get_route_news({"id": "suez", "name": "Suez Canal and SUMED"}, cache=TTLCache(None, 1200, Clock()), fetch=_broken()))
+    assert r["feed_status"] == "unavailable" and r["snapshot"] is False and r["items"] == []
+
+
+def test_every_response_carries_the_snapshot_flag():
+    async def good(q):
+        return []
+    assert run(nf.get_route_news(HORMUZ, cache=TTLCache(None, 1200, Clock()), fetch=good))["snapshot"] is False
+
+
+def test_cache_survives_a_backend_restart_and_shows_its_fetched_at_time(tmp_path):
+    clock = Clock()
+    calls = []
+
+    async def good(q):
+        calls.append(q)
+        return [rec("Hormuz tanker traffic slows")]
+
+    first = run(nf.get_route_news(HORMUZ, cache=TTLCache(tmp_path, 1200, clock), fetch=good))
+    clock.t += 300                                                         # 5 minutes later, "after a restart": a brand-new cache object
+    after = run(nf.get_route_news(HORMUZ, cache=TTLCache(tmp_path, 1200, clock), fetch=good))
+    assert len(calls) == 1                                                 # served from disk, no new fetch
+    assert after["last_updated"] == first["last_updated"] and after["stale"] is False and after["count"] == 1
+
+
+def test_snapshot_writer_saves_only_real_cached_headlines_with_their_own_dates(tmp_path):
+    clock = Clock()
+    cache = TTLCache(None, 1200, clock)
+    cache.put("news_hormuz", {"items": SNAP["routes"]["hormuz"]["items"]})
+    cache.put("news_suez", {"items": []})                                  # empty results are not worth a snapshot
+    out = nf.write_snapshot_from_cache([{"id": "hormuz", "name": "H"}, {"id": "suez", "name": "S"}, {"id": "cpc", "name": "C"}],
+                                       cache=cache, path=tmp_path / "snap.json")
+    assert list(out["routes"]) == ["hormuz"]
+    saved = json.loads((tmp_path / "snap.json").read_text(encoding="utf-8"))
+    assert saved["routes"]["hormuz"]["items"] == SNAP["routes"]["hormuz"]["items"] and saved["routes"]["hormuz"]["fetched_at"].endswith("Z")
+    assert "never presented as live" in saved["_meta"]["description"]
