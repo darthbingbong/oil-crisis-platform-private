@@ -1,13 +1,16 @@
 import { useMemo } from "react";
 import { Line, LineChart, ResponsiveContainer } from "recharts";
 import { TOKENS } from "../../lib/constants";
-import type { ConflictEvent, Location } from "../../types";
+import type { ConflictEvent, CurrentConditions, Location } from "../../types";
+import CurrentConditionsNote from "../CurrentConditionsNote";
 
 interface Props {
   location: Location;
   conflicts: ConflictEvent[];
   visible: boolean;
   onBack: () => void;
+  /** Shown on the Hormuz chokepoint view: baseline data is pre-crisis, real 2026 conditions differ. */
+  currentConditions?: CurrentConditions | null;
 }
 
 const TYPE_LABEL: Record<Location["type"], string> = {
@@ -20,7 +23,7 @@ const TYPE_LABEL: Record<Location["type"], string> = {
  * camera flight completes (see EarthGlobe's phase machine). Stays mounted
  * (at opacity 0, non-interactive) during travel/return so the fade has
  * something to animate to/from -- unmounted only back at "idle". */
-export default function LocationDetail({ location, conflicts, visible, onBack }: Props) {
+export default function LocationDetail({ location, conflicts, visible, onBack, currentConditions = null }: Props) {
   const accentColor = location.accent === "crude" ? TOKENS.crude : TOKENS.ion;
 
   const history = useMemo(
@@ -142,6 +145,12 @@ export default function LocationDetail({ location, conflicts, visible, onBack }:
                 </LineChart>
               </ResponsiveContainer>
             </div>
+          </div>
+        )}
+
+        {location.type === "chokepoint" && location.name.toLowerCase() === "hormuz" && (
+          <div style={{ maxWidth: 640 }}>
+            <CurrentConditionsNote conditions={currentConditions} />
           </div>
         )}
 

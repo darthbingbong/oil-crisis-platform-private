@@ -1,0 +1,48 @@
+← BACK TO OVERVIEW
+CHOKEPOINT LANE
+Strait of Hormuz
+ANNUAL FLOW (2024)
+20.7 Mb/d
+20,700,000 bpd
+BARRELS PER YEAR
+7.56 bn
+26% of global seaborne oil
+
+Last full pre-disruption year in EIA's table (first-half 2025 figures are also stored).
+
+CURRENT CONDITIONS
+
+Baseline data comes from the last pre-crisis year (2023 or 2024). Real conditions in 2026 differ: EIA reports the Strait of Hormuz effectively closed since early 2026 with production shut-ins across Gulf producers. Treat results as a what-if from a normal baseline, not a forecast of current flows.
+
+EIA press release, 7 April 2026: Hormuz closure and related outages ↗
+EIA Short-Term Energy Outlook (latest) ↗
+TOP IMPORTERS, BY REGION/GROUP
+China, India, Japanand South Korea(combined)
+Other Asia (Asia84% minus thefour-country 69%)
+Rest of world (100%minus Asia 84%)
+69
+15
+16
+
+Pale bars are derived (a subtraction of two published shares). EIA publishes destination shares only at region/group level.
+
+TOP EXPORTERS
+Saudi Arabia 42%
+BYPASS AND IF CLOSED
+BYPASS CAPACITY
+4.70 Mb/d
+sensitivity: 2.60 Mb/d
+IF FULLY CLOSED
+16.0 Mb/d
+displaced; 18.1 Mb/d with the low bypass
+
+EIA's latest combined estimate for Saudi East-West (5.0 Mb/d rated) plus UAE Abu Dhabi Crude Oil Pipeline (1.8 Mb/d rated), about 4.7 Mb/d. Older EIA pieces estimated 3.5 Mb/d (with Iran's Goreh-Jask) and 2.6 Mb/d 'effective unused'. Pipelines already carry some oil that never touches Hormuz, so real spare capacity may be lower: treat 2.6 Mb/d as a sensitivity.
+
+Hubs depending on this route: Ras Tanura, Jamnagar, Kharg Island, Ras Laffan.
+
+BLOCKADE
+DETOUR
+Simulate disruption on this route
+Source: EIA, World Oil Transit Chokepoints; EIA Today in Energy 2025-06 'Amid regional conflict, the Strait of Hormuz remains critical oil chokepoint' and 2023 'The Strait of Hormuz is the world's most important oil transit chokepoint'
+https://www.eia.gov/international/content/analysis/special_topics/World_Oil_Transit_Chokepoints
+Data year 2024. ALL 'path' waypoints are ILLUSTRATIVE geometry hand-placed for drawing on the globe. They are NOT surveyed shipping-lane or pipeline coordinates and are not a sourced data field.

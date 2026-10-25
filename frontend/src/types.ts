@@ -110,3 +110,99 @@ export interface AlertEvent {
   countries: string[];
   summary: string;
 }
+
+// ---------------------------------------------------------------------------
+// Route layer (backend/routers/routes.py, data in backend/data/routes.json).
+// Pipelines carry NAMEPLATE CAPACITY, never flow: annual_flow_bpd is null for them.
+// ---------------------------------------------------------------------------
+export type RouteType = "chokepoint" | "sea_lane" | "pipeline";
+
+export interface RouteSummary {
+  id: string;
+  name: string;
+  type: RouteType;
+  /** [lat, lng] waypoints. ILLUSTRATIVE geometry, not surveyed coordinates. */
+  path: [number, number][];
+  annual_flow_bpd: number | null;
+  capacity_bpd: number | null;
+  flow_basis: "eia_chokepoint_table" | "nameplate_capacity_gem" | "unverified";
+  baseline_year?: number;
+  share_of_global_seaborne_oil_pct: number | null;
+  bypass_capacity_bpd: number | null;
+  alt_route_id: string | null;
+  source: string;
+  source_url: string;
+  data_year: number;
+  is_estimate: boolean;
+  status?: string;
+  excluded_from_calculations?: boolean;
+}
+
+export interface CurrentConditions {
+  note: string;
+  links: { label: string; url: string }[];
+}
+
+export interface RoutesResponse {
+  path_disclaimer: string;
+  current_conditions: CurrentConditions;
+  routes: RouteSummary[];
+}
+
+export interface RouteImporter {
+  country: string;
+  iso3: string | null;
+  level: "country" | "group";
+  derived: boolean;
+  share_of_route_flow_pct: number;
+  basis?: string;
+}
+
+export interface RouteExporter {
+  country: string;
+  share_pct: number | null;
+  basis?: string;
+}
+
+export interface RouteOwner {
+  name: string;
+  country: string;
+  share_pct: number | null;
+}
+
+/** GET /api/v1/routes/{id}: route fields plus (for the four original chokepoints) the legacy bypass keys. */
+export interface RouteDetail extends RouteSummary {
+  annual_flow_bbl_per_year: number | null;
+  capacity_label: string | null;
+  if_closed_displaced_bpd: number | null;
+  if_closed_displaced_low_bypass_bpd: number | null;
+  if_closed_supply_loss_pct: number | null;
+  top_importers: RouteImporter[];
+  importers_unverified?: string;
+  top_exporters: RouteExporter[];
+  owners?: RouteOwner[];
+  bypass_note?: string;
+  bypass_capacity_low_bpd?: number;
+  baseline_year_note?: string;
+  baseline_voyage_days: number | null;
+  default_detour_days?: number;
+  flow_by_year_bpd?: Record<string, number>;
+  exclusion_reason?: string;
+  capacity_resolution?: { finding: string; decision: string };
+  current_conditions: CurrentConditions;
+  path_disclaimer: string;
+  // legacy bypass keys (present only for hormuz, bab_el_mandeb, suez, malacca)
+  chokepoint?: string;
+  capacity_at_risk_bpd?: number;
+  affected_hubs?: string[];
+  explanation?: string;
+}
+
+/** What "Simulate disruption on this route" hands to the scenario controls. */
+export interface RouteScenarioPrefill {
+  routeId: string;
+  disruptionType: "blockade" | "detour";
+  blockedSharePct: number;
+  detourDays: number;
+  nonce: number;
+}

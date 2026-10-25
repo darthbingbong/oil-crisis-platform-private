@@ -139,7 +139,7 @@
         "2024": 20700000,
         "1H25": 20900000
       },
-      "baseline_year_note": "Last full pre-disruption year in EIA's table (1H25 is also stored in flow_history_mbpd).",
+      "baseline_year_note": "Last full pre-disruption year in EIA's table (first-half 2025 figures are also stored).",
       "voyage_derivation": {
         "representative_voyage": "Ras Tanura to Ningbo via Hormuz and Malacca (largest importer, China)",
         "waypoints_latlng": [
@@ -277,7 +277,7 @@
         "2024": 4100000,
         "1H25": 4200000
       },
-      "baseline_year_note": "2023 is the last normal year. EIA's 2024 figure is depressed by Red Sea attacks (4.1 vs 9.3 Mb/d). Both stored in flow_by_year_bpd.",
+      "baseline_year_note": "2023 is the last normal year. EIA's 2024 figure is depressed by Red Sea attacks (4.1 vs 9.3 Mb/d). Both years are stored.",
       "default_detour_days": 12.7,
       "default_detour_days_note": "Cape voyage 33.9 d minus Suez voyage 21.2 d, same waypoint method (estimate, lower bound).",
       "voyage_derivation": {
@@ -445,7 +445,7 @@
         "2024": 4800000,
         "1H25": 4900000
       },
-      "baseline_year_note": "2023 is the last normal year. EIA's 2024 figure is depressed by Red Sea attacks (4.8 vs 8.8 Mb/d). Both stored in flow_by_year_bpd.",
+      "baseline_year_note": "2023 is the last normal year. EIA's 2024 figure is depressed by Red Sea attacks (4.8 vs 8.8 Mb/d). Both years are stored.",
       "default_detour_days": 12.7,
       "default_detour_days_note": "Cape voyage 33.9 d minus Suez voyage 21.2 d, same waypoint method (estimate, lower bound).",
       "voyage_derivation": {
@@ -636,7 +636,7 @@
         "2024": 22500000,
         "1H25": 23200000
       },
-      "baseline_year_note": "Last full pre-disruption year in EIA's table (1H25 is also stored in flow_history_mbpd).",
+      "baseline_year_note": "Last full pre-disruption year in EIA's table (first-half 2025 figures are also stored).",
       "voyage_derivation": {
         "representative_voyage": "Ras Tanura to Ningbo via Hormuz and Malacca",
         "waypoints_latlng": [
@@ -782,7 +782,7 @@
         "2024": 3600000,
         "1H25": 3700000
       },
-      "baseline_year_note": "Last full pre-disruption year in EIA's table (1H25 is also stored in flow_history_mbpd).",
+      "baseline_year_note": "Last full pre-disruption year in EIA's table (first-half 2025 figures are also stored).",
       "voyage_derivation": {
         "representative_voyage": "Novorossiysk to Trieste via the Turkish Straits",
         "waypoints_latlng": [
@@ -940,7 +940,7 @@
         "2024": 4900000,
         "1H25": 4900000
       },
-      "baseline_year_note": "Last full pre-disruption year in EIA's table (1H25 is also stored in flow_history_mbpd).",
+      "baseline_year_note": "Last full pre-disruption year in EIA's table (first-half 2025 figures are also stored).",
       "voyage_derivation": {
         "representative_voyage": "Primorsk to Rotterdam via the Danish Straits",
         "waypoints_latlng": [

@@ -61,3 +61,12 @@ The frontend's offline-fallback mirrors (`localFormula.ts`, `chokepointRisk.ts`)
 **Consequence for conclusions.** The old finding "a 5% shock needs 3.2 times the world's annual lithium" does not hold for
 the 0.008 t/EV project assumption: it is 38% of annual production. With the sourced 0.0319 t/EV case it is about 1.5 times.
 `/simulate` still uses the 0.008 project assumption (only wrong values were changed); `/simulate/report` headlines the sourced case.
+
+## Route layer (Milestone 3)
+
+The three.js globe draws all 14 routes from `GET /api/v1/routes`: sea lanes and chokepoints in blue with animated dashes (width scales with flow),
+pipelines in amber and thinner (width scales with **nameplate capacity**, never flow), and a route under a scenario in pulsing crimson, elevated.
+Hover shows a tooltip, click flies the camera to the route and opens its panel (flow or capacity, importers by region/group, exporters, bypass,
+"if closed" stat, current-conditions note with EIA links), and "Simulate disruption on this route" pre-fills the scenario controls.
+Route geometry is illustrative. Druzhba shows n/a. Routes with no sourced importer data say "not available" rather than showing an empty chart.
+Screenshots from a real browser run are in `docs/m3_screenshots/`; the scripts that produced them are in `frontend/e2e/`.

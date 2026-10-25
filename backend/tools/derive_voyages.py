@@ -93,14 +93,14 @@ def main():
         r["flow_by_year_bpd"] = {y: round(m * 1e6) for y, m in r["flow_history_mbpd"].items()}
     for rid in ("bab_el_mandeb", "suez"):
         routes[rid]["baseline_year_note"] = ("2023 is the last normal year. EIA's 2024 figure is depressed by Red Sea attacks "
-                                             f"({routes[rid]['flow_history_mbpd']['2024']} vs {routes[rid]['flow_history_mbpd']['2023']} Mb/d). Both stored in flow_by_year_bpd.")
+                                             f"({routes[rid]['flow_history_mbpd']['2024']} vs {routes[rid]['flow_history_mbpd']['2023']} Mb/d). Both years are stored.")
         routes[rid]["default_detour_days"] = detour_days
         routes[rid]["default_detour_days_note"] = (f"Cape voyage {cape['days']} d minus Suez voyage {v['suez']['days']} d, same waypoint method (estimate, lower bound).")
     routes["cape_good_hope"]["baseline_year_note"] = "2023 (6.2 Mb/d) is the last year before Red Sea diversions; 2024 (9.3) is inflated by them."
     routes["cape_good_hope"]["voyage_derivation"] = cape
     routes["cape_good_hope"]["baseline_voyage_note"] = "Not applicable: this lane is the alternative. Its length is used to derive default_detour_days."
     for rid in ("hormuz", "malacca", "turkish_straits", "danish_straits"):
-        routes[rid]["baseline_year_note"] = "Last full pre-disruption year in EIA's table (1H25 is also stored in flow_history_mbpd)."
+        routes[rid]["baseline_year_note"] = "Last full pre-disruption year in EIA's table (first-half 2025 figures are also stored)."
 
     # --- voyage days ----------------------------------------------------
     for rid, d in v.items():

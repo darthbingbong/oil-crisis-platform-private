@@ -3,7 +3,15 @@
 // assumes the frontend is served from behind the same origin as the API (or
 // a reverse proxy doing the same job) -- revisit if that stops being true.
 
-import type { ChokepointRisk, ConflictEvent, RefineryHub, SimulateRequest, SimulateResponse } from "../types";
+import type {
+  ChokepointRisk,
+  ConflictEvent,
+  RefineryHub,
+  RouteDetail,
+  RoutesResponse,
+  SimulateRequest,
+  SimulateResponse,
+} from "../types";
 
 const API_BASE = "/api/v1";
 
@@ -34,4 +42,35 @@ export function getRefineries(): Promise<RefineryHub[]> {
 
 export function getChokepointRisk(chokepoint: string): Promise<ChokepointRisk> {
   return fetchJson<ChokepointRisk>(`/refineries/at-risk/${encodeURIComponent(chokepoint)}`);
+}
+
+export function getRoutes(): Promise<RoutesResponse> {
+  return fetchJson<RoutesResponse>("/routes");
+}
+
+export function getRouteDetail(id: string): Promise<RouteDetail> {
+  return fetchJson<RouteDetail>(`/routes/${encodeURIComponent(id)}`);
+}
+
+export interface ReportRequest {
+  route_id: string;
+  disruption_type: "blockade" | "detour";
+  blocked_share_pct: number;
+  detour_days: number | null;
+  duration_days: number;
+  lithium_availability_pct: number;
+}
+
+/** Only the fields the scenario controls need from POST /simulate/report (the Results page reads the rest in M5). */
+export interface ReportPreview {
+  kpis: { displaced_bpd: number; price_impact_pct: number; outside_validated_range: boolean; validated_note: string | null };
+  sections: { barrels: { numbers: { supply_loss_pct: number } } };
+}
+
+export function simulateReportPreview(req: ReportRequest): Promise<ReportPreview> {
+  return fetchJson<ReportPreview>("/simulate/report", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(req),
+  });
 }

@@ -11,17 +11,27 @@ import {
 } from "react";
 import { Vector3, type Group } from "three";
 import { latLngToVector3 } from "../../lib/geo";
+import { ROUTE_TYPE_LABEL, formatMbpd, routeMidpoint } from "../../lib/routeGeometry";
 import { useReducedMotion } from "../../lib/useReducedMotion";
-import type { ConflictEvent, Location } from "../../types";
+import type { ConflictEvent, CurrentConditions, Location, RouteScenarioPrefill, RouteSummary } from "../../types";
+import RoutePanel from "../RoutePanel";
 import Atmosphere from "./Atmosphere";
 import Clouds from "./Clouds";
 import Earth, { EARTH_RADIUS } from "./Earth";
 import LocationDetail from "./LocationDetail";
 import Markers from "./Markers";
+import RouteLayer from "./RouteLayer";
 
 interface Props {
   locations: Location[];
   conflicts: ConflictEvent[];
+  routes: RouteSummary[];
+  currentConditions: CurrentConditions | null;
+  /** Route under an active scenario (drawn crimson/elevated) and the alternate lane for a detour. */
+  disruptedRouteId: string | null;
+  altRouteId: string | null;
+  conflictIntensity: number;
+  onSimulateRoute: (prefill: Omit<RouteScenarioPrefill, "nonce">) => void;
 }
 
 type Phase = "idle" | "traveling" | "detail" | "returning";
@@ -44,6 +54,16 @@ interface RotatingGlobeProps {
   setFocusedId: Dispatch<SetStateAction<string | null>>;
   onActivate: (loc: Location) => void;
   interactive: boolean;
+  routeLayer: {
+    routes: RouteSummary[];
+    hoveredRouteId: string | null;
+    focusedRouteId: string | null;
+    disruptedRouteId: string | null;
+    altRouteId: string | null;
+    conflictIntensity: number;
+    onHover: (id: string | null, x?: number, y?: number) => void;
+    onSelect: (route: RouteSummary) => void;
+  };
 }
 
 /** Owns rotation for Earth + Markers together, so markers stay glued to
@@ -64,6 +84,7 @@ function RotatingGlobe({
   setFocusedId,
   onActivate,
   interactive,
+  routeLayer,
 }: RotatingGlobeProps) {
   useFrame((_, delta) => {
     if (groupRef.current && !paused) {
@@ -84,8 +105,49 @@ function RotatingGlobe({
         interactive={interactive}
         reducedMotion={reducedMotion}
       />
+      <RouteLayer
+        routes={routeLayer.routes}
+        hoveredId={routeLayer.hoveredRouteId}
+        focusedId={routeLayer.focusedRouteId}
+        disruptedId={routeLayer.disruptedRouteId}
+        altId={routeLayer.altRouteId}
+        conflictIntensity={routeLayer.conflictIntensity}
+        interactive={interactive}
+        reducedMotion={reducedMotion}
+        onHover={routeLayer.onHover}
+        onSelect={routeLayer.onSelect}
+      />
     </group>
   );
+}
+
+/** DEV-ONLY test bridge (stripped from production builds): lets a browser test project a lat/lng to screen
+ * pixels and turn the globe to face the camera, so screenshots can target a route deterministically. */
+function DebugBridge({ groupRef }: { groupRef: React.RefObject<Group | null> }) {
+  const { camera, size, gl } = useThree();
+  useEffect(() => {
+    const w = window as unknown as { __globe?: unknown };
+    w.__globe = {
+      stats: () => ({ calls: gl.info.render.calls, triangles: gl.info.render.triangles, geometries: gl.info.memory.geometries }),
+      project(lat: number, lng: number) {
+        const g = groupRef.current;
+        if (!g) return null;
+        const v = g.localToWorld(latLngToVector3(lat, lng, EARTH_RADIUS * 1.004)).project(camera);
+        return { x: ((v.x + 1) / 2) * size.width, y: ((1 - v.y) / 2) * size.height, front: v.z < 1 };
+      },
+      face(lat: number, lng: number) {
+        const g = groupRef.current;
+        if (!g) return;
+        // azimuth' = azimuth + rotation.y, so rotate by (camera azimuth - point azimuth)
+        const p = latLngToVector3(lat, lng, 1);
+        g.rotation.y = Math.atan2(camera.position.x, camera.position.z) - Math.atan2(p.x, p.z);
+      },
+    };
+    return () => {
+      delete w.__globe;
+    };
+  }, [camera, size, gl, groupRef]);
+  return null;
 }
 
 interface CameraRigProps {
@@ -158,7 +220,19 @@ function CameraRig({ phase, travelTargetLocal, rotatingGroupRef, savedCamera, re
   return null;
 }
 
-export default function EarthGlobe({ locations, conflicts }: Props) {
+export default function EarthGlobe({
+  locations,
+  conflicts,
+  routes,
+  currentConditions,
+  disruptedRouteId,
+  altRouteId,
+  conflictIntensity,
+  onSimulateRoute,
+}: Props) {
+  const [hoveredRoute, setHoveredRoute] = useState<{ id: string; x: number; y: number; width: number } | null>(null);
+  const [activeRoute, setActiveRoute] = useState<RouteSummary | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>("idle");
@@ -169,7 +243,7 @@ export default function EarthGlobe({ locations, conflicts }: Props) {
   const savedCamera = useRef<{ position: Vector3; distance: number } | null>(null);
   const reducedMotion = useReducedMotion();
 
-  const targeting = hoveredId !== null || focusedId !== null;
+  const targeting = hoveredId !== null || focusedId !== null || hoveredRoute !== null;
   const paused = targeting || phase !== "idle" || reducedMotion;
   const interactive = phase === "idle";
 
@@ -182,6 +256,26 @@ export default function EarthGlobe({ locations, conflicts }: Props) {
     },
     [phase]
   );
+
+  const handleSelectRoute = useCallback(
+    (route: RouteSummary) => {
+      if (phase !== "idle") return;
+      const [lat, lng] = routeMidpoint(route.path);
+      setActiveRoute(route);
+      setActiveLocation(null);
+      setHoveredRoute(null);
+      setTravelTargetLocal(latLngToVector3(lat, lng, EARTH_RADIUS * 1.003));
+      setPhase("traveling");
+    },
+    [phase]
+  );
+
+  const handleRouteHover = useCallback((id: string | null, x?: number, y?: number) => {
+    if (id === null) return setHoveredRoute(null);
+    // position relative to the globe container, computed here (an event handler), not during render
+    const rect = containerRef.current?.getBoundingClientRect();
+    setHoveredRoute({ id, x: (x ?? 0) - (rect?.left ?? 0), y: (y ?? 0) - (rect?.top ?? 0), width: rect?.width ?? 1000 });
+  }, []);
 
   const handleBack = useCallback(() => {
     if (phase !== "detail") return;
@@ -201,8 +295,10 @@ export default function EarthGlobe({ locations, conflicts }: Props) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [phase, handleBack]);
 
+  const hoveredRouteData = hoveredRoute ? (routes.find((r) => r.id === hoveredRoute.id) ?? null) : null;
+
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+    <div ref={containerRef} style={{ position: "relative", width: "100%", height: "100%" }}>
       <Canvas
         camera={{ position: [0, 0, 5.5], fov: 45 }}
         gl={{ antialias: true }}
@@ -223,7 +319,18 @@ export default function EarthGlobe({ locations, conflicts }: Props) {
             setFocusedId={setFocusedId}
             onActivate={handleActivate}
             interactive={interactive}
+            routeLayer={{
+              routes,
+              hoveredRouteId: hoveredRoute?.id ?? null,
+              focusedRouteId: activeRoute?.id ?? null,
+              disruptedRouteId,
+              altRouteId,
+              conflictIntensity,
+              onHover: handleRouteHover,
+              onSelect: handleSelectRoute,
+            }}
           />
+          {import.meta.env.DEV && <DebugBridge groupRef={rotatingGroupRef} />}
           <Clouds reducedMotion={reducedMotion} />
           <Atmosphere />
         </Suspense>
@@ -239,6 +346,7 @@ export default function EarthGlobe({ locations, conflicts }: Props) {
             onReturned={() => {
               setPhase("idle");
               setActiveLocation(null);
+              setActiveRoute(null);
               setTravelTargetLocal(null);
             }}
           />
@@ -259,12 +367,61 @@ export default function EarthGlobe({ locations, conflicts }: Props) {
         )}
       </Canvas>
 
+      {hoveredRouteData && hoveredRoute && (
+        <div
+          data-testid="route-tooltip"
+          role="tooltip"
+          style={{
+            position: "absolute",
+            left: Math.min(hoveredRoute.x + 14, hoveredRoute.width - 250),
+            top: hoveredRoute.y + 14,
+            pointerEvents: "none",
+            zIndex: 5,
+            background: "rgba(3,3,3,0.9)",
+            border: "1px solid rgba(244,241,234,0.16)",
+            borderRadius: 6,
+            padding: "7px 11px",
+            maxWidth: 240,
+          }}
+        >
+          <div style={{ fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, color: "var(--color-bone)" }}>
+            {hoveredRouteData.name}
+          </div>
+          <div className="data-readout" style={{ fontSize: 10, color: "var(--color-ash)", marginTop: 2 }}>
+            {ROUTE_TYPE_LABEL[hoveredRouteData.type]}
+          </div>
+          <div
+            className="data-readout"
+            style={{ fontSize: 11, color: hoveredRouteData.type === "pipeline" ? "var(--color-crude)" : "#5aa9ff", marginTop: 2 }}
+          >
+            {hoveredRouteData.excluded_from_calculations
+              ? "n/a (no sourced figure)"
+              : hoveredRouteData.type === "pipeline"
+                ? `nameplate capacity ${formatMbpd(hoveredRouteData.capacity_bpd)}`
+                : `flow ${formatMbpd(hoveredRouteData.annual_flow_bpd)} (${hoveredRouteData.baseline_year ?? hoveredRouteData.data_year})`}
+          </div>
+        </div>
+      )}
+
       {activeLocation && (
         <LocationDetail
           location={activeLocation}
           conflicts={conflicts}
           visible={phase === "detail"}
           onBack={handleBack}
+          currentConditions={currentConditions}
+        />
+      )}
+
+      {activeRoute && (
+        <RoutePanel
+          route={activeRoute}
+          visible={phase === "detail"}
+          onClose={handleBack}
+          onSimulate={(prefill) => {
+            onSimulateRoute(prefill);
+            handleBack();
+          }}
         />
       )}
     </div>
