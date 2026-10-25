@@ -427,6 +427,12 @@ async def get_route_news(
 # ---------------------------------------------------------------------------
 # Startup warm-up: fill the cache one route at a time so the first click in a demo does not wait 10 to 20 s
 # ---------------------------------------------------------------------------
+def warmup_enabled(environ=None) -> bool:
+    """NEWS_WARMUP: on by default when the server runs; 0/false/off/no (any case) turns it off. tests/conftest.py sets it to 0 so tests never start it."""
+    value = (environ if environ is not None else os.environ).get("NEWS_WARMUP", "1").strip().lower()
+    return value not in ("0", "false", "off", "no")
+
+
 WARMUP_GAP_SECONDS = float(os.environ.get("NEWS_WARMUP_GAP", "6.0"))      # at least 6 s between routes
 WARMUP_FIRST = ("hormuz", "bab_el_mandeb", "suez", "malacca")             # the routes people click first
 

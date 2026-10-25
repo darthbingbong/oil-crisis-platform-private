@@ -52,7 +52,7 @@ export default function AlertFeed({ alerts, status }: Props) {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h2 className="section-label" style={{ color: "var(--color-bone)" }}>
-          Live Alert Feed
+          News Alert Feed
         </h2>
         <StreamStatusBadge status={status} />
       </div>
@@ -124,7 +124,7 @@ function ClassifierTag({ classifier }: { classifier: ClassifierUsed }) {
 function StreamStatusBadge({ status }: { status: StreamStatus }) {
   const color =
     status === "open" ? "var(--color-crude)" : status === "reconnecting" ? "var(--color-alarm)" : "var(--color-ash)";
-  const text = status === "open" ? "LIVE" : status === "reconnecting" ? "RECONNECTING" : "CONNECTING";
+  const text = status === "open" ? "NEWS STREAM CONNECTED" : status === "reconnecting" ? "RECONNECTING" : "CONNECTING";
   return (
     <span className="section-label flex items-center gap-1.5" style={{ color }}>
       <span

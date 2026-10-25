@@ -13,7 +13,7 @@ interface Props {
 
 const BADGE: Record<BackendStatus, { text: string; color: string }> = {
   loading: { text: "CONNECTING", color: "var(--color-ash)" },
-  live: { text: "LIVE BACKEND", color: "var(--color-crude)" },
+  live: { text: "BACKEND CONNECTED", color: "var(--color-crude)" },
   mock: { text: "OFFLINE · MOCK DATA", color: "var(--color-alarm)" },
 };
 
@@ -54,10 +54,11 @@ export default function Header({ backendStatus, priceState, streamStatus }: Prop
           <div
             className="hidden md:flex items-baseline gap-2"
             style={{ opacity: streamStatus === "open" ? 1 : 0.5, transition: "opacity 300ms ease" }}
-            title="Simulated crude price, calibrated off classified news -- not a live market quote"
+            data-testid="model-baseline"
+            title={`Model baseline (simulation, not a market price). Source: a hand-set seed of $82.50 (unsourced, "real-ish recent Brent") moved by the price engine, +/-2% at most per classified news headline, drifting back toward the seed. Last updated ${priceState.last_updated_at.slice(0, 19).replace("T", " ")} UTC. For real prices see the EIA ticker above.`}
           >
             <span className="section-label whitespace-nowrap" style={{ color: "var(--color-ash)" }}>
-              SIM CRUDE
+              MODEL BASELINE
             </span>
             <span className="data-readout text-sm" style={{ color: "var(--color-crude)" }}>
               ${animatedPrice.toFixed(2)}

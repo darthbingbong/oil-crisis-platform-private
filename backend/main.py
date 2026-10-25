@@ -55,7 +55,7 @@ from routers import news as route_news_router
 from routers import price as price_router
 from routers import report as report_router
 from routers import routes as routes_router
-from services.news_feed import warm_cache
+from services.news_feed import warm_cache, warmup_enabled
 from services.route_data import all_routes
 
 from news import db as news_db
@@ -78,7 +78,7 @@ async def lifespan(app: FastAPI):
     # Route-news cache warm-up: one route at a time, at least 6 s apart, so the first click in a demo is instant.
     # Set NEWS_WARMUP=0 to disable (e.g. to measure a cold start).
     warmup_task = None
-    if os.environ.get("NEWS_WARMUP", "1") != "0":
+    if warmup_enabled():
         warmup_task = asyncio.create_task(warm_cache(all_routes()))
     yield
     poller_task.cancel()

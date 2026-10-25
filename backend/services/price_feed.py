@@ -28,7 +28,27 @@ import pandas as pd
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 CSV_PATH = DATA_DIR / "oil_daily_prices.csv"
 
-EIA_BASE_URL = os.environ.get("EIA_BASE_URL", "https://api.eia.gov/v2")
+REAL_EIA_BASE_URL = "https://api.eia.gov/v2"
+
+
+def resolve_eia_base_url() -> str:
+    """The EIA endpoint to use at runtime: ALWAYS the real one, unless a developer has explicitly opted in to a stand-in (the dev-only mock server)
+    with BOTH EIA_BASE_URL and PRICE_DEV_ALLOW_CUSTOM_EIA_URL=1. A stray EIA_BASE_URL alone is ignored (with a warning), so production can never
+    silently talk to the mock."""
+    custom = os.environ.get("EIA_BASE_URL", "").strip().rstrip("/")
+    if not custom or custom == REAL_EIA_BASE_URL:
+        return REAL_EIA_BASE_URL
+    if os.environ.get("PRICE_DEV_ALLOW_CUSTOM_EIA_URL", "") == "1":
+        logging.getLogger("price_feed").warning("DEV MODE: EIA requests are going to %s, not the real EIA API. Anything shown is NOT EIA data.", custom)
+        return custom
+    logging.getLogger("price_feed").warning("Ignoring EIA_BASE_URL (%s): custom EIA endpoints need PRICE_DEV_ALLOW_CUSTOM_EIA_URL=1. Using the real EIA API.", custom)
+    return REAL_EIA_BASE_URL
+
+
+def using_stand_in_eia() -> bool:
+    return resolve_eia_base_url() != REAL_EIA_BASE_URL
+
+
 EIA_ROUTE = "petroleum/pri/spt"
 SERIES = {"RWTC": "wti", "RBRTE": "brent"}        # WTI Cushing, Brent Europe; both in USD per barrel
 EIA_TIMEOUT_SECONDS = 5.0                         # measured: a call takes about 0.75 s, so 5 s is generous; worst case total is about 10.5 s
@@ -126,10 +146,10 @@ class EiaProvider:
 
     name = "EIA API v2"
 
-    def __init__(self, api_key: str, *, base_url: str = EIA_BASE_URL, timeout: float = EIA_TIMEOUT_SECONDS, retries: int = EIA_RETRIES,
+    def __init__(self, api_key: str, *, base_url: str | None = None, timeout: float = EIA_TIMEOUT_SECONDS, retries: int = EIA_RETRIES,
                  backoff: float = EIA_BACKOFF_SECONDS, transport: httpx.AsyncBaseTransport | None = None,
                  sleep: Callable[[float], Awaitable[None]] = asyncio.sleep):
-        self._key, self._base, self._timeout, self._retries, self._backoff = api_key, base_url.rstrip("/"), timeout, retries, backoff
+        self._key, self._base, self._timeout, self._retries, self._backoff = api_key, (base_url or resolve_eia_base_url()).rstrip("/"), timeout, retries, backoff
         self._transport, self._sleep = transport, sleep
         self.last_latency_ms: float | None = None
 
@@ -272,6 +292,8 @@ class PriceService:
         try:
             points, meta = await self._eia()
             status, source = STATUS_DAILY_CLOSE, "EIA API v2, series RWTC (WTI) and RBRTE (Brent)"
+            if using_stand_in_eia():
+                source = "DEV STAND-IN for EIA (mock server, NOT EIA DATA): " + source
         except PriceFeedError as e:
             reason = e
             logger.warning("EIA price feed unavailable (%s); serving the local CSV", e.kind)

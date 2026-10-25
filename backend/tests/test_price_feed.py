@@ -350,3 +350,48 @@ def test_the_hazard_is_real_without_the_protections_httpx_logs_the_key(caplog):
     finally:
         logging.setLogRecordFactory(saved_factory)
         logging.getLogger("httpx").setLevel(saved_level)
+
+
+# ------------------------------------------------------------------ the dev-only mock can never be used by accident
+def test_default_endpoint_is_the_real_eia_api(monkeypatch):
+    monkeypatch.delenv("EIA_BASE_URL", raising=False)
+    monkeypatch.delenv("PRICE_DEV_ALLOW_CUSTOM_EIA_URL", raising=False)
+    assert pf.resolve_eia_base_url() == "https://api.eia.gov/v2" and pf.using_stand_in_eia() is False
+
+
+def test_a_custom_eia_url_alone_is_ignored_with_a_warning(monkeypatch, caplog):
+    monkeypatch.setenv("EIA_BASE_URL", "http://127.0.0.1:8765/v2")
+    monkeypatch.delenv("PRICE_DEV_ALLOW_CUSTOM_EIA_URL", raising=False)
+    caplog.set_level(logging.WARNING)
+    assert pf.resolve_eia_base_url() == "https://api.eia.gov/v2" and "Ignoring EIA_BASE_URL" in caplog.text
+
+
+def test_requests_go_to_the_real_host_when_only_a_custom_url_is_set(monkeypatch):
+    monkeypatch.setenv("EIA_BASE_URL", "http://127.0.0.1:8765/v2")
+    monkeypatch.delenv("PRICE_DEV_ALLOW_CUSTOM_EIA_URL", raising=False)
+    rec = Recorder(ok)
+    run(service(rec).live())
+    assert rec.requests[0].url.host == "api.eia.gov" and rec.requests[0].url.scheme == "https"
+
+
+def test_the_stand_in_needs_both_settings_and_is_then_labelled_as_not_eia(monkeypatch):
+    monkeypatch.setenv("EIA_BASE_URL", "http://127.0.0.1:8765/v2")
+    monkeypatch.setenv("PRICE_DEV_ALLOW_CUSTOM_EIA_URL", "1")
+    rec = Recorder(ok)
+    j = run(service(rec).live())
+    assert rec.requests[0].url.host == "127.0.0.1"
+    assert j["source"].startswith("DEV STAND-IN for EIA") and "NOT EIA DATA" in j["source"]
+
+
+def test_no_application_module_imports_the_mock_server():
+    offenders = []
+    for folder in ("services", "routers", "news"):
+        for p in (BACKEND / folder).rglob("*.py"):
+            if "mock_eia_server" in p.read_text(encoding="utf-8"):
+                offenders.append(str(p.relative_to(BACKEND)))
+    assert not offenders and "mock_eia_server" not in (BACKEND / "main.py").read_text(encoding="utf-8")
+
+
+def test_the_mock_server_file_is_marked_dev_only_in_its_header_and_banner():
+    text = (BACKEND / "tools" / "mock_eia_server.py").read_text(encoding="utf-8")
+    assert text.startswith('"""DEV-ONLY') and "NOT EIA. NOT LIVE" in text and "PRICE_DEV_ALLOW_CUSTOM_EIA_URL" in text

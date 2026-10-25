@@ -220,4 +220,10 @@ Without a key the app runs fully: the ticker shows `OFFLINE_FALLBACK` and says w
 filter redacts any `api_key=` value and the key itself from every record. `backend/tests/test_price_feed.py` checks all of this, including a test that proves the leak is real when the protections are removed.
 
 **Demo and screenshots without a key.** `backend/tools/mock_eia_server.py` stands in for EIA (modes: `ok`, `invalid_key`, `error`, `slow`). It is **not EIA and not live**: it serves the six closes (13 to 20 Oct 2026) that EIA's public table showed, so the real adapter can be exercised over real HTTP.
-Start it, then run the backend with `EIA_BASE_URL=http://127.0.0.1:8765/v2 EIA_API_KEY=any-dummy-value`. Screenshots of every ticker state are in `docs/m6_screenshots/`, produced by `frontend/e2e/price_ticker.mjs`.
+It is **dev-only**: the app ignores a custom `EIA_BASE_URL` unless `PRICE_DEV_ALLOW_CUSTOM_EIA_URL=1` is also set, and then labels the price source "DEV STAND-IN for EIA (mock server, NOT EIA DATA)". Start it, then run the backend with `EIA_BASE_URL=http://127.0.0.1:8765/v2 PRICE_DEV_ALLOW_CUSTOM_EIA_URL=1 EIA_API_KEY=any-dummy-value`. Screenshots of every ticker state are in `docs/m6_screenshots/`, produced by `frontend/e2e/price_ticker.mjs`.
+
+
+### The `NEWS_WARMUP` setting
+
+`NEWS_WARMUP` (in `backend/.env` or the environment) controls whether the server fills the route-news cache at startup. **On by default** (`1`); `0`, `false`, `off` or `no` turns it off. The test suite sets it to `0` (`backend/tests/conftest.py`) so tests never call GDELT.
+Turn it off for cold-start measurements or when working offline; leave it on before a demo (see "Before a demo" above).

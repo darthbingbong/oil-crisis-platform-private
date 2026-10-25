@@ -558,3 +558,17 @@ def test_snapshot_writer_saves_only_real_cached_headlines_with_their_own_dates(t
     saved = json.loads((tmp_path / "snap.json").read_text(encoding="utf-8"))
     assert saved["routes"]["hormuz"]["items"] == SNAP["routes"]["hormuz"]["items"] and saved["routes"]["hormuz"]["fetched_at"].endswith("Z")
     assert "never presented as live" in saved["_meta"]["description"]
+
+
+# ------------------------------------------------------------------ NEWS_WARMUP flag
+def test_warmup_flag_defaults_on_and_parses_off_values():
+    assert nf.warmup_enabled({}) is True
+    for off in ("0", "false", "OFF", " no "):
+        assert nf.warmup_enabled({"NEWS_WARMUP": off}) is False
+    for on in ("1", "true", "yes"):
+        assert nf.warmup_enabled({"NEWS_WARMUP": on}) is True
+
+
+def test_warmup_is_off_under_test():
+    import os
+    assert os.environ["NEWS_WARMUP"] == "0" and nf.warmup_enabled() is False

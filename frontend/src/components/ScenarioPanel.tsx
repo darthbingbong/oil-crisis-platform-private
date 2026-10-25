@@ -411,7 +411,7 @@ export default function ScenarioPanel({
 function StatusBadge({ status }: { status: "loading" | "live" | "offline" }) {
   const color =
     status === "live" ? "var(--color-crude)" : status === "offline" ? "var(--color-alarm)" : "var(--color-ash)";
-  const text = status === "live" ? "LIVE" : status === "offline" ? "OFFLINE" : "CONNECTING";
+  const text = status === "live" ? "SCENARIO (simulated)" : status === "offline" ? "OFFLINE" : "CONNECTING";
   return (
     <span className="section-label flex items-center gap-1.5" style={{ color }}>
       <span

@@ -1,4 +1,7 @@
-"""A tiny stand-in for the EIA API v2 spot-price route, for demos and screenshots when no real EIA key is available.
+"""DEV-ONLY. A tiny stand-in for the EIA API v2 spot-price route, for tests and screenshots when no real EIA key is available.
+
+The application NEVER uses this at runtime on its own: price_feed.resolve_eia_base_url() ignores any custom EIA_BASE_URL unless the developer also sets
+PRICE_DEV_ALLOW_CUSTOM_EIA_URL=1, and the price response then labels its source "DEV STAND-IN for EIA (mock server, NOT EIA DATA)".
 
 NOT EIA, and NOT live data. It answers on 127.0.0.1 in the documented v2 reply shape with the six daily closes (13 to 20 Oct 2026) that
 EIA's public table page showed when it was read on 25 Oct 2026, so the REAL adapter (backend/services/price_feed.py) can be exercised end
@@ -9,7 +12,7 @@ to end over real HTTP. Anything the ticker shows from it must be described as "f
     python tools/mock_eia_server.py --mode error         # 503
     python tools/mock_eia_server.py --mode slow          # answers after 20 s (to trigger the client's timeout)
 
-Then start the backend with:  EIA_BASE_URL=http://127.0.0.1:8765/v2  EIA_API_KEY=any-dummy-value
+Then start the backend with:  EIA_BASE_URL=http://127.0.0.1:8765/v2  PRICE_DEV_ALLOW_CUSTOM_EIA_URL=1  EIA_API_KEY=any-dummy-value
 """
 
 import argparse
@@ -65,5 +68,6 @@ if __name__ == "__main__":
     ap.add_argument("--port", type=int, default=8765)
     args = ap.parse_args()
     MODE = args.mode
+    print("*" * 78 + "\nDEV-ONLY MOCK of the EIA API. NOT EIA. NOT LIVE. Never point a real deployment at this.\n" + "*" * 78)
     print(f"MOCK EIA server (not EIA, not live) on http://127.0.0.1:{args.port}/v2 in mode '{MODE}'", flush=True)
     HTTPServer(("127.0.0.1", args.port), Handler).serve_forever()
