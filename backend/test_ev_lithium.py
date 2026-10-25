@@ -43,11 +43,14 @@ def test_gasoline_gallons_to_vehicle_years_scales():
 
 
 def test_vehicles_to_lithium_tonnes_single_vehicle():
-    assert vehicles_to_lithium_tonnes(1) == LCE_TONNES_PER_EV_BATTERY == 0.008
+    # Sourced case: 0.10 kg Li/kWh x 60 kWh x 5.323 LCE per Li = 0.031938 t LCE per EV (was the project's 0.008 t).
+    assert vehicles_to_lithium_tonnes(1) == LCE_TONNES_PER_EV_BATTERY == pytest.approx(0.031938)
+    assert vehicles_to_lithium_tonnes(1, lce_t_per_ev=0.008) == 0.008  # the project assumption is still available explicitly
 
 
 def test_vehicles_to_lithium_tonnes_thousand_vehicles():
-    assert vehicles_to_lithium_tonnes(1000) == pytest.approx(8.0)
+    assert vehicles_to_lithium_tonnes(1000) == pytest.approx(31.938)
+    assert vehicles_to_lithium_tonnes(1000, lce_t_per_ev=0.008) == pytest.approx(8.0)
 
 
 # ---------------------------------------------------------------------------
@@ -60,8 +63,9 @@ def test_crude_barrels_to_ev_equivalent_chains_correctly():
     assert result.gasoline_gallons_total == pytest.approx(1000 * 19.5)
     assert result.gasoline_vehicle_years_displaced == pytest.approx((1000 * 19.5) / 500)
     assert result.lithium_tonnes_required == pytest.approx(
-        ((1000 * 19.5) / 500) * 0.008
+        ((1000 * 19.5) / 500) * LCE_TONNES_PER_EV_BATTERY
     )
+    assert result.lithium_tonnes_required_project_assumption == pytest.approx(((1000 * 19.5) / 500) * 0.008)
 
 
 def test_crude_barrels_to_ev_equivalent_zero_barrels():
@@ -132,14 +136,14 @@ def test_supply_shock_lithium_ratio_zero_when_no_loss():
 
 
 def test_supply_shock_lithium_ratio_exceeds_world_supply_at_crisis_scale():
-    """CORRECTED (see README changelog): world lithium production is now in true LCE
-    (290,000 t Li x 5.323 = 1.54 Mt LCE), so a 5% shock needs about 37% of a year's output
-    (it showed 3.2x before the unit fix). Exceeding a full year now takes roughly a 14%+ shock."""
+    """See README changelog. World lithium production is in true LCE (290,000 t Li x 5.323 = 1.54 Mt LCE).
+    With the sourced per-EV case (0.0319 t LCE) a 5% shock needs about 1.5x a year's output; with the project's
+    0.008 t assumption it is about 0.38x (it showed 3.2x before the unit fix)."""
     five = supply_shock_to_ev_feasibility(supply_loss_pct=5)
-    assert 0.3 < five.lithium_supply_ratio < 0.45
-    big = supply_shock_to_ev_feasibility(supply_loss_pct=15)
-    assert big.lithium_supply_ratio > 1
-    assert "x the world's entire annual lithium production" in big.explanation
+    assert 1.4 < five.lithium_supply_ratio < 1.65
+    assert 0.33 < five.lithium_supply_ratio_project_assumption < 0.45
+    assert "x the world's entire annual lithium production" in five.explanation
+    assert "Basis: 0.0319 t LCE per EV" in five.explanation
 
 
 def test_supply_shock_lithium_ratio_under_world_supply_for_small_shock():

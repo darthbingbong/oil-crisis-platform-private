@@ -14,6 +14,11 @@ export interface EvFeasibility {
   lithium_tonnes_required: number;
   lithium_supply_ratio: number;
   explanation: string;
+  /** Added keys: the per-EV figure used (sourced case) and the project's earlier 0.008 t LCE for comparison. */
+  lce_tonnes_per_ev_used: number;
+  lce_tonnes_per_ev_project_assumption: number;
+  lithium_tonnes_required_project_assumption: number;
+  lithium_supply_ratio_project_assumption: number;
 }
 
 export interface SimulateResponse {

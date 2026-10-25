@@ -43,7 +43,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
-from ev_lithium import DEFAULT_GLOBAL_DAILY_CRUDE_PRODUCTION_BBL, supply_shock_to_ev_feasibility
+from ev_lithium import (
+    DEFAULT_GLOBAL_DAILY_CRUDE_PRODUCTION_BBL,
+    LCE_TONNES_PER_EV_BATTERY,
+    LCE_TONNES_PER_EV_PROJECT,
+    supply_shock_to_ev_feasibility,
+)
 from refineries import capacity_at_risk_bpd, capacity_at_risk_pct_of_global, load_refineries, refineries_at_chokepoint
 from routers import report as report_router
 from routers import routes as routes_router
@@ -129,6 +134,11 @@ class EvFeasibility(BaseModel):
         ..., description="lithium_tonnes_required / one year of global lithium production"
     )
     explanation: str
+    # Added keys (additive; every key above is unchanged). /simulate now uses the sourced per-EV lithium case.
+    lce_tonnes_per_ev_used: float = Field(..., description="t LCE per EV behind lithium_tonnes_required (sourced case)")
+    lce_tonnes_per_ev_project_assumption: float = Field(..., description="The project's earlier 0.008 t LCE per EV, for comparison")
+    lithium_tonnes_required_project_assumption: float
+    lithium_supply_ratio_project_assumption: float
 
 
 class SimulateResponse(BaseModel):
@@ -225,6 +235,10 @@ def simulate(req: SimulateRequest):
             lithium_tonnes_required=round(ev.equivalent.lithium_tonnes_required, 0),
             lithium_supply_ratio=round(ev.lithium_supply_ratio, 3),
             explanation=ev.explanation,
+            lce_tonnes_per_ev_used=round(LCE_TONNES_PER_EV_BATTERY, 6),
+            lce_tonnes_per_ev_project_assumption=LCE_TONNES_PER_EV_PROJECT,
+            lithium_tonnes_required_project_assumption=round(ev.equivalent.lithium_tonnes_required_project_assumption, 0),
+            lithium_supply_ratio_project_assumption=round(ev.lithium_supply_ratio_project_assumption, 3),
         ),
     )
 

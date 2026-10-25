@@ -26,9 +26,13 @@ GALLONS_PER_BARREL = 42.0  # physical fact: a barrel of crude is 42 US gallons
 GASOLINE_YIELD_GAL_PER_BBL = _CFG.gasoline_gal_per_bbl
 ANNUAL_FUEL_GAL_PER_VEHICLE = _CFG.gal_per_vehicle_year
 
-# Project assumption (0.008 t LCE per EV). /simulate keeps using this one; the sourced case
-# (_CFG.li_kg_per_kwh x typical_pack_kwh x lce_per_t_li) is the headline of /simulate/report.
-LCE_TONNES_PER_EV_BATTERY = _CFG.lce_t_per_ev_project
+# Per-EV lithium (t LCE). Both /simulate and /simulate/report use the SOURCED case:
+# 0.10 kg Li/kWh (ICCT 2024, NMC-811) x 60 kWh pack (IEA GEVO 2026) x 5.323 = 0.0319 t LCE.
+# The project's own 0.008 t assumption is kept only as a comparison value in the response.
+from services.calc_engine import lce_per_ev_sourced as _lce_per_ev_sourced
+
+LCE_TONNES_PER_EV_BATTERY = _lce_per_ev_sourced(_CFG)
+LCE_TONNES_PER_EV_PROJECT = _CFG.lce_t_per_ev_project
 
 # World supply: EIA 103.3 Mb/d (2024). Was 101 Mb/d, an unsourced assumption.
 DEFAULT_GLOBAL_DAILY_CRUDE_PRODUCTION_BBL = _CFG.global_supply_bpd
@@ -54,9 +58,9 @@ def gasoline_gallons_to_vehicle_years(gallons: float) -> float:
     return gallons / ANNUAL_FUEL_GAL_PER_VEHICLE
 
 
-def vehicles_to_lithium_tonnes(vehicle_count: float) -> float:
-    """Number of EV batteries needed -> tonnes of lithium (as LCE) required."""
-    return vehicle_count * LCE_TONNES_PER_EV_BATTERY
+def vehicles_to_lithium_tonnes(vehicle_count: float, lce_t_per_ev: float | None = None) -> float:
+    """Number of EV batteries needed -> tonnes of lithium (as LCE) required (sourced per-EV figure by default)."""
+    return vehicle_count * (LCE_TONNES_PER_EV_BATTERY if lce_t_per_ev is None else lce_t_per_ev)
 
 
 # ---------------------------------------------------------------------------
@@ -69,6 +73,7 @@ class EvEquivalent:
     gasoline_gallons_total: float
     gasoline_vehicle_years_displaced: float
     lithium_tonnes_required: float
+    lithium_tonnes_required_project_assumption: float = 0.0
 
 
 def crude_barrels_to_ev_equivalent(barrels_per_day: float, days: float = 365.0) -> EvEquivalent:
@@ -87,6 +92,7 @@ def crude_barrels_to_ev_equivalent(barrels_per_day: float, days: float = 365.0) 
         gasoline_gallons_total=gasoline_gallons_total,
         gasoline_vehicle_years_displaced=vehicle_years,
         lithium_tonnes_required=lithium_tonnes,
+        lithium_tonnes_required_project_assumption=vehicles_to_lithium_tonnes(vehicle_years, LCE_TONNES_PER_EV_PROJECT),
     )
 
 
@@ -98,6 +104,7 @@ class SupplyShockEvFeasibility:
     equivalent: EvEquivalent
     lithium_supply_ratio: float
     explanation: str
+    lithium_supply_ratio_project_assumption: float = 0.0
 
 
 def supply_shock_to_ev_feasibility(
@@ -145,6 +152,9 @@ def supply_shock_to_ev_feasibility(
     years = horizon_days / 365.0
     lithium_available_over_horizon = GLOBAL_ANNUAL_LITHIUM_PRODUCTION_TONNES * lithium_supply_index * years
     lithium_supply_ratio = equivalent.lithium_tonnes_required / lithium_available_over_horizon
+    lithium_supply_ratio_project = (
+        equivalent.lithium_tonnes_required_project_assumption / lithium_available_over_horizon
+    )
 
     if lithium_supply_ratio >= 1:
         lithium_clause = (
@@ -168,7 +178,11 @@ def supply_shock_to_ev_feasibility(
         f"{equivalent.gasoline_gallons_total:,.0f} gallons of gasoline that won't get "
         f"refined -- roughly the annual fuel needs of {equivalent.gasoline_vehicle_years_displaced:,.0f} "
         f"gasoline vehicles. Replacing that many vehicles with EVs instead would need about "
-        f"{equivalent.lithium_tonnes_required:,.0f} tonnes of lithium (as LCE) -- {lithium_clause}{index_note}"
+        f"{equivalent.lithium_tonnes_required:,.0f} tonnes of lithium (as LCE) -- {lithium_clause}{index_note} "
+        f"(Basis: {LCE_TONNES_PER_EV_BATTERY:.4f} t LCE per EV = {_CFG.li_kg_per_kwh} kg Li/kWh x "
+        f"{_CFG.typical_pack_kwh:g} kWh pack x {_CFG.lce_per_t_li} LCE per Li. The project's earlier "
+        f"{LCE_TONNES_PER_EV_PROJECT} t assumption would give "
+        f"{equivalent.lithium_tonnes_required_project_assumption:,.0f} t.)"
     )
 
     return SupplyShockEvFeasibility(
@@ -178,4 +192,5 @@ def supply_shock_to_ev_feasibility(
         equivalent=equivalent,
         lithium_supply_ratio=lithium_supply_ratio,
         explanation=explanation,
+        lithium_supply_ratio_project_assumption=lithium_supply_ratio_project,
     )

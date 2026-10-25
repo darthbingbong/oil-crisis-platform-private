@@ -60,7 +60,29 @@ The frontend's offline-fallback mirrors (`localFormula.ts`, `chokepointRisk.ts`)
 
 **Consequence for conclusions.** The old finding "a 5% shock needs 3.2 times the world's annual lithium" does not hold for
 the 0.008 t/EV project assumption: it is 38% of annual production. With the sourced 0.0319 t/EV case it is about 1.5 times.
-`/simulate` still uses the 0.008 project assumption (only wrong values were changed); `/simulate/report` headlines the sourced case.
+At that point `/simulate` still used the 0.008 project assumption; it was switched to the sourced case in the next entry.
+
+### Changed: `POST /api/v1/simulate` now uses the sourced per-EV lithium case
+
+Both endpoints now agree: `/simulate` and `/simulate/report` use **0.0319 t LCE per EV** (0.10 kg Li/kWh, ICCT 2024, NMC-811,
+x 60 kWh pack, IEA Global EV Outlook 2026, x 5.323 LCE per Li) instead of the project's unsourced 0.008 t. Every existing key
+and the response shape are unchanged; four keys were **added** inside `ev_feasibility`: `lce_tonnes_per_ev_used`,
+`lce_tonnes_per_ev_project_assumption`, `lithium_tonnes_required_project_assumption`, `lithium_supply_ratio_project_assumption`.
+The `explanation` text now ends with a "Basis" clause stating the per-EV figure and what 0.008 t would have given.
+Barrels lost, vehicle-years and the price figure are untouched. Before/after (news lithium index pinned to 1.0;
+snapshot of the old output in `backend/tests/snapshots/simulate_before_sourced_switch.json`):
+
+| supply_loss_pct | lithium t LCE | `lithium_supply_ratio` | project-case keys (unchanged from before) |
+|---|---|---|---|
+| 0.5 | 58,819 to 234,820 | 0.038 to **0.152** | 58,819 t, 0.038 |
+| 2 | 235,276 to 939,281 | 0.152 to **0.608** | 235,276 t, 0.152 |
+| 5 | 588,190 to 2,348,202 | 0.381 to **1.521** | 588,190 t, 0.381 |
+| 8 | 941,104 to 3,757,124 | 0.610 to **2.434** | 941,104 t, 0.610 |
+
+So with the sourced battery figure a 5% supply loss needs about 1.5 times a year of world lithium output, not 0.38. The old
+0.008 t figure is about 4 times lower than the published battery intensity, which is why the project case is kept only as a comparison.
+The frontend offline-fallback mirror (`localFormula.ts`) and TypeScript types were updated to match. Regression tests:
+`backend/tests/test_simulate_sourced_switch.py` and `test_simulate_corrected.py`.
 
 ## Route layer (Milestone 3)
 

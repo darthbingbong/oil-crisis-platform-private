@@ -12,10 +12,13 @@ const ELASTICITY = 0.15;
 
 const GASOLINE_YIELD_GAL_PER_BBL = 19.5;
 const ANNUAL_FUEL_GAL_PER_VEHICLE = 500.0;
-const LCE_TONNES_PER_EV_BATTERY = 0.008;
 // Mirrors backend/services/config.py (single source of truth). Keep in sync.
 const DEFAULT_GLOBAL_DAILY_CRUDE_PRODUCTION_BBL = 103_300_000.0; // EIA world oil supply, 2024
 const LCE_PER_T_LI = 5.323; // USGS reports lithium content; LCE = Li x 5.323
+// Sourced per-EV case: 0.10 kg Li/kWh (ICCT 2024, NMC-811) x 60 kWh pack (IEA GEVO 2026) x 5.323 = 0.0319 t LCE.
+// The project's earlier 0.008 t assumption is kept for comparison only.
+const LCE_TONNES_PER_EV_BATTERY = (0.1 * 60 * LCE_PER_T_LI) / 1000;
+const LCE_TONNES_PER_EV_PROJECT = 0.008;
 const GLOBAL_ANNUAL_LITHIUM_PRODUCTION_TONNES = 290_000.0 * LCE_PER_T_LI; // USGS MCS 2026, 2025 est., in t LCE
 
 function evFeasibility(supplyLossPct: number): EvFeasibility {
@@ -25,6 +28,10 @@ function evFeasibility(supplyLossPct: number): EvFeasibility {
       gasoline_vehicle_years_displaced: 0,
       lithium_tonnes_required: 0,
       lithium_supply_ratio: 0,
+      lce_tonnes_per_ev_used: LCE_TONNES_PER_EV_BATTERY,
+      lce_tonnes_per_ev_project_assumption: LCE_TONNES_PER_EV_PROJECT,
+      lithium_tonnes_required_project_assumption: 0,
+      lithium_supply_ratio_project_assumption: 0,
       explanation: "No supply loss in this scenario, so there's no oil demand for EVs to displace.",
     };
   }
@@ -35,6 +42,7 @@ function evFeasibility(supplyLossPct: number): EvFeasibility {
   const vehicleYears = gasolineGallonsTotal / ANNUAL_FUEL_GAL_PER_VEHICLE;
   const lithiumTonnes = vehicleYears * LCE_TONNES_PER_EV_BATTERY;
   const lithiumRatio = lithiumTonnes / GLOBAL_ANNUAL_LITHIUM_PRODUCTION_TONNES;
+  const lithiumTonnesProject = vehicleYears * LCE_TONNES_PER_EV_PROJECT;
 
   const lithiumClause =
     lithiumRatio >= 1
@@ -46,13 +54,20 @@ function evFeasibility(supplyLossPct: number): EvFeasibility {
     gasoline_vehicle_years_displaced: Math.round(vehicleYears),
     lithium_tonnes_required: Math.round(lithiumTonnes),
     lithium_supply_ratio: Math.round(lithiumRatio * 1000) / 1000,
+    lce_tonnes_per_ev_used: LCE_TONNES_PER_EV_BATTERY,
+    lce_tonnes_per_ev_project_assumption: LCE_TONNES_PER_EV_PROJECT,
+    lithium_tonnes_required_project_assumption: Math.round(lithiumTonnesProject),
+    lithium_supply_ratio_project_assumption:
+      Math.round((lithiumTonnesProject / GLOBAL_ANNUAL_LITHIUM_PRODUCTION_TONNES) * 1000) / 1000,
     explanation:
       `A ${supplyLossPct.toFixed(1)}% loss of global crude supply removes about ` +
       `${Math.round(barrelsPerDayLost).toLocaleString()} barrels/day. Over 1.0 year(s), that's ` +
       `${Math.round(gasolineGallonsTotal).toLocaleString()} gallons of gasoline that won't get ` +
       `refined -- roughly the annual fuel needs of ${Math.round(vehicleYears).toLocaleString()} ` +
       `gasoline vehicles. Replacing that many vehicles with EVs instead would need about ` +
-      `${Math.round(lithiumTonnes).toLocaleString()} tonnes of lithium (as LCE) -- ${lithiumClause}`,
+      `${Math.round(lithiumTonnes).toLocaleString()} tonnes of lithium (as LCE) -- ${lithiumClause} ` +
+      `(Basis: ${LCE_TONNES_PER_EV_BATTERY.toFixed(4)} t LCE per EV; the project's earlier ` +
+      `${LCE_TONNES_PER_EV_PROJECT} t assumption would give ${Math.round(lithiumTonnesProject).toLocaleString()} t.)`,
   };
 }
 
