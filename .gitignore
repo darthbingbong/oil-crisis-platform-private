@@ -7,3 +7,6 @@ frontend/dist/
 
 # large source dataset, copied from minor-degree-r-project/data/raw (not redistributed here)
 backend/data/globalEnergyOwnership.xlsx
+
+# Claude Code runtime lock file
+.claude/scheduled_tasks.lock
