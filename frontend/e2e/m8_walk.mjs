@@ -111,7 +111,6 @@ if (at) {
 // ---- 4. Results for a known scenario (Suez 20-day detour), then back
 await page.goto(`${BASE}/results?route=suez&type=detour&detour=20&dur=60&conf=5&dem=0&ev=100&li=10&horizon=5`, { waitUntil: "load" });
 await page.waitForSelector('[data-testid="kpi-strip"]', { timeout: 60000 });
-const t0 = Date.now();
 await page.waitForTimeout(1200);
 await shot("07_results_suez_full", true);
 await audit("results suez");

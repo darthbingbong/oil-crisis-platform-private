@@ -64,11 +64,11 @@ export default function EconomyPanel({ report }: { report: ReportResponse }) {
           {eco.sectors.map((s) => (
             <li key={s.sector} className="text-sm" style={{ color: TOKENS.bone }}>
               <strong>{s.sector}</strong>{" "}
-              <span className="section-label" style={{ marginLeft: 6, padding: "0 6px", border: `1px solid ${TOKENS.ash}`, borderRadius: 3, fontSize: 9 }}>
+              <span className="section-label" style={{ marginLeft: 6, padding: "0 6px", border: `1px solid ${TOKENS.ash}`, borderRadius: 3, fontSize: 11 }}>
                 {s.direction}{s.quantified ? "" : ", not quantified"}
               </span>
               {!s.quantified && (
-                <span className="section-label" style={{ marginLeft: 6, padding: "0 6px", border: `1px solid ${TOKENS.crude}`, color: TOKENS.crude, borderRadius: 3, fontSize: 9 }}>
+                <span className="section-label" style={{ marginLeft: 6, padding: "0 6px", border: `1px solid ${TOKENS.crude}`, color: TOKENS.crude, borderRadius: 3, fontSize: 11 }}>
                   no sourced coefficient
                 </span>
               )}

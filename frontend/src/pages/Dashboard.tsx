@@ -110,7 +110,7 @@ export default function Dashboard() {
       <Header backendStatus={backendStatus} priceState={priceState} streamStatus={streamStatus} />
       <main className="flex-1 flex flex-col overflow-y-auto lg:grid lg:grid-cols-[1fr_400px] lg:overflow-hidden gap-0">
         <div className="flex flex-col lg:min-h-0">
-          <div className="min-h-[320px] h-[320px] lg:h-auto lg:flex-1 relative">
+          <div className="min-h-[320px] h-[320px] md:h-[480px] lg:h-auto lg:flex-1 relative">
             <EarthGlobe
               locations={locations}
               conflicts={conflicts}

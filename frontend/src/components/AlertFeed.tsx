@@ -109,7 +109,7 @@ function ClassifierTag({ classifier }: { classifier: ClassifierUsed }) {
     <span
       className="data-readout"
       style={{
-        fontSize: 9,
+        fontSize: 11,
         letterSpacing: "0.04em",
         color: isClaude ? "var(--color-bone)" : "var(--color-ash)",
         opacity: isClaude ? 1 : 0.7,

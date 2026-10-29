@@ -37,7 +37,7 @@ export default function ReportSection({ index, testId, title, summary, takeaway,
           {assumptions.map((a, i) => (
             <li key={i} className="text-xs font-light leading-relaxed" style={{ color: "var(--color-ash)" }}>
               {a.is_estimate && (
-                <span className="section-label" style={{ marginRight: 8, padding: "0 5px", border: "1px solid var(--color-crude)", color: "var(--color-crude)", borderRadius: 3, fontSize: 9 }}>
+                <span className="section-label" style={{ marginRight: 8, padding: "0 5px", border: "1px solid var(--color-crude)", color: "var(--color-crude)", borderRadius: 3, fontSize: 11 }}>
                   estimate / assumption
                 </span>
               )}

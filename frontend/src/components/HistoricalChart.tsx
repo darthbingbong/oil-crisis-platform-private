@@ -47,14 +47,14 @@ export default function HistoricalChart({ conflicts }: Props) {
           <CartesianGrid stroke="rgba(244,241,234,0.06)" strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="year"
-            tick={{ fill: TOKENS.ash, fontSize: 9 }}
+            tick={{ fill: TOKENS.ash, fontSize: 11 }}
             axisLine={{ stroke: "rgba(244,241,234,0.12)" }}
             tickLine={false}
             interval={2}
           />
           <YAxis
             yAxisId="left"
-            tick={{ fill: TOKENS.ash, fontSize: 9 }}
+            tick={{ fill: TOKENS.ash, fontSize: 11 }}
             axisLine={{ stroke: "rgba(244,241,234,0.12)" }}
             tickLine={false}
             width={30}
@@ -62,7 +62,7 @@ export default function HistoricalChart({ conflicts }: Props) {
           <YAxis
             yAxisId="right"
             orientation="right"
-            tick={{ fill: TOKENS.ash, fontSize: 9 }}
+            tick={{ fill: TOKENS.ash, fontSize: 11 }}
             axisLine={{ stroke: "rgba(244,241,234,0.12)" }}
             tickLine={false}
             width={24}

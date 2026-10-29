@@ -129,7 +129,7 @@ export default function RouteNews({ routeId }: { routeId: string }) {
                 <div className="flex items-start gap-2">
                   <span
                     className="section-label"
-                    style={{ flex: "none", marginTop: 1, padding: "0 5px", border: `1px solid ${TAG_COLOR[item.tag]}`, color: TAG_COLOR[item.tag], borderRadius: 3, fontSize: 9 }}
+                    style={{ flex: "none", marginTop: 1, padding: "0 5px", border: `1px solid ${TAG_COLOR[item.tag]}`, color: TAG_COLOR[item.tag], borderRadius: 3, fontSize: 11 }}
                   >
                     {item.tag}
                   </span>

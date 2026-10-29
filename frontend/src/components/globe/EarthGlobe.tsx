@@ -426,6 +426,30 @@ export default function EarthGlobe({
         )}
       </Canvas>
 
+      {/* Keyboard access to the routes: the lines themselves are canvas objects. Hidden until it receives focus (Tab from the globe controls). */}
+      {phase === "idle" && routes.length > 0 && (
+        <nav
+          aria-label="Routes (keyboard access)"
+          data-testid="route-keyboard-list"
+          className="sr-only focus-within:not-sr-only"
+          style={{ position: "absolute", left: 12, bottom: 12, zIndex: 8, maxWidth: 360, background: "rgba(3,3,3,0.94)", border: "1px solid rgba(244,241,234,0.2)", borderRadius: 6, padding: "8px 10px" }}
+        >
+          <div className="section-label" style={{ marginBottom: 6 }}>Open a route (Enter)</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+            {routes.map((r) => (
+              <button
+                key={r.id}
+                type="button"
+                onClick={() => handleSelectRoute(r)}
+                className="text-xs"
+                style={{ padding: "3px 8px", border: "1px solid rgba(244,241,234,0.25)", borderRadius: 3, color: "var(--color-bone)", cursor: "pointer" }}
+              >
+                {r.name}
+              </button>
+            ))}
+          </div>
+        </nav>
+      )}
       <VesselControls
         mode={vesselMode}
         setMode={(m) => { setVesselMode(m); setSelectedVessel(null); setVesselInfo(null); }}

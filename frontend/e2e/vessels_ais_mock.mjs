@@ -12,7 +12,7 @@ const MOCK = [
 ];
 await page.routeWebSocket("**/ws/vessels", (ws) => {
   ws.send(JSON.stringify({ type: "status", provider: "AISStream.io", state: "streaming", detail: "MOCK frames from the test harness", verified_against_live_feed: false, disclaimer: "UNVERIFIED against the live feed: MOCK FRAMES in this screenshot.", vessel_count: 3 }));
-  ws.send(JSON.stringify({ type: "snapshot", vessels: MOCK.map(({ type, ...v }) => ({ ...v })) }));
+  ws.send(JSON.stringify({ type: "snapshot", vessels: MOCK.map(({ type: _type, ...v }) => ({ ...v })) }));
 });
 await page.goto("http://localhost:5173/"); await page.waitForFunction(() => window.__vessels?.count > 0, null, { timeout: 60000 });
 await page.locator('[data-testid="vessel-mode-ais"]').click();
