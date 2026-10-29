@@ -214,7 +214,7 @@ The key goes in the request URL (EIA does not accept a header), so it is read on
 | `DAILY_CLOSE` | The EIA API call succeeded (or a success from the last 24 hours is being reused after EIA failed). The age is always shown; over 3 days old it turns orange and carries a warning. |
 | `OFFLINE_FALLBACK` | EIA could not be used (no key, rejected key, timeout, server error, rate limit, unreadable reply). Shows the **last row of `data/oil_daily_prices.csv`, with its real date (2026-08-18, 68 days old)** and the reason. |
 
-Without a key the app runs fully: the ticker shows `OFFLINE_FALLBACK` and says why. Measured on this machine: an EIA call (keyless, so it returns HTTP 403) takes about **0.74 to 0.78 s**; the timeout is 5 s with one retry (worst case about 10.5 s before falling back); results are cached 15 minutes; the browser polls every 10 minutes and backs off 30 s, 60 s ... up to 10 minutes after an error.
+Without a key the app runs fully: the ticker shows `OFFLINE_FALLBACK` and says why. Measured on this machine: a real authenticated EIA call takes about **1.7 to 2.1 s** (a keyless call, which returns HTTP 403, took 0.74 to 0.78 s); the timeout is 5 s with one retry (worst case about 10.5 s before falling back); results are cached 15 minutes; the browser polls every 10 minutes and backs off 30 s, 60 s ... up to 10 minutes after an error.
 
 **History and holidays.** `/price/history` merges the CSV with EIA data by date (EIA wins when both have a date), never returns a date twice, and drops dates where both prices are blank. EIA leaves a blank value on market holidays; blanks are treated as "no price" and skipped when computing the latest value and the change.
 
