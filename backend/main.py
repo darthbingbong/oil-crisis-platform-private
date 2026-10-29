@@ -295,12 +295,12 @@ def _price_event_to_conflict_event(row: dict) -> ConflictEvent:
 
 
 @app.get("/api/v1/conflicts", response_model=list[ConflictEvent])
-def get_conflicts():
-    """Returns all historical events with coordinates where available --
-    the static dataset (events.csv) UNIONED with live, news-driven events
-    that actually moved the simulated crude price (news/price_engine.py).
-    Live entries are clearly tagged '[SIMULATED, <classifier>]' in their
-    name so they're never mistaken for the real historical record."""
+def get_conflicts(include_simulated: bool = False):
+    """Returns the historical events (events.csv: 24 sourced events) with coordinates where available.
+
+    By default ONLY the real historical record is returned. With ?include_simulated=true it is UNIONED with the news-driven events that moved the
+    simulated crude price (news/price_engine.py); those carry a derived conflict_intensity and supply_loss_pct, are tagged '[SIMULATED, <classifier>]'
+    in their name, and are NOT shown in the historical chart (a few hundred of them drowned the 24 real events, and they are not history)."""
     results = []
     for _, row in events_df.iterrows():
         coords = _chokepoint_coords_for(row["chokepoint"])
@@ -314,8 +314,9 @@ def get_conflicts():
             lng=coords["lng"],
         ))
 
-    for row in news_db.crude_price_events_for_chart():
-        results.append(_price_event_to_conflict_event(row))
+    if include_simulated:
+        for row in news_db.crude_price_events_for_chart():
+            results.append(_price_event_to_conflict_event(row))
 
     return results
 

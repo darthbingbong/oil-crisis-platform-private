@@ -311,3 +311,10 @@ def test_lithium_range_uses_other_iea_pack_sizes_and_states_the_chemistry_caveat
     assert "NMC-811" in c["chemistry_caveat"] and "LFP" in c["chemistry_caveat"]
     # the caveat now lives beside the availability control (chart payload), not repeated inside the 2-4 sentence summary
     assert f"{low:,.0f} to {high:,.0f}" in j["sections"]["lithium"]["summary"]
+
+
+def test_conflicts_default_is_only_the_real_historical_record():
+    rows = client.get("/api/v1/conflicts").json()
+    assert len(rows) == 24 and not any("[SIMULATED" in r["name"] for r in rows)
+    with_sim = client.get("/api/v1/conflicts?include_simulated=true").json()
+    assert len(with_sim) >= 24 and all(r["name"] in {x["name"] for x in with_sim} for r in rows)

@@ -88,7 +88,7 @@ export default function AlertFeed({ alerts, status }: Props) {
                   className="text-sm font-light leading-snug hover:underline"
                   style={{ color: "var(--color-bone)" }}
                 >
-                  {a.summary}
+                  {a.summary.replace(/^\[heuristic match: '[^']*'\]\s*/, "")}
                 </a>
                 <span className="section-label" style={{ fontSize: 10, color: "var(--color-ash)" }}>
                   {EVENT_TYPE_LABEL[a.event_type] ?? a.event_type}

@@ -133,14 +133,14 @@ export function PriceChart({ report }: { report: ReportResponse }) {
           {/* the bypass assumption (Hormuz): the same blockade under two published capacities */}
           {sens.length > 1 && (
             <ReferenceArea x1={0} x2={dur} y1={Math.min(...sensPeaks)} y2={Math.max(...sensPeaks)} fill={TOKENS.crude} fillOpacity={0.22} ifOverflow="visible"
-              label={{ value: `bypass sensitivity: ${(sens[0].bypass_bpd / 1e6).toFixed(1)} vs ${(sens[1].bypass_bpd / 1e6).toFixed(1)} Mb/d`, position: "insideBottomLeft", fill: TOKENS.crude, fontSize: 11 }} />
+              label={{ value: `bypass sensitivity: ${(sens[0].bypass_bpd / 1e6).toFixed(1)} vs ${(sens[1].bypass_bpd / 1e6).toFixed(1)} Mb/d`, position: "insideTopLeft", dy: -2, fill: TOKENS.crude, fontSize: 11 }} />
           )}
           {bandShown && <Area type="monotone" dataKey="band" stroke="none" fill={LANE} fillOpacity={0.16} isAnimationActive={false} connectNulls />}
 
           <ReferenceLine y={ceiling} stroke={TOKENS.ash} strokeDasharray="2 4"
-            label={{ value: `formula at ${report.validated_supply_loss_max_pct}% supply loss: ${fmtSigned(ceiling)}% (edge of the validated range)`, position: "insideBottomRight", dy: 13, fill: TOKENS.ash, fontSize: 11 }} />
+            label={{ value: `formula at ${report.validated_supply_loss_max_pct}% supply loss: ${fmtSigned(ceiling)}%`, position: "insideBottomRight", dy: 17, fill: TOKENS.ash, fontSize: 11 }} />
           <ReferenceLine y={ref.actual_price_move_pct} stroke={TOKENS.ion} strokeDasharray="6 3"
-            label={{ value: `${ref.name.replace(/\s*\(.*\)/, "")}: ${fmtSigned(ref.actual_price_move_pct)}% actual, ${ref.supply_loss_pct}% supply loss (soft figure, still unfolding)`, position: "insideTopLeft", fill: TOKENS.ion, fontSize: 11 }} />
+            label={{ value: `2026 war: ${fmtSigned(ref.actual_price_move_pct)}% actual, ${ref.supply_loss_pct}% supply loss (soft)`, position: "insideTopRight", dy: -22, fill: TOKENS.ion, fontSize: 11 }} />
 
           <Line type="monotone" dataKey="valid" stroke={LANE} strokeWidth={2.5} dot={false} connectNulls={false} isAnimationActive={false} />
           <Line type="monotone" dataKey="beyond" stroke={TOKENS.alarm} strokeWidth={2.5} strokeDasharray="7 5" dot={false} connectNulls={false} isAnimationActive={false} />
@@ -152,8 +152,8 @@ export function PriceChart({ report }: { report: ReportResponse }) {
           { color: LANE, label: "linear formula, within the validated range" },
           ...(anyBeyond ? [{ color: TOKENS.alarm, label: "linear formula, beyond the validated range (extrapolation)", dashed: true }] : []),
           ...(bandShown ? [{ color: LANE, label: `± ${report.kpis.price_band_pp} pp measured error band`, swatch: "box" as const }] : []),
-          { color: TOKENS.ion, label: "largest validated event (reference)", dashed: true },
-          ...(sens.length > 1 ? [{ color: TOKENS.crude, label: "bypass-capacity sensitivity range", swatch: "box" as const }] : []),
+          { color: TOKENS.ion, label: `largest validated event (reference): ${ref.name.replace(/\s*\(.*\)/, "")}, soft figure, still unfolding`, dashed: true },
+          ...(sens.length > 1 ? [{ color: TOKENS.crude, label: `bypass-capacity sensitivity range (${(sens[0].bypass_bpd / 1e6).toFixed(1)} vs ${(sens[1].bypass_bpd / 1e6).toFixed(1)} Mb/d)`, swatch: "box" as const }] : []),
         ]}
       />
       {!bandShown && (
