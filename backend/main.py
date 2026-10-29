@@ -52,6 +52,7 @@ from ev_lithium import (
 )
 from refineries import capacity_at_risk_bpd, capacity_at_risk_pct_of_global, load_refineries, refineries_at_chokepoint
 from routers import news as route_news_router
+from routers import health as health_router
 from routers import price as price_router
 from routers import vessels as vessels_router
 from routers import report as report_router
@@ -103,6 +104,7 @@ app.add_middleware(
 app.include_router(routes_router.router)   # /api/v1/routes, /routes/{id}, /routes/{id}/bypass
 app.include_router(report_router.router)   # POST /api/v1/simulate/report
 app.include_router(price_router.router)
+app.include_router(health_router.router)    # GET /api/v1/health: state of each external feed
 app.include_router(vessels_router.router)   # WS /ws/vessels, GET /api/v1/vessels/status
 app.include_router(route_news_router.router)  # GET /api/v1/routes/{id}/news (GDELT) + DEV-ONLY /dev/news-feed
 

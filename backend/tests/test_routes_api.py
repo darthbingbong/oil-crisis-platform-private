@@ -318,3 +318,21 @@ def test_conflicts_default_is_only_the_real_historical_record():
     assert len(rows) == 24 and not any("[SIMULATED" in r["name"] for r in rows)
     with_sim = client.get("/api/v1/conflicts?include_simulated=true").json()
     assert len(with_sim) >= 24 and all(r["name"] in {x["name"] for x in with_sim} for r in rows)
+
+
+# ---------------------------------------------------------------------------
+# /health
+# ---------------------------------------------------------------------------
+def test_health_reports_each_feed_and_never_a_key(monkeypatch):
+    monkeypatch.delenv("EIA_API_KEY", raising=False)
+    monkeypatch.delenv("AISSTREAM_API_KEY", raising=False)
+    from services import price_feed
+    monkeypatch.setattr(price_feed, "_service", None, raising=False)
+    j = client.get("/api/v1/health").json()
+    assert set(j["feeds"]) == {"price", "news", "ais"} and j["overall"] in ("ok", "degraded", "fallback")
+    assert j["feeds"]["price"]["state"] in ("ok", "fallback") and j["feeds"]["price"]["status"] in ("DAILY_CLOSE", "OFFLINE_FALLBACK", None)
+    assert j["feeds"]["ais"]["state"] == "fallback" and j["feeds"]["ais"]["verified_against_live_feed"] is False
+    assert j["feeds"]["news"]["state"] in ("ok", "degraded", "unknown")
+    assert "LIVE" not in str(j).replace("UNVERIFIED against the live feed", "").replace("live quote", "").replace("live feed", "")
+    monkeypatch.setenv("AISSTREAM_API_KEY", "health-test-secret-value-123")        # a configured key must never appear in the health output
+    assert "health-test-secret-value-123" not in str(client.get("/api/v1/health").json())
