@@ -49,7 +49,7 @@ def _news() -> dict:
             fresh += 1
         else:
             stale += 1
-    snapshot = len(news_feed.load_snapshot())
+    snapshot = len(news_feed.load_snapshot().get("routes") or {})
     if fresh:
         state, detail = "ok", f"{fresh} route(s) have fresh cached headlines ({stale} stale)."
     elif stale or snapshot:

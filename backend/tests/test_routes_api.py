@@ -333,6 +333,8 @@ def test_health_reports_each_feed_and_never_a_key(monkeypatch):
     assert j["feeds"]["price"]["state"] in ("ok", "fallback") and j["feeds"]["price"]["status"] in ("DAILY_CLOSE", "OFFLINE_FALLBACK", None)
     assert j["feeds"]["ais"]["state"] == "fallback" and j["feeds"]["ais"]["verified_against_live_feed"] is False
     assert j["feeds"]["news"]["state"] in ("ok", "degraded", "unknown")
+    from services import news_feed
+    assert j["feeds"]["news"]["snapshot_routes"] == len(news_feed.load_snapshot()["routes"]) == 4
     assert "LIVE" not in str(j).replace("UNVERIFIED against the live feed", "").replace("live quote", "").replace("live feed", "")
     monkeypatch.setenv("AISSTREAM_API_KEY", "health-test-secret-value-123")        # a configured key must never appear in the health output
     assert "health-test-secret-value-123" not in str(client.get("/api/v1/health").json())
