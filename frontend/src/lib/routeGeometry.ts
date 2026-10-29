@@ -1,14 +1,16 @@
 import { CatmullRomCurve3, Vector3 } from "three";
 import type { RouteSummary, RouteType } from "../types";
+import { TOKENS } from "./constants";
+import { fmtMbd } from "./format";
 import { latLngToVector3 } from "./geo";
 
 // Colours: lane blue is a NEW token (cool, distinct from --color-ion teal, which the design system
 // reserves for EV/lithium). Pipelines reuse --color-crude (oil). Disrupted routes use --color-alarm.
 export const ROUTE_COLORS: Record<RouteType | "disrupted", string> = {
-  chokepoint: "#5aa9ff",
-  sea_lane: "#5aa9ff",
-  pipeline: "#e8871e",
-  disrupted: "#ff3b3b",
+  chokepoint: TOKENS.lane,
+  sea_lane: TOKENS.lane,
+  pipeline: TOKENS.crude,
+  disrupted: TOKENS.alarm,
 };
 
 export const ROUTE_TYPE_LABEL: Record<RouteType, string> = {
@@ -63,5 +65,5 @@ export function routeMidpoint(path: [number, number][]): [number, number] {
 }
 
 export function formatMbpd(bpd: number | null | undefined): string {
-  return bpd == null ? "n/a" : `${(bpd / 1e6).toFixed(bpd >= 10e6 ? 1 : 2)} Mb/d`;
+  return bpd == null ? "n/a" : fmtMbd(bpd);
 }

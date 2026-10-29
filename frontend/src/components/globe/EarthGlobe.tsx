@@ -487,7 +487,7 @@ export default function EarthGlobe({
           </div>
           <div
             className="data-readout"
-            style={{ fontSize: 11, color: hoveredRouteData.type === "pipeline" ? "var(--color-crude)" : "#5aa9ff", marginTop: 2 }}
+            style={{ fontSize: 11, color: hoveredRouteData.type === "pipeline" ? "var(--color-crude)" : "var(--color-lane)", marginTop: 2 }}
           >
             {hoveredRouteData.excluded_from_calculations
               ? "n/a (no sourced figure)"

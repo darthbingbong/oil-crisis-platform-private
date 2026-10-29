@@ -153,7 +153,7 @@ export default function RoutePanel({ route, visible, onClose, onSimulate }: Prop
                         <YAxis type="category" dataKey="country" width={150} tick={{ fill: TOKENS.bone, fontSize: 10 }} axisLine={false} tickLine={false} />
                         <Tooltip
                           cursor={{ fill: "rgba(255,255,255,0.04)" }}
-                          contentStyle={{ background: "#0b0b0b", border: "1px solid rgba(244,241,234,0.14)", fontSize: 11 }}
+                          contentStyle={{ background: "var(--color-surface)", border: "1px solid rgba(244,241,234,0.14)", fontSize: 11 }}
                           formatter={(v) => [`${v}% of route flow`, "share"]}
                         />
                         <Bar
@@ -295,7 +295,7 @@ export default function RoutePanel({ route, visible, onClose, onSimulate }: Prop
               fontWeight: 600,
               fontSize: 13,
               background: "var(--color-crude)",
-              color: "#120a02",
+              color: "var(--color-on-crude)",
               border: "none",
             }}
           >

@@ -16,6 +16,11 @@
   --color-ion: #35e0c9;
   --color-alarm: #ff3b3b;
   --color-refinery-teal: #0d3b3d;
+  --color-lane: #5aa9ff;
+  --color-gain: #3ddc97;
+  --color-surface: #0b0b0b;
+  --color-caution: #e6c84f;
+  --color-on-crude: #120a02;
 }
 
 html, body, #root {

@@ -158,7 +158,7 @@ function RouteLayerStatus({ state }: { state: ReturnType<typeof useRoutes> }) {
       {state.status === "error" && <span style={{ color: "var(--color-alarm)" }}>Route layer unavailable: backend not reachable.</span>}
       {state.status === "ready" && (
         <>
-          <span><span style={{ color: "#5aa9ff" }}>━ ━</span> sea lane / chokepoint (flow)</span>
+          <span><span style={{ color: "var(--color-lane)" }}>━ ━</span> sea lane / chokepoint (flow)</span>
           <span><span style={{ color: "var(--color-crude)" }}>━━</span> pipeline (nameplate capacity)</span>
           <span><span style={{ color: "var(--color-alarm)" }}>━ ━</span> disrupted route</span>
           <span>Route geometry is illustrative, not surveyed.</span>

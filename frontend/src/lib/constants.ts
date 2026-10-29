@@ -17,6 +17,16 @@ export const TOKENS = {
   ion: "#35e0c9",
   alarm: "#ff3b3b",
   refineryTeal: "#0d3b3d",
+  /** sea lanes, chokepoints and "flow" figures (cool blue; the teal --color-ion is reserved for EV / lithium) */
+  lane: "#5aa9ff",
+  /** a price going up (alarm red is a price going down) */
+  gain: "#3ddc97",
+  /** tooltip and input backgrounds */
+  surface: "#0b0b0b",
+  /** news tag: disruption */
+  caution: "#e6c84f",
+  /** text on a crude-orange button */
+  onCrude: "#120a02",
 } as const;
 
 export const HUB_TYPE_COLOR: Record<string, string> = {

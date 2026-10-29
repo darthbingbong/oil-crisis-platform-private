@@ -246,7 +246,7 @@ export default function ScenarioPanel({
               value={routeScenario.routeId}
               onChange={(e) => patchRoute({ routeId: e.target.value })}
               className="text-sm"
-              style={{ background: "#0b0b0b", color: "var(--color-bone)", border: "1px solid rgba(244,241,234,0.18)", borderRadius: 4, padding: "6px 8px" }}
+              style={{ background: "var(--color-surface)", color: "var(--color-bone)", border: "1px solid rgba(244,241,234,0.18)", borderRadius: 4, padding: "6px 8px" }}
             >
               {simulatable.map((r) => (
                 <option key={r.id} value={r.id}>{r.name}</option>
@@ -330,7 +330,7 @@ export default function ScenarioPanel({
                 })}`
               )
             }
-            style={{ padding: "10px 14px", borderRadius: 6, cursor: preview ? "pointer" : "not-allowed", fontWeight: 600, fontSize: 13, background: "var(--color-crude)", color: "#120a02", border: "none", opacity: preview ? 1 : 0.5 }}
+            style={{ padding: "10px 14px", borderRadius: 6, cursor: preview ? "pointer" : "not-allowed", fontWeight: 600, fontSize: 13, background: "var(--color-crude)", color: "var(--color-on-crude)", border: "none", opacity: preview ? 1 : 0.5 }}
           >
             Run full simulation
           </button>
@@ -367,7 +367,7 @@ export default function ScenarioPanel({
           }}
         >
           {animatedPricePct > 0 ? "+" : ""}
-          {animatedPricePct.toFixed(2)}%
+          {animatedPricePct.toFixed(1)}%
         </div>
         {outsideValidated && (
           <p

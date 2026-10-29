@@ -6,8 +6,8 @@ import type { NewsTag, RouteNews as RouteNewsData } from "../types";
 const TAG_COLOR: Record<NewsTag, string> = {
   attack: TOKENS.alarm,
   sanctions: TOKENS.crude,
-  disruption: "#e6c84f",
-  shipping: "#5aa9ff",
+  disruption: TOKENS.caution,
+  shipping: TOKENS.lane,
   general: TOKENS.ash,
 };
 

@@ -1,4 +1,4 @@
-import { fmtCompact, fmtInt, fmtSigned } from "../../lib/format";
+import { fmtCompact, fmtInt, fmtMbd, fmtSigned } from "../../lib/format";
 import type { ReportResponse } from "../../types";
 
 function Tile({ label, value, sub, color, testId }: { label: string; value: string; sub?: string; color?: string; testId: string }) {
@@ -29,7 +29,7 @@ export default function KpiStrip({ report }: { report: ReportResponse }) {
           color={outside ? "var(--color-alarm)" : "var(--color-bone)"}
           sub={outside ? "not validated at this magnitude" : `± ${k.price_band_pp} pp (measured error)`}
         />
-        <Tile testId="kpi-displaced" label="Barrels per day displaced" value={fmtInt(k.displaced_bpd)} sub={`${fmtCompact(k.displaced_bpd)} bpd`} color="#5aa9ff" />
+        <Tile testId="kpi-displaced" label="Barrels per day displaced" value={fmtInt(k.displaced_bpd)} sub={fmtMbd(k.displaced_bpd)} color="var(--color-lane)" />
         <Tile testId="kpi-evs" label="EVs required" value={fmtCompact(k.evs_required)} sub={`${fmtInt(k.evs_required)} cars`} color="var(--color-ion)" />
         <Tile
           testId="kpi-lithium"

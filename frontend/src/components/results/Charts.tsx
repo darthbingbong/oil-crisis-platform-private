@@ -15,13 +15,13 @@ import {
   YAxis,
 } from "recharts";
 import { TOKENS } from "../../lib/constants";
-import { fmtCompact, fmtInt, fmtSigned } from "../../lib/format";
+import { fmtCompact, fmtInt, fmtMbd, fmtSigned } from "../../lib/format";
 import type { ReportResponse } from "../../types";
 
-const LANE = "#5aa9ff";
+const LANE = TOKENS.lane;
 const GRID = "rgba(244,241,234,0.08)";
 const AXIS = { fill: TOKENS.ash, fontSize: 11 } as const;
-const TOOLTIP = { contentStyle: { background: "#0b0b0b", border: "1px solid rgba(244,241,234,0.14)", fontSize: 12 }, labelStyle: { color: TOKENS.bone } } as const;
+const TOOLTIP = { contentStyle: { background: TOKENS.surface, border: "1px solid rgba(244,241,234,0.14)", fontSize: 12 }, labelStyle: { color: TOKENS.bone } } as const;
 
 /** Round an axis outward to clean numbers (multiples of a nice step) and return matching ticks, so labels read 0, 20, 40 and not 49, 29, 9. */
 function niceAxis(lo: number, hi: number, targetTicks = 6): { domain: [number, number]; ticks: number[] } {
@@ -133,7 +133,7 @@ export function PriceChart({ report }: { report: ReportResponse }) {
           {/* the bypass assumption (Hormuz): the same blockade under two published capacities */}
           {sens.length > 1 && (
             <ReferenceArea x1={0} x2={dur} y1={Math.min(...sensPeaks)} y2={Math.max(...sensPeaks)} fill={TOKENS.crude} fillOpacity={0.22} ifOverflow="visible"
-              label={{ value: `bypass sensitivity: ${(sens[0].bypass_bpd / 1e6).toFixed(1)} vs ${(sens[1].bypass_bpd / 1e6).toFixed(1)} Mb/d`, position: "insideTopLeft", dy: -2, fill: TOKENS.crude, fontSize: 11 }} />
+              label={{ value: `bypass sensitivity: ${Number((sens[0].bypass_bpd / 1e6).toFixed(2))} vs ${fmtMbd(sens[1].bypass_bpd)}`, position: "insideTopLeft", dy: -2, fill: TOKENS.crude, fontSize: 11 }} />
           )}
           {bandShown && <Area type="monotone" dataKey="band" stroke="none" fill={LANE} fillOpacity={0.16} isAnimationActive={false} connectNulls />}
 
@@ -153,7 +153,7 @@ export function PriceChart({ report }: { report: ReportResponse }) {
           ...(anyBeyond ? [{ color: TOKENS.alarm, label: "linear formula, beyond the validated range (extrapolation)", dashed: true }] : []),
           ...(bandShown ? [{ color: LANE, label: `± ${report.kpis.price_band_pp} pp measured error band`, swatch: "box" as const }] : []),
           { color: TOKENS.ion, label: `largest validated event (reference): ${ref.name.replace(/\s*\(.*\)/, "")}, soft figure, still unfolding`, dashed: true },
-          ...(sens.length > 1 ? [{ color: TOKENS.crude, label: `bypass-capacity sensitivity range (${(sens[0].bypass_bpd / 1e6).toFixed(1)} vs ${(sens[1].bypass_bpd / 1e6).toFixed(1)} Mb/d)`, swatch: "box" as const }] : []),
+          ...(sens.length > 1 ? [{ color: TOKENS.crude, label: `bypass-capacity sensitivity range (${Number((sens[0].bypass_bpd / 1e6).toFixed(2))} vs ${fmtMbd(sens[1].bypass_bpd)})`, swatch: "box" as const }] : []),
         ]}
       />
       {!bandShown && (
@@ -167,7 +167,7 @@ export function PriceChart({ report }: { report: ReportResponse }) {
           <tbody>
             {sens.map((s) => (
               <tr key={s.label}>
-                <td style={{ paddingRight: 24, paddingTop: 4 }}>{s.label} ({(s.bypass_bpd / 1e6).toFixed(1)} Mb/d)</td>
+                <td style={{ paddingRight: 24, paddingTop: 4 }}>{s.label} ({fmtMbd(s.bypass_bpd)})</td>
                 <td className="data-readout" style={{ paddingRight: 24 }}>{fmtInt(s.displaced_bpd)} bpd</td>
                 <td className="data-readout">{fmtSigned(s.price_impact_pct)}%</td>
               </tr>
@@ -277,7 +277,7 @@ export function ImporterChart({ report }: { report: ReportResponse }) {
           <Tooltip {...TOOLTIP} formatter={(v, _n, item) => [`${fmtInt(Number(v))} bpd (${(item.payload as { share: number }).share}% of route flow)`, "shortfall"]} />
           <Bar dataKey="bpd" radius={[0, 3, 3, 0]} isAnimationActive={false}>
             {data.map((d) => <Cell key={d.name} fill={d.derived ? "rgba(90,169,255,0.35)" : LANE} />)}
-            <LabelList dataKey="bpd" position="right" formatter={(v: unknown) => `${fmtCompact(Number(v), 2)} bpd`} fill={TOKENS.bone} fontSize={11} />
+            <LabelList dataKey="bpd" position="right" formatter={(v: unknown) => fmtMbd(Number(v))} fill={TOKENS.bone} fontSize={11} />
           </Bar>
         </BarChart>
       </Frame>

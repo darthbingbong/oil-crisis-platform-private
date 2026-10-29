@@ -4,8 +4,8 @@ import { usePrice } from "../hooks/usePrice";
 import { TOKENS } from "../lib/constants";
 import type { PriceHistory, PriceLive, PriceStatus } from "../types";
 
-const GAIN = "#3ddc97";
-const LANE = "#5aa9ff";
+const GAIN = TOKENS.gain;
+const LANE = TOKENS.lane;
 
 const STATUS_COLOR: Record<PriceStatus, string> = { DAILY_CLOSE: TOKENS.crude, OFFLINE_FALLBACK: TOKENS.alarm };
 
@@ -41,7 +41,7 @@ function Sparkline({ history }: { history: PriceHistory | null }) {
         <LineChart data={history.points} margin={{ top: 3, right: 2, left: 2, bottom: 3 }}>
           <YAxis hide domain={["dataMin - 2", "dataMax + 2"]} />
           <Tooltip
-            contentStyle={{ background: "#0b0b0b", border: "1px solid rgba(244,241,234,0.14)", fontSize: 11, padding: "4px 8px" }}
+            contentStyle={{ background: TOKENS.surface, border: "1px solid rgba(244,241,234,0.14)", fontSize: 11, padding: "4px 8px" }}
             labelStyle={{ color: TOKENS.ash }}
             formatter={(v, name) => [Number(v).toFixed(2), String(name).toUpperCase()]}
           />
