@@ -249,7 +249,8 @@ export default function RoutePanel({ route, visible, onClose, onSimulate }: Prop
             bottom: -20,
             margin: "0 -22px -20px",
             padding: "12px 22px 16px",
-            background: "linear-gradient(to top, rgba(8,8,8,0.98) 80%, rgba(8,8,8,0))",
+            background: "rgb(8,8,8)",                                  // solid: a fade let the text scrolling underneath show through the buttons
+            borderTop: "1px solid rgba(244,241,234,0.12)",
             zIndex: 2,
           }}
         >

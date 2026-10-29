@@ -48,24 +48,14 @@ await shot("01_dashboard");
 await audit("dashboard");
 await shot("01b_dashboard_full", true);
 
-// ---- keyboard: tab through the page and record what receives focus
-const focus = [];
-await page.mouse.click(5, 5);
-for (let i = 0; i < 45; i++) {
-  await page.keyboard.press("Tab");
-  const f = await page.evaluate(() => { const e = document.activeElement; if (!e || e === document.body) return null; const cs = getComputedStyle(e); return { tag: e.tagName, name: (e.getAttribute("aria-label") || e.textContent || e.getAttribute("data-testid") || "").trim().slice(0, 36), outline: cs.outlineStyle !== "none" && parseFloat(cs.outlineWidth) > 0, shadow: cs.boxShadow !== "none" }; });
-  if (f) focus.push(f);
-}
-console.log(`[${TAG}] KEYBOARD: ${focus.length} tab stops in 45 presses; visible focus indicator (outline or shadow) on ${focus.filter((f) => f.outline || f.shadow).length}`);
-console.log(`[${TAG}] KEYBOARD without visible indicator:`, JSON.stringify(focus.filter((f) => !f.outline && !f.shadow).map((f) => `${f.tag}:${f.name}`).slice(0, 12)));
-console.log(`[${TAG}] KEYBOARD stops:`, JSON.stringify(focus.slice(0, 40).map((f) => f.name || f.tag)));
-
 // ---- 2. route hover + click (Hormuz)
 await page.mouse.click(5, 5);
 await look(25, 52, 5.5);
 await page.waitForTimeout(500);
 const routes = (await (await fetch(`${BASE}/api/v1/routes`)).json()).routes;
 const hz = routes.find((r) => r.id === "hormuz");
+await page.evaluate(() => window.scrollTo(0, 0));          // the Tab presses above may have scrolled the page on a narrow viewport
+await page.waitForTimeout(300);
 const box = await page.locator("canvas").first().boundingBox();
 let at = null;
 for (let i = 0; i < hz.path.length - 1 && !at; i++) {
@@ -75,8 +65,8 @@ for (let i = 0; i < hz.path.length - 1 && !at; i++) {
   if (!q || !q.front) continue;
   const x = box.x + q.x, y = box.y + q.y;
   await page.keyboard.down("Alt");     // always the route, even where vessels sit on it
-  await page.mouse.move(x - 10, y - 3); await page.mouse.move(x, y, { steps: 2 });
-  await page.waitForTimeout(300);
+  await page.mouse.move(x - 8, y - 3); await page.mouse.move(x, y, { steps: 3 });
+  await page.waitForTimeout(450);
   if (await page.locator('[data-testid="route-tooltip"]').count()) { at = { x, y }; await shot("02_route_hover"); }
   await page.keyboard.up("Alt");
 }
@@ -120,6 +110,20 @@ await page.goto(`${BASE}/`, { waitUntil: "load" });
 await page.waitForFunction(() => window.__vessels?.count > 0, null, { timeout: 60000 });
 for (let i = 0; i < 3; i++) { await look(26.2, 55.5, 3.3); await page.waitForTimeout(300); }
 await shot("08_vessels_hormuz");
+
+// ---- keyboard: tab through the page and record what receives focus
+const focus = [];
+await page.evaluate(() => window.scrollTo(0, 0));
+await page.mouse.click(5, 5);
+for (let i = 0; i < 45; i++) {
+  await page.keyboard.press("Tab");
+  const f = await page.evaluate(() => { const e = document.activeElement; if (!e || e === document.body) return null; const cs = getComputedStyle(e); return { tag: e.tagName, name: (e.getAttribute("aria-label") || e.textContent || e.getAttribute("data-testid") || "").trim().slice(0, 36), outline: cs.outlineStyle !== "none" && parseFloat(cs.outlineWidth) > 0, shadow: cs.boxShadow !== "none" }; });
+  if (f) focus.push(f);
+}
+console.log(`[${TAG}] KEYBOARD: ${focus.length} tab stops in 45 presses; visible focus indicator (outline or shadow) on ${focus.filter((f) => f.outline || f.shadow).length}`);
+console.log(`[${TAG}] KEYBOARD without visible indicator:`, JSON.stringify(focus.filter((f) => !f.outline && !f.shadow).map((f) => `${f.tag}:${f.name}`).slice(0, 12)));
+console.log(`[${TAG}] KEYBOARD stops:`, JSON.stringify(focus.slice(0, 40).map((f) => f.name || f.tag)));
+
 
 fs.writeFileSync(path.join(OUT, `${TAG}_console.txt`), logs.join("\n"));
 const errors = logs.filter((l) => /\[(error|pageerror)\]/.test(l));
