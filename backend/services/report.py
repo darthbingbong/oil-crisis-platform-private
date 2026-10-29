@@ -242,7 +242,7 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
             _a(f"World mine production {_n(cfg.world_li_production_t_li)} t lithium content (2025 estimate, excl. US) converted to LCE; reserves {_n(cfg.world_li_reserves_t_li)} t.",
                "USGS Mineral Commodity Summaries 2026", USGS_LITHIUM_URL),
             _a(f"Supply cap = lithium availability % x current world production per year. Default {req['lithium_availability_pct']:g}%: USGS shows 2025 production "
-               "(290,000 t Li) above consumption (263,000 t Li) by only about 9%, so little output is spare. Real redirectable supply is a scenario input, not a sourced value.",
+               "(290,000 t Li) above consumption (263,000 t Li) by 27,000 t, about 9% of production, so little output is spare. Real redirectable supply is a scenario input, not a sourced value.",
                "USGS Mineral Commodity Summaries 2026", USGS_LITHIUM_URL, True),
         ],
     }

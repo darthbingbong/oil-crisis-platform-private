@@ -1,7 +1,21 @@
 # Limitations and future work
 
-Started in Milestone 5 and extended as later milestones land. Everything here was observed or measured in this project, not assumed.
-Items marked **(to do)** are not built yet.
+Final state at **v1.0** (30 Oct 2026). Everything here was observed or measured in this project, not assumed. Items marked **(to do)** are not built yet.
+
+## 0. What is verified and what is not (one table)
+
+| Item | Status |
+|---|---|
+| Price formula and the Phase 1 comparison (24 events, 21 used, MAE 13.09 vs 13.80) | **Verified**: `phase1_analysis.py` re-run on 29 Oct 2026. The other experiment rows in `PHASE1_SUMMARY.md` (24.41, 13.77, 13.62, 18.01/18.15) are quoted from the Phase 1 session and were **not re-run** |
+| Calculation chain, report numbers, the worked examples | **Verified**: unit and golden tests, a consistency test that every number in a summary matches the payload, and `tools/check_claims.py` (every number in the README, DEMO_SCRIPT and this file rebuilt from the running app) |
+| EIA price path, `DAILY_CLOSE` | **Verified live** on 29 Oct 2026 with a real key |
+| EIA failure paths (`OFFLINE_FALLBACK`: rejected key, timeout, server error, rate limit) | **Mock only**: exercised against a mock server and mocked transports, not by breaking the real service |
+| GDELT route news | **Verified live** (slow, often rate-limited); quality filters tested on real headlines; fallbacks proven by simulated failures |
+| **Live AIS feed** | **UNVERIFIED**: no key was available; built from the provider's documentation and tested against a mock transport |
+| AISStream terms of service | **Unconfirmed**: the terms page could not be found |
+| Three USGS lithium cells (see section 8) | Read from the PDF's text layer and its footnotes on 30 Oct 2026; a person should still compare them with the rendered PDF |
+| Frame rates | **Software rendering only** (a lower bound); a real GPU was not measured |
+| Keyboard use | Routes yes (hidden list); individual simulated vessels no |
 
 ## 1. Route news (GDELT)
 
@@ -15,7 +29,7 @@ Items marked **(to do)** are not built yet.
 ## 2. Price model
 
 - **Small sample.** The elasticity formula was tested against 21 daily-resolution events (24 in the table; 3 pre-1986 events are annual averages and were excluded). A trained model did not beat it (formula MAE 13.09 pp, model 13.80 pp).
-- **`conflict_intensity` is hand-scored** and several `supply_loss_pct` values in `events.csv` are informed estimates. The largest one, the 2026 Iran war (8%), is marked "ROUGH ESTIMATE, still unfolding" in the file, so the top of the validated range is itself soft.
+- **`conflict_intensity` is hand-scored and does not enter the price formula** (only supply loss does; intensity is used for the high-intensity caveat and the pulsing ring), and several `supply_loss_pct` values in `events.csv` are informed estimates. The largest one, the 2026 Iran war (8%), is marked "ROUGH ESTIMATE, still unfolding" in the file, so the top of the validated range is itself soft.
 - **The elasticity (-0.15) is a borrowed textbook value**, not estimated from this project's data.
 - **The formula is linear and was validated only up to 8% supply loss.** A full Hormuz blockade is a 15.5% supply loss and the formula implies about +103%. The Results page marks that part of the curve as beyond the validated range, hides the plus or minus 13.09 pp band ("not validated at this magnitude"), and shows the largest validated event for comparison (+57.8% at 8%). No cap or nonlinear model is applied, by decision.
 - **The 180 day trajectory shape is an assumption**: the price is held at its peak while the disruption lasts, then decays exponentially with a half-life of half the duration, clamped to 7 to 60 days.
@@ -35,7 +49,7 @@ Items marked **(to do)** are not built yet.
 - **The 60 kWh pack is a choice** made from IEA's regional averages (China below 60, EU close to 70, US 90); there is no published global average. The 60 to 90 kWh range is shown.
 - The project's own **0.008 t LCE per EV has no source** and is about 4 times lower than the published figure; it is shown for comparison only.
 - **500 gallons of gasoline per vehicle-year is a US-style figure**; the global average is lower, so the true EV count would be higher.
-- **Lithium availability (default 10%) is a scenario input**, anchored on USGS showing 2025 production only about 9% above consumption, not a forecast of what could be redirected.
+- **Lithium availability (default 10%) is a scenario input**, anchored on USGS showing 2025 production (290,000 t Li) above consumption (263,000 t Li) by 27,000 t, about 9% of production, not a forecast of what could be redirected.
 - EV counts are a fleet that must be in place to replace the lost fuel permanently, divided by the horizon; a real transition would also change oil demand in other ways.
 
 ## 5. Economy and markets
@@ -50,7 +64,7 @@ Items marked **(to do)** are not built yet.
 - **The offline fallback is 68 days old** (2026-08-18) and far below the real price at the time of writing (WTI 86.48 in the CSV against 107.89 on 20 Oct per EIA's table). The ticker always shows the age and `OFFLINE_FALLBACK`, but a presenter should not read it as a current price.
 - **The success path was verified against the real EIA API on 29 Oct 2026** with a real key: HTTP 200, `DAILY_CLOSE`, WTI 103.37 and Brent 123.10 as of 2026-10-27 (2 days old). The reply matched the adapter and the mock (rows of `period`, `series`, string `value`, `units`; `frequency: daily`). Authenticated latency was 2.1 s through the app and 1.7 s for a direct fresh call (the keyless 403 earlier took 0.74 to 0.78 s). The two other statuses (`OFFLINE_FALLBACK` on a rejected key, a timeout or a server error) were only exercised against the mock server and mocked transports, not by breaking the real service.
 - **EIA's rate limits are not published as numbers** in the API documentation, so the server caches for 15 minutes and the browser polls every 10.
-- The header's **"SIM CRUDE" price is a simulation driven by classified news** and is unrelated to the EIA series next to it (it read about $93 while EIA's latest close was $107.89). Both are labelled, but they can look contradictory side by side.
+- The header's **MODEL BASELINE price is a simulation**: a hand-set seed of $82.50 moved by up to 2% per classified news headline, drifting back to the seed. It is unrelated to the EIA series next to it (on 25 Oct 2026 it read $92.94 while EIA's latest close was WTI 107.89). It was renamed from "SIM CRUDE" and its hover text gives the source and date, but the two numbers can still look contradictory side by side.
 - **WTI and Brent change** is computed between the two newest published closes, which can be several days apart across a weekend or a holiday.
 
 ## 7. Vessels and AIS (M7)
@@ -60,9 +74,34 @@ Items marked **(to do)** are not built yet.
 - **A vessel appears only after its static message is seen**, because position reports carry no ship type. Right after startup the map can be empty for several minutes.
 - **AIS limits** (coverage gaps, transponders off, unreliable destination, free-tier limits, no cargo information) are listed in the README and the in-app info tooltip. AISStream states there is no SLA or uptime guarantee. Its terms of service page could not be found (a request to `/terms` returned 404), so the permitted uses (for example redistribution on a public site) are **not confirmed**.
 - **Flags come from the MMSI prefix** using a short table of common tanker registries; other prefixes show "not reported". This is the claimed registry, not a verified one.
+- **Individual vessels cannot be selected by keyboard.** (Routes can: Tab to the hidden route list and press Enter.) The simulated vessels carry no information that is not in the info tooltip.
 - **Clicking a vessel needs zoom or Shift**, because vessels sit on route lines that are also clickable. Alt-click selects the route.
 - **Performance numbers are from software rendering.** A real GPU should do better, but that has not been measured.
 
-## 8. Not built yet
+## 8. Data check: the three USGS lithium cells
+
+`backend/data/lithium_usgs.json` was built from the USGS *Mineral Commodity Summaries 2026: Lithium* PDF. Its text layer glues each table footnote digit onto the number next to it, so three cells (and the two world totals) read wrongly if taken literally. On 30 Oct 2026 the PDF was downloaded again and its text and footnotes read directly:
+
+| Cell | The PDF text reads | Footnote glued on | **Stored value** |
+|---|---|---|---|
+| Argentina, mine production 2024 | `513,800` | 5 = "Reported." | **13,800 t Li** |
+| Chile, mine production 2024 | `548,900` | 5 = "Reported." | **48,900 t Li** |
+| Australia, reserves | `68,400,000` | 6 = "For Australia, Joint Ore Reserves Committee-compliant or equivalent reserves were 5.1 million tons." | **8,400,000 t Li** |
+| World total, 2024 and 2025 (not stored as cells) | `8222,000` and `8290,000` | 8 = "Excludes U.S. production." | 222,000 and 290,000 t Li |
+
+The literal readings are impossible (Argentina or Chile alone would exceed the world total of 222,000 t; Australia's reserves would exceed the world's 37 Mt). Sum checks on the stored values: nine producers' 2024 production 222,970 t against the USGS rounded 222,000 t; 2025 production 288,380 t against 290,000 t; reserves 36.47 Mt against 37 Mt. Neighbouring cells stored for comparison: Argentina 2025 = 23,000; Chile 2025 = 56,000; Australia 2024 = 82,700 and 2025 = 92,000. This is a reading of the PDF's text layer, **not** a look at the rendered page: please compare these three cells with the PDF.
+
+## 9. Corrections made by the final audits (M8 and M9)
+
+- The historical events chart had silently become a chart of 335 events (24 real plus about 311 simulated news rows) with an unreadable axis; `/api/v1/conflicts` now returns only the real events by default.
+- "2025 production exceeded consumption by only about 9%" was imprecise (27,000 t is about 9% of production but 10.3% of consumption); every occurrence now states the 27,000 t and what it is a share of.
+- Price-chart labels crossed by their own reference lines, a route-panel footer that let text show through its buttons, and 9 px text were fixed.
+- `/api/v1/health` (in the master prompt) was missing and was built.
+
+## 10. Not built yet
 
 - **(to do)** A print-friendly or PDF version of the Results page.
+- **(to do)** Run the AIS adapter with a real key, check it against the provider's actual frames, confirm the provider's terms, then flip `VERIFIED_AGAINST_LIVE_FEED`.
+- **(to do)** Measure frame rate on a real GPU.
+- **(to do)** Replace the older NewsAPI pipeline's live polling (or move to a paid plan) before any public deployment.
+- **(to do)** Break the real EIA service on purpose (a rejected key against the real endpoint) to check the fallback end to end.

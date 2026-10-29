@@ -29,6 +29,7 @@
 
 - **Do:** choose **Detour**, press **Simulate disruption on this route**, set **20 days** and a **60-day** duration, then **Run full simulation**. (Or open the prepared tab.)
 - **Say:** "Ships avoid the canal and go round the Cape. With a fixed tanker fleet, a longer trip means fewer deliveries."
+- **If you notice the URL says `conf=6`:** the dashboard's conflict-intensity slider defaults to 6 and the prepared link uses 5. It changes **no number** here, because the price formula uses supply loss only. Say that if asked.
 - **KPIs on screen:** price impact **@@s_price@@%**, barrels displaced **@@s_displaced@@**, EVs required **@@s_evs_m@@ million**, extra lithium **@@s_li_mt@@ Mt**, deficit **@@s_deficit_mt@@ Mt**.
 
 ### 2:30 to 3:30. The arithmetic, by hand (this is the credibility moment)
@@ -81,7 +82,7 @@
 
 **"Why does the lithium number change so much?"** Because the per-EV figure is an assumption. The sourced case is **@@li_per_ev@@ t LCE per EV** (0.10 kg Li/kWh from ICCT for NMC-811 cathodes, a 60 kWh pack from IEA's regional averages, 5.323 to convert lithium to carbonate equivalent). It does not cover LFP batteries, which dominate in China. My original 0.008 t per EV had no source and is about @@li_ratio@@ times lower; I kept it only as a comparison line. A larger EU or US pack raises the requirement to @@s_li_hi_mt@@ Mt.
 
-**"What is the 10% lithium availability?"** A scenario input, not a forecast. USGS shows 2025 production exceeded consumption by only about 9%, so very little output is spare. Change it on the Results page and the deficit moves.
+**"What is the 10% lithium availability?"** A scenario input, not a forecast. USGS shows 2025 production (290,000 t of lithium) exceeded consumption (263,000 t) by 27,000 t, about 9% of production, so very little output is spare. Change it on the Results page and the deficit moves.
 
 **"Why is the ticker a few days old?"** EIA's spot prices are daily closes **published in a weekly release**, so the newest point is never fresher than the last Wednesday release. I label it `DAILY_CLOSE` with its age and never call it live.
 

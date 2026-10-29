@@ -25,7 +25,7 @@ export default function LithiumControl({ value, onChange, chemistryCaveat }: Pro
       <p className="text-xs font-light leading-relaxed" style={{ color: TOKENS.ash, margin: "0 0 8px" }}>
         How much of today&apos;s world lithium mine output could be redirected to build the EVs that replace the lost oil. It sets the supply cap; the
         shortfall beyond it is the deficit. The 10% default is anchored on USGS (Mineral Commodity Summaries 2026): 2025 production (290,000 t lithium)
-        exceeded consumption (263,000 t) by only about 9%, so little output is spare. A scenario input, not a forecast.{" "}
+        exceeded consumption (263,000 t) by 27,000 t, about 9% of production, so little output is spare. A scenario input, not a forecast.{" "}
         <a href="https://pubs.usgs.gov/periodicals/mcs2026/mcs2026-lithium.pdf" target="_blank" rel="noopener noreferrer" style={{ color: TOKENS.ash, textDecoration: "underline" }}>USGS ↗</a>
       </p>
       <p data-testid="chemistry-caveat" className="text-xs font-light leading-relaxed" style={{ color: TOKENS.crude, margin: 0 }}>

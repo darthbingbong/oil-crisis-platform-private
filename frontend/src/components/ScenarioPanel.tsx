@@ -291,8 +291,8 @@ export default function ScenarioPanel({
             <p data-testid="lithium-availability-help" className="text-xs font-light leading-relaxed" style={{ color: "var(--color-ash)", margin: 0 }}>
               How much of today's world lithium mine output could be redirected to build the EVs that replace the lost oil.
               This caps the lithium supply in the report; the shortfall beyond it is the deficit. The 10% default is anchored on
-              USGS (Mineral Commodity Summaries 2026): 2025 production (290,000 t lithium) exceeded consumption (263,000 t) by only
-              about 9%, so little is spare. A scenario input, not a forecast.
+              USGS (Mineral Commodity Summaries 2026): 2025 production (290,000 t lithium) exceeded consumption (263,000 t) by 27,000 t,
+              about 9% of production, so little is spare. A scenario input, not a forecast.
             </p>
           </div>
 

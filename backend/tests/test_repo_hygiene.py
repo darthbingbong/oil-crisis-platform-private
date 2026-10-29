@@ -80,3 +80,9 @@ def test_no_key_value_from_the_local_env_is_in_a_tracked_file_or_in_history():
     for v in values:                                    # pickaxe over every commit on every branch
         hits = subprocess.run(["git", "log", "--all", "--oneline", "-S" + v], cwd=ROOT, capture_output=True, text=True, encoding="utf-8").stdout.strip()
         assert hits == "", "a key value from .env is in git history"
+
+
+def test_claims_audit_passes():
+    """Every number in the README, DEMO_SCRIPT and LIMITATIONS file matches the running app and the data files (tools/check_claims.py)."""
+    r = subprocess.run([__import__("sys").executable, str(BACKEND / "tools" / "check_claims.py")], cwd=BACKEND, capture_output=True, text=True, encoding="utf-8")
+    assert r.returncode == 0, "\n".join(l for l in r.stdout.splitlines() if l.startswith("FAIL"))

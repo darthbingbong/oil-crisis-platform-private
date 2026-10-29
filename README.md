@@ -1,41 +1,257 @@
 # Maritime Oil Crisis & EV/Lithium Transition Platform
 
-> Work in progress. The full README (architecture, methodology, limitations) is written in Milestone 9.
+A terminal-style web app for exploring what a maritime oil disruption would do. Pick a route (a chokepoint such as Suez or Hormuz, or a pipeline) on a 3D globe, blockade it or force a detour, and see the **price impact**, the **barrels displaced**, the **electric vehicles** that would be needed to offset them, the **extra lithium** that implies, and indicative **economy and market effects**. Every number is traceable to a source, a formula or a labelled assumption.
 
-## Data files not stored in git
+**Version 1.0.** It is a student project for presenting to a professor: *credibility beats flash*. Nothing is labelled live that is not, simulated things are labelled simulated, and the places where the evidence is thin are written down (see [What is verified and what is not](#what-is-verified-and-what-is-not) and `LIMITATIONS_AND_FUTURE_WORK.md`).
 
-`backend/data/globalEnergyOwnership.xlsx` (31 MB) is excluded from git. It is the Global Energy Monitor
-**Global Energy Ownership Tracker, March 2026 release** (CC BY 4.0). To reproduce the project, download it from
-<https://globalenergymonitor.org/projects/global-energy-ownership-tracker/> and place it at
-`backend/data/globalEnergyOwnership.xlsx`. It is used for pipeline owners and nameplate capacities (Oil & NGL Pipeline Ownership sheet).
+- Walkthrough for presenting: **`DEMO_SCRIPT.md`** (5 minutes, with the arithmetic and a demo-day fallback plan).
+- Known limits: **`LIMITATIONS_AND_FUTURE_WORK.md`**.
+- Build instructions it was written to: `MASTER_PROMPT.md`. Phase 1 modelling decisions: `backend/PHASE1_SUMMARY.md`.
+
+## Contents
+1. [Quick start (Windows)](#quick-start-windows) · 2. [Architecture](#architecture) · 3. [Environment variables](#environment-variables) · 4. [API endpoints](#api-endpoints) · 5. [Data sources](#data-sources) · 6. [Methodology](#methodology) · 7. [The calculation chain](#the-calculation-chain) · 8. [Every assumption](#every-assumption) · 9. [What is verified and what is not](#what-is-verified-and-what-is-not) · 10. [Changelog / corrected values](#changelog--corrected-values) · 11. [Feature notes](#feature-notes) · 12. [Limitations](#limitations) · 13. [Tests](#tests) · 14. [Repo hygiene and secrets](#repo-hygiene-and-secrets)
+
+## Quick start (Windows)
+
+Tested with Python 3.13 and Node 22 on Windows 11, using PowerShell. You need two terminals.
+
+**Terminal 1: the backend (one-time setup, then run)**
+
+```powershell
+cd C:\oil-crisis-platform\backend
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python -m uvicorn main:app --port 8000
+```
+
+**Terminal 2: the frontend**
+
+```powershell
+cd C:\oil-crisis-platform\frontend
+npm install
+npm run dev
+```
+
+Open <http://localhost:5173>. The frontend proxies `/api` and `/ws` to the backend on port 8000.
+
+### With no API keys at all
+
+Do exactly the above. The app runs fully on local data and says so on screen:
+
+| Feature | With no key |
+|---|---|
+| Price ticker | `OFFLINE_FALLBACK`: the last row of `backend/data/oil_daily_prices.csv` (**2026-08-18**, stale, with its age shown) |
+| Vessels | `SIMULATED VESSELS` badge; the "AIS feed" toggle explains that no key is configured |
+| Route news | Works without a key (GDELT is free). Slow and sometimes refused: see "Before a demo" below |
+| Older news pipeline | Rule-based classifier and fixtures only |
+| Everything else (simulation, Results page, routes, lithium, economy) | Fully working |
+
+### With API keys
+
+```powershell
+cd C:\oil-crisis-platform\backend
+copy .env.example .env
+notepad .env          # add EIA_API_KEY=..., optionally AISSTREAM_API_KEY=...
+```
+
+Restart the backend (keys are read at startup; `Ctrl+C`, then run the `uvicorn` line again). Check what is live and what is fallback at <http://127.0.0.1:8000/api/v1/health>. Keys stay on the server and never reach the browser.
+
+### Before a demo, and other commands
+
+```powershell
+# fill the route-news cache and refresh the demo snapshot (5 to 15 minutes; do not run while the backend is also warming up)
+cd C:\oil-crisis-platform\backend ; python tools\prewarm_news.py --snapshot
+
+# run the backend tests (from backend\, venv active)
+python -m pytest
+
+# type-check, lint and build the frontend (from frontend\)
+npx tsc -b ; npx oxlint ; npm run build
+
+# serve the production build (proxies /api and /ws to :8000 like the dev server)
+npm run preview        # http://localhost:4173
+```
+
+The browser checks in `frontend/e2e/` drive a real Chromium and save screenshots; see `frontend/e2e/README.md`. The `window.__globe` / `window.__vessels` test bridges exist only in dev builds.
+
+The 31 MB source workbook `backend/data/globalEnergyOwnership.xlsx` is **not in git**. It is the Global Energy Monitor *Global Energy Ownership Tracker, March 2026 release* (CC BY 4.0). Download it from <https://globalenergymonitor.org/projects/global-energy-ownership-tracker/> and place it at `backend/data/globalEnergyOwnership.xlsx` **only if you want to re-derive the pipeline capacities**; the committed `routes.json` already holds the extracted values and the app does not read the workbook at runtime.
+
+## Architecture
+
+```
+ Browser  (React 19, Vite, TypeScript, Tailwind 4, three.js globe via react-three-fiber, Recharts)
+   |  HTTP /api/v1/*                      WebSocket /ws/vessels
+   v  (Vite dev server / preview proxies both to :8000)
+ FastAPI backend (uvicorn, :8000)
+   routers/    routes . report . price . vessels . health      (main.py: /simulate, /conflicts, /refineries, news stream)
+   services/   calc_engine (pure functions) . config (every constant, with its source) . report . route_data
+               price_feed . news_feed . ais_feed . cache . news_classifier
+   data/       routes.json . importers.json . lithium_usgs.json . events.csv . oil_daily_prices.csv . refineries.csv ...
+   news/       the older pipeline: NewsAPI -> classifier -> SIMULATED "model baseline" price (SQLite)
+   |
+   +-- EIA API v2 (key)            price ticker .............. fallback: local CSV, labelled OFFLINE_FALLBACK
+   +-- GDELT DOC 2.0 (no key)      route headlines ........... fallback: disk cache -> labelled DEMO SNAPSHOT
+   +-- AISStream.io (key)          tanker positions .......... fallback: SIMULATED vessels (drawn in the browser)
+   +-- NewsAPI, Anthropic (keys)   older classification pipeline, optional
+```
+
+Design rules (from `MASTER_PROMPT.md`): the price formula stays `%dP = %dS / |Ed|`; the calculation engine is pure (`services/calc_engine.py` takes a `CalcConfig`); every external feed has a timeout, retry with backoff, a cache and a labelled fallback; keys live only in `backend/.env`.
+
+## Environment variables
+
+All optional. Set them in `backend/.env` (copy `backend/.env.example`). Never put a real value in `.env.example`.
+
+| Variable | Default | What it does |
+|---|---|---|
+| `EIA_API_KEY` | none | EIA Open Data key for the WTI/Brent ticker. Without it: `OFFLINE_FALLBACK` |
+| `AISSTREAM_API_KEY` | none | AISStream.io key for the tanker feed. Without it: simulated vessels. Adapter is **unverified against the live feed** |
+| `ANTHROPIC_API_KEY` | none | Lets the older news pipeline classify headlines with Claude; otherwise a rule-based classifier |
+| `NEWSAPI_API_KEY` | none | NewsAPI key for the older pipeline's polling (the free plan is dev/test only, see Limitations) |
+| `NEWS_POLL_INTERVAL_SECONDS` | `1200` | NewsAPI poll interval (20 min = 72 calls/day, under the 100/day free cap) |
+| `NEWS_WARMUP` | `1` | Fill the route-news cache at startup. `0`, `false`, `off`, `no` turn it off. Tests set it to `0` |
+| `NEWS_WARMUP_GAP` | `6.0` | Seconds between warm-up fetches |
+| `NEWS_MIN_REQUEST_INTERVAL` | `6.0` | Minimum seconds between any two GDELT requests |
+| `NEWS_GDELT_URL` | GDELT's endpoint | Only for testing against a stand-in |
+| `EIA_BASE_URL` + `PRICE_DEV_ALLOW_CUSTOM_EIA_URL=1` | unset | **Dev only**: point the price feed at the mock EIA server. Both must be set, otherwise `EIA_BASE_URL` is ignored |
+
+`ALPHA_VANTAGE_API_KEY` appears in an old `.env` and a comment in `main.py`, but nothing reads it; it can be deleted.
 
 ## API endpoints
 
 | Method | Path | Status | Notes |
 |---|---|---|---|
-| POST | `/api/v1/simulate` | unchanged | Phase 1 elasticity formula |
-| GET | `/api/v1/conflicts` | unchanged | 24 historical events plus news-derived `[SIMULATED]` rows |
+| POST | `/api/v1/simulate` | unchanged shape; **values corrected** | Phase 1 elasticity formula. Lithium and supply values were corrected and the sourced per-EV lithium case is now used (see the changelog) |
+| GET | `/api/v1/conflicts` | **default changed in M8** | Returns the **24 real historical events**. `?include_simulated=true` adds the news-derived rows tagged `[SIMULATED, ...]` (the old behaviour; they drowned the history chart) |
 | GET | `/api/v1/refineries`, `/api/v1/refineries/at-risk/{chokepoint}` | unchanged | |
 | GET | `/api/v1/routes` | new | All 14 routes with illustrative geometry and summary stats |
 | GET | `/api/v1/routes/{id}` | **superset of the old endpoint** | Old bypass keys (`chokepoint`, `capacity_at_risk_bpd`, `affected_hubs`, `bypass_options`, `fast_bypass_capacity_bpd`, `uncovered_capacity_bpd`, `explanation`) keep the same key, value and type; route stats are added alongside. Accepts old spellings (`hormuz`, `Hormuz`, `bab%20el-mandeb`) and new ids (`bab_el_mandeb`) |
 | GET | `/api/v1/routes/{id}/bypass` | new | The original bypass payload only |
-| POST | `/api/v1/simulate/report` | new | Full scenario report for the Results page: KPIs, six sections each with chart data, a templated 2-4 sentence summary, a one-line takeaway and cited assumptions. Rejects (422, with a plain message) pipelines, routes with no sourced figure and the Cape alternate lane |
-| GET | `/api/v1/routes/{id}/news` | new (M4) | Tagged headlines (title, source, date, link only) from GDELT; cached 20 min; `stale` / `refreshing` when the live feed is down or being refreshed |
-| POST | `/api/v1/dev/news-feed` | new, DEV-ONLY | Simulate a feed failure, an empty feed, or an aged cache |
-| GET | `/api/v1/price/live` | new (M6) | Latest WTI and Brent (USD per barrel), change, `as_of`, `age_days` and `status` = `DAILY_CLOSE` (EIA answered) or `OFFLINE_FALLBACK` (last row of the local CSV). Never `LIVE` |
-| GET | `/api/v1/price/history?days=30` | new (M6) | Merged CSV + EIA daily series for the sparkline: no duplicate dates, blank holiday rows skipped |
-| WS | `/ws/vessels` | new (M7) | Tanker updates from the AIS provider (server-side key). First frame is a status frame; **UNVERIFIED against the live feed**. With no key it sends the status and closes; the browser then shows simulated vessels |
-| GET | `/api/v1/vessels/status` | new (M7) | The AIS feed status as JSON |
-| GET | `/api/v1/health` | planned | Not built |
+| POST | `/api/v1/simulate/report` | new | Full scenario report for the Results page: KPIs, six sections each with chart data, a templated 2-4 sentence summary, a one-line takeaway and cited assumptions. Rejects (422, plain message) pipelines, routes with no sourced figure and the Cape alternate lane |
+| GET | `/api/v1/routes/{id}/news` | new | Tagged headlines (title, source, date, link only) from GDELT; cached 20 min; `stale` / `refreshing` / `snapshot` states |
+| GET | `/api/v1/price/live` | new | Latest WTI and Brent (USD per barrel), change, `as_of`, `age_days`, `status` = `DAILY_CLOSE` (EIA answered) or `OFFLINE_FALLBACK` (last CSV row). Never `LIVE` |
+| GET | `/api/v1/price/history?days=30` | new | Merged CSV + EIA daily series for the sparkline: no duplicate dates, blank holiday rows skipped |
+| WS | `/ws/vessels` | new | Tanker updates from the AIS provider (server-side key). First frame is a status frame; **UNVERIFIED against the live feed**. With no key it sends the status and closes |
+| GET | `/api/v1/vessels/status` | new | The AIS feed status as JSON |
+| GET | `/api/v1/health` | new | State of each external feed (`price`, `news`, `ais`) as `ok` / `degraded` / `fallback` / `unknown`, with a plain sentence each, and an `overall` |
+| POST | `/api/v1/dev/news-feed`, `/api/v1/news/test-inject` | DEV-ONLY | Simulate a feed failure or an empty feed; inject a test headline |
+| GET | `/api/v1/news/stream`, `/api/v1/alerts`, `/api/v1/price-state` (older pipeline) | unchanged | SSE alert stream, recent alerts, the SIMULATED model-baseline price |
 
-**Route-collision decision: Option A.** `/api/v1/routes/{id}` returns a superset of what `/api/v1/routes/{chokepoint}`
-returned before. `backend/tests/test_routes_api.py` checks it against snapshots of the original responses
-(`backend/tests/snapshots/*_before.json`), key by key, for all four chokepoints and several URL spellings.
-Option B (`/route-data/{id}`) was not needed: no new field clashes with an old key.
+**Route-collision decision: Option A.** `/api/v1/routes/{id}` returns a superset of what `/api/v1/routes/{chokepoint}` returned before. `backend/tests/test_routes_api.py` checks it against snapshots of the original responses (`backend/tests/snapshots/*_before.json`), key by key, for all four chokepoints and several URL spellings. Option B (`/route-data/{id}`) was not needed: no new field clashes with an old key.
+
+## Data sources
+
+Every data record in `routes.json` carries `source`, `source_url`, `data_year` and `is_estimate`. The distinct sources:
+
+| Source | Used for | Year | URL |
+|---|---|---|---|
+| EIA, *World Oil Transit Chokepoints* (Table 1; last updated 2026-03-03) | Chokepoint flows (Hormuz, Malacca, Turkish and Danish straits: **2024**; Suez/SUMED, Bab el-Mandeb, Cape: **2023**, the last normal year before the Red Sea attacks), world oil supply 103.3 Mb/d, world maritime trade 79.7 Mb/d, importer group shares, Hormuz bypass capacity (4.7 Mb/d, with 2.6 Mb/d as a sensitivity) | 2023 / 2024 | <https://www.eia.gov/international/content/analysis/special_topics/World_Oil_Transit_Chokepoints> |
+| EIA, *Today in Energy* (2025-06 Hormuz; 2023 Hormuz) and EIA press release 7 Apr 2026 | Route notes; the "current conditions" note (Hormuz effectively closed since early 2026) | 2023 to 2026 | linked from the route panel and Results header |
+| EIA Open Data API v2, route `petroleum/pri/spt`, series `RWTC` (WTI) and `RBRTE` (Brent) | The price ticker (daily closes, published in a weekly release) | live | <https://www.eia.gov/opendata/> |
+| EIA daily WTI/Brent, 1986 to 2026 (`oil_daily_prices.csv`) | Phase 1 analysis; the offline-fallback ticker row (last row **2026-08-18**) | 1986-2026 | <https://www.eia.gov/dnav/pet/pet_pri_spt_s1_d.htm> |
+| Energy Institute *Statistical Review of World Energy 2026* via Our World in Data (`crude-oil-prices.csv`, annual 1861-2025, downloaded 2026-08-24) | Phase 1: price changes for the three pre-1986 events | 2025 | <https://ourworldindata.org/grapher/crude-oil-prices> |
+| Global Energy Monitor, *Global Energy Ownership Tracker* (Mar 2026; Oil Infrastructure Tracker, Mar 2025), CC BY 4.0 | Pipeline nameplate capacities (East-West, Habshan-Fujairah, SUMED, BTC, CPC, TAPS); Druzhba deliberately not extracted | 2025 | <https://globalenergymonitor.org/projects/global-oil-infrastructure-tracker/> |
+| USGS, *Mineral Commodity Summaries 2026: Lithium* (Feb 2026) | World lithium mine production (290,000 t Li in 2025, estimate) and reserves (37 Mt), consumption (263,000 t), the lithium-availability anchor | 2024-2025 | <https://pubs.usgs.gov/periodicals/mcs2026/mcs2026-lithium.pdf> |
+| ICCT, *EV supply chain* report (Feb 2024) | 0.10 kg lithium per kWh for NMC-811 cathodes | 2024 | <https://theicct.org/wp-content/uploads/2024/02/ID-85-%E2%80%93-EV-supply-chain-Report-Letter-70112-v3.pdf> |
+| IEA, *Global EV Outlook 2026* | EV sales above 20 million and about 22 million produced in 2025; average battery sizes (China below 60 kWh, EU close to 70, US 90) | 2025 | <https://www.iea.org/reports/global-ev-outlook-2026> |
+| IMF Managing Director K. Georgieva, speech of 9 Mar 2026; IMF Working Paper 17/196 | The only two macro coefficients with a verified primary source: +0.4 pp global inflation and -0.1 to -0.2% global output per +10% oil, if it lasts most of a year | 2026, 2017 | <https://www.imf.org/en/news/articles/2026/03/09/sp030926-coping-and-thriving-in-a-fluid-world> and <https://www.imf.org/en/publications/wp/issues/2017/09/05/oil-prices-and-inflation-dynamics-evidence-from-advanced-and-developing-economies-45180> |
+| GDELT Project, DOC 2.0 API | Route headlines (headline, source, date, link only). Attribution link shown in the panel | live | <https://www.gdeltproject.org/> |
+| AISStream.io | Tanker positions (live mode, unverified) | live | <https://aisstream.io/documentation> |
+| `events.csv` (24 events, 1973-2026), `refineries.csv`, `bypass_routes.csv`, `oil_production_statistics.csv`, `electric-car-sales-share.csv` | Phase 1 model inputs and the refinery/bypass layer. The events were hand-compiled from news and agency sources; several `supply_loss_pct` and `conflict_intensity` values are **informed estimates**; refinery capacities and bypass capacities are marked "Estimate" in their notes | 1973-2026 | OWID/IEA files carry their citation in `*.metadata.json` |
+
+Route geometry (the lines on the globe) is **illustrative**, hand-placed for drawing, not surveyed shipping-lane or pipeline coordinates.
+
+## Methodology
+
+**Phase 1: can a trained model beat the textbook formula?** The price predictor is the elasticity formula `%dP = %dS / |Ed|` with `Ed = -0.15`. A trained model was tested against it using leave-one-out cross-validation, because there are very few labelled events: `events.csv` has **24** events, of which **21** have daily-resolution prices (the three pre-1986 events are annual averages and were excluded). The score is the mean absolute error of the 30-day price move, in percentage points:
+
+| Approach | MAE (pp) |
+|---|---|
+| **Formula alone** | **13.09** |
+| Ridge, unscaled features | 24.41 |
+| Ridge, scaled and tuned | 13.77 |
+| Formula + learned per-feature correction | **13.80** |
+| Formula + a single constant correction | 13.62 |
+| 90-day horizon: formula / model | 18.01 / 18.15 |
+
+**Why the formula was kept.** Nothing beat it, and with 21 events and four features there is not enough signal to justify replacing theory with a fitted model. It is also transparent: a professor can check `5% supply loss / 0.15 = 33.3%` by hand. The one thing that did survive: when a model could learn anything, `demand_change_pct` was the strongest feature (demand-driven events such as 2008 and COVID behave differently), so the app warns when `demand_change_pct` is far from zero. The trained model is kept in `price_surge_experimental.joblib`, inactive. The ±13.09 pp band drawn on the price chart is exactly that leave-one-out error. (The first row and the fourth row's headline, 13.09 and 13.80, were reproduced by re-running `phase1_analysis.py` on 29 Oct 2026; the other rows are quoted from `backend/PHASE1_SUMMARY.md`, written in the Phase 1 session, and were not re-run.) Details: `backend/PHASE1_SUMMARY.md`, reproduced by `backend/phase1_analysis.py`.
+
+**Where the formula is and is not validated.** It was measured on events up to **8% supply loss** (the largest was the 2026 Iran war, itself a soft estimate). Beyond that, the app still shows the formula's number, but marks it as an extrapolation: a dashed line on a shaded zone, the ±13.09 pp band hidden ("not validated at this magnitude"), and the 2026 event shown as a reference. A full Hormuz blockade is a 15.5% supply loss and the linear formula implies about +103%; the app says that is outside the validated range and does not cap or bend it, by decision.
+
+## The calculation chain
+
+All of it is in `backend/services/calc_engine.py` as pure functions, driven by `backend/services/config.py` (every constant with its source or an `ASSUMPTION` flag). `/simulate` and `/simulate/report` share them. Worked example, a **20-day detour of Suez** for 60 days (these figures are produced by the API and re-checked by `backend/tools/check_claims.py`):
+
+| # | Step | Formula | Suez 20-day detour |
+|---|---|---|---|
+| 1 | Route flow (EIA, 2023 baseline) | from `routes.json` | 8,800,000 bpd (8.8 Mb/d) |
+| 2 | Voyage length T | great-circle distance of the illustrative waypoints / 14 knots | 21.2 days |
+| 3 | Delivery factor with a fixed tanker fleet | `T / (T + detour)` | 21.2 / 41.2 = 0.5146 |
+| 4 | Barrels displaced per day | `flow x (1 - delivery factor)` (blockade: `max(0, flow x blocked share - bypass)`) | 4,271,845 bpd |
+| 5 | Supply loss | `displaced / 103.3 Mb/d` | 4.135% of world supply |
+| 6 | Price impact (the validated formula) | `supply loss / 0.15` | **+27.6%** (±13.09 pp) |
+| 7 | Price path | held at the peak while the disruption lasts, then exponential decay, half-life = duration/2 clamped to 7 to 60 days, over 180 days | peak +27.6%, half-life 30 d |
+| 8 | EVs needed to offset the lost fuel | `displaced x 19.5 gal gasoline/bbl x 365 / 500 gal per vehicle-year x EV share` | 60,809,709 EVs |
+| 9 | Lithium per EV (sourced case) | `0.10 kg Li/kWh x 60 kWh x 5.323 (LCE per Li) / 1000` | 0.0319 t LCE (the project's own 0.008 is shown for comparison) |
+| 10 | Lithium required | `EVs x t LCE per EV` | 1,942,140 t LCE (1.94 to 2.91 Mt across 60/70/90 kWh packs) |
+| 11 | Supply cap and deficit | cap = `availability x 1,543,670 t LCE (2025 world production) x years`; deficit = `max(0, required - cap)` | 10% x 1,543,670 x 5 = 771,835 t; deficit **1,170,305 t** |
+| 12 | Importer shortfall | displaced x each group's share of route flow (EIA group shares only) | not available for Suez (EIA gives no breakdown) |
+| 13 | Economy (indicative) | IMF coefficients x price move per 10% x min(duration, 365)/365 | +0.18 pp inflation, -0.09 to -0.05% output |
+| 14 | Tanker tonne-miles (derived) | `detour / T` | +94.3% |
+| 15 | One-time transit gap | `flow x detour days` | 176,000,000 barrels |
+
+## Every assumption
+
+Everything below is either borrowed, chosen, or estimated, and is flagged in the app ("estimate / assumption" tags, "Assumptions and sources" blocks). Nothing here is hidden in the code.
+
+1. **Elasticity Ed = -0.15** is a borrowed textbook short-run value, not estimated from this project's data.
+2. **The ±13.09 pp band** is the leave-one-out MAE of 21 events and is applied as a constant width; it is not a statistical confidence interval.
+3. **The formula is linear** and validated only up to 8% supply loss (see Methodology).
+4. **Price path shape** (hold at the peak, then exponential decay with half-life of half the duration, clamped to 7 to 60 days, 180-day window) is an assumption.
+5. **Tanker fleet is fixed** for a detour (worst case): delivery scales by `T/(T+detour)`. `fleet=0` on the Results page lets the fleet expand (zero displaced).
+6. **Voyage days** are great-circle distance over illustrative waypoints at 14 knots, so they are lower bounds. The default Suez detour (12.7 days) is derived the same way.
+7. **Baseline flows** are the last normal year (2023 for Suez, Bab el-Mandeb and the Cape, 2024 elsewhere). Real conditions in 2026 differ (Hormuz effectively closed); results are a what-if from a normal baseline.
+8. **Hormuz bypass capacity** changed between EIA estimates (4.7, 3.5, 2.6 Mb/d); the headline uses 4.7 and the Results page shows 2.6 as a labelled sensitivity.
+9. **Importer shares** are group-level (EIA publishes nothing finer for most routes) and some are derived by subtraction; reserve cover days are not available.
+10. **Pipelines carry nameplate capacity, never flow**, and cannot be simulated. Druzhba is n/a. CPC capacity is an estimate.
+11. **EV substitution**: 19.5 gal of gasoline per barrel, **500 gal per vehicle-year (a US-style figure; the global average is lower, so the true EV count would be higher)**, and a default of 100% of the lost demand replaced by EVs.
+12. **Lithium per EV**: 0.10 kg Li/kWh is for NMC-811 only (LFP, which dominates in China, is not covered); the **60 kWh pack is a choice** (IEA gives regional averages, no global one); 5.323 is stoichiometry. The project's original 0.008 t LCE per EV is unsourced and about 4 times lower than the published figure, kept for comparison only.
+13. **Lithium availability (default 10%)** is a scenario input, anchored on USGS showing 2025 production (290,000 t Li) above consumption (263,000 t Li) by 27,000 t, about 9% of production. It is not a forecast of what could be redirected.
+14. **Macro effects**: only two coefficients have a verified primary source (IMF); they assume the oil price rise lasts most of a year and are scaled linearly to the price move and to `min(duration, 365)/365`, which is an assumption. Sector effects (airlines, equities, tanker rates) are qualitative with no coefficient, except the derived tonne-mile figure.
+15. **`conflict_intensity`** is hand-scored for the 24 historical events. It is an input to the scenario but does not change the price formula.
+16. **Model baseline price** (header): a hand-set seed of $82.50, nudged by up to 2% per classified news headline and drifting back to the seed. It is a simulation, not a market price.
+17. **Simulated vessels** are invented for illustration (14 knots, time compressed 6 simulated hours per second, counts per lane cosmetic) and are never used in any result or statistic.
+18. **Route geometry** is illustrative.
+
+## What is verified and what is not
+
+| Item | Status |
+|---|---|
+| Elasticity formula, Phase 1 comparison (24 events, 21 used, MAE 13.09 vs 13.80) | Reproduced by re-running `phase1_analysis.py` (29 Oct 2026). The other experiment rows are quoted from `PHASE1_SUMMARY.md`, not re-run |
+| Calculation chain, worked numbers, report summaries | Unit and consistency tests (every number in a summary matches the payload); worked example re-checked against the running API |
+| EIA price path (`DAILY_CLOSE`) | **Verified against the real EIA API** on 29 Oct 2026 with a real key (WTI 103.37, Brent 123.10 as of 2026-10-27; 1.7 to 2.1 s). The failure paths (rejected key, timeout, server error, rate limit) were exercised against a mock server and mocked transports, not by breaking the real service |
+| GDELT route news | Verified against the live service (slow, often rate-limited); quality filters tested on real headlines; fallbacks proven by simulated failures |
+| **Live AIS feed** | **UNVERIFIED.** No AISStream key was available. Built from the provider's documentation and tested against a mock transport only. Every status says so |
+| AISStream terms of service | **Not confirmed**: the provider's terms page could not be found. Check before any public deployment |
+| USGS lithium cells (Argentina and Chile 2024 production, Australia reserves) | Read from a PDF whose text extraction glued a footnote digit on; the stored values were corrected by hand and cross-checked by sums. See `LIMITATIONS_AND_FUTURE_WORK.md` for the exact values to compare with the PDF |
+| Keyboard use of vessels | Routes are reachable by keyboard (Tab to the hidden route list); individual simulated vessels are not |
+| Real-GPU frame rate | **Not measured.** All fps figures are from software rendering (a lower bound) |
 
 ## Changelog / corrected values
 
-### Corrected: `POST /api/v1/simulate` lithium and supply values (deliberate exception to backward compatibility)
+### Changed in M6 to M8 (behaviour you can see)
+
+- **`GET /api/v1/conflicts` now returns only the 24 real historical events by default** (a deliberate change to an endpoint that was otherwise unchanged). It used to be unioned with every news-derived event that moved the simulated price; after a few days that was over 300 rows, the "Historical events" chart read "335 events" with an unreadable axis, and derived numbers sat in a chart titled history. `?include_simulated=true` restores the old union. Test: `test_conflicts_default_is_only_the_real_historical_record`.
+- **Labels no longer imply live market data.** `LIVE BACKEND` is now `BACKEND CONNECTED`; `SIM CRUDE` is now `MODEL BASELINE` (hover: its source and date); the scenario panel's `LIVE` is `SCENARIO (simulated)`; the alert stream's `LIVE` is `NEWS STREAM CONNECTED`; "Live Alert Feed" is "News Alert Feed". "Predicted price change" is now "Modelled price change", and the `/simulate` explanation text says "estimate" instead of "prediction" (the JSON field `predicted_price_change_pct` keeps its name for compatibility).
+- **One number format.** Flow rates are written `x.xx Mb/d` (trailing zeros dropped) everywhere; the dashboard price change shows one decimal like the Results page; colours come from one token set (`lib/constants.ts` and `index.css`, kept in step by a test).
+- **Wording fix found by the claims audit.** The text "2025 production exceeded consumption by only about 9%" was imprecise: the headroom is 27,000 t (290,000 minus 263,000), which is about 9% of production but 10.3% of consumption. It now says "by 27,000 t, about 9% of production".
+- **Layout and access.** The route panel's footer no longer lets scrolled text show through the Blockade/Detour buttons; text is at least 11 px; the globe is taller at tablet width; routes are reachable by keyboard (Tab to a hidden list that appears on focus, then Enter).
+- **Price history is faster**: the CSV is parsed once and cached by modification time (it was re-parsed on every request).
+- **New endpoints** (all additive): `/price/live`, `/price/history`, `/ws/vessels`, `/vessels/status`, `/health`, `/routes/{id}/news`, `/simulate/report`.
+
+### Earlier changes (M1 to M3): corrected `/simulate` values
+
+#### Corrected: `POST /api/v1/simulate` lithium and supply values (deliberate exception to backward compatibility)
 
 Key names and response shape are **unchanged**; only wrong values changed. Before/after for the same inputs
 (`conflict_intensity=5`; snapshot of the old output in `backend/tests/snapshots/simulate_before.json`):
@@ -68,7 +284,7 @@ The frontend's offline-fallback mirrors (`localFormula.ts`, `chokepointRisk.ts`)
 the 0.008 t/EV project assumption: it is 38% of annual production. With the sourced 0.0319 t/EV case it is about 1.5 times.
 At that point `/simulate` still used the 0.008 project assumption; it was switched to the sourced case in the next entry.
 
-### Changed: `POST /api/v1/simulate` now uses the sourced per-EV lithium case
+#### Changed: `POST /api/v1/simulate` now uses the sourced per-EV lithium case
 
 Both endpoints now agree: `/simulate` and `/simulate/report` use **0.0319 t LCE per EV** (0.10 kg Li/kWh, ICCT 2024, NMC-811,
 x 60 kWh pack, IEA Global EV Outlook 2026, x 5.323 LCE per Li) instead of the project's unsourced 0.008 t. Every existing key
@@ -90,7 +306,11 @@ So with the sourced battery figure a 5% supply loss needs about 1.5 times a year
 The frontend offline-fallback mirror (`localFormula.ts`) and TypeScript types were updated to match. Regression tests:
 `backend/tests/test_simulate_sourced_switch.py` and `test_simulate_corrected.py`.
 
-## Route layer (Milestone 3)
+## Feature notes
+
+Detail on each part of the app, written as it was built.
+
+### Route layer
 
 The three.js globe draws all 14 routes from `GET /api/v1/routes`: sea lanes and chokepoints in blue with animated dashes (width scales with flow),
 pipelines in amber and thinner (width scales with **nameplate capacity**, never flow), and a route under a scenario in pulsing crimson, elevated.
@@ -99,7 +319,7 @@ Hover shows a tooltip, click flies the camera to the route and opens its panel (
 Route geometry is illustrative. Druzhba shows n/a. Routes with no sourced importer data say "not available" rather than showing an empty chart.
 Screenshots from a real browser run are in `docs/m3_screenshots/`; the scripts that produced them are in `frontend/e2e/`.
 
-## Route news (Milestone 4)
+### Route news
 
 `GET /api/v1/routes/{id}/news` returns recent headlines for one route: **headline, source, published time, link and a tag** (`attack`,
 `sanctions`, `disruption`, `shipping`, `general`). No article text is requested, stored or shown. The route panel's "Recent news" section
@@ -134,7 +354,7 @@ With `fail` and an aged cache the backend returned the same 2 headlines with `st
 said so; with `empty` it showed the empty message. Screenshots: `docs/m4_screenshots/` (`11_news_normal`, `12_news_stale`,
 `13_news_unavailable_nothing_cached`, `14_news_empty`), produced by `frontend/e2e/news_states.mjs`.
 
-## Results page (Milestone 5)
+### Results page
 
 `/results` is the full report for one scenario. **The whole scenario is in the address**, so a refresh or a shared link restores the same page:
 
@@ -170,7 +390,7 @@ labelled a soft figure, still unfolding), shows the Hormuz bypass sensitivity (4
 **News warm-up.** At startup the backend fetches route news one route at a time, at least 6 s apart (with the 429 back-off), so the first click in a demo does not wait
 10 to 20 s or more. Set `NEWS_WARMUP=0` to disable it. Measured: with an empty cache the first request took 44.5 s (Bab el-Mandeb) and 68.8 s then 17.6 s (Hormuz, whose first attempt failed); once cached, 0.017 s. A full warm-up pass over 14 routes fetched 5, found 2 already fresh and **7 failed** (GDELT answered 429 or timed out on every retry), so a route can still start cold; afterwards cached clicks took 14 to 24 ms, and an expired entry was shown at once (about 0.5 s, marked stale and refreshing) while a refresh ran in the background.
 
-## Before a demo: news warm-up and the demo snapshot
+### Before a demo: news warm-up and the demo snapshot
 
 GDELT, the free news feed, is slow (10 to 60 s per answer here) and often refuses requests (HTTP 429), and that is outside our control. Three layers keep the
 route-news panel from stalling or going blank on the day. **Run the pre-warm script a few minutes before presenting.**
@@ -199,7 +419,12 @@ It is built only from real fetched results by the script (never edited by hand).
 returned headlines for; the other routes show the plain "empty" or "unavailable" message. Re-run the pre-warm script with `--snapshot` to refresh it, and commit the file if you want the new copy kept.
 
 
-## Live oil price (Milestone 6)
+#### The `NEWS_WARMUP` setting
+
+`NEWS_WARMUP` (in `backend/.env` or the environment) controls whether the server fills the route-news cache at startup. **On by default** (`1`); `0`, `false`, `off` or `no` turns it off. The test suite sets it to `0` (`backend/tests/conftest.py`) so tests never call GDELT.
+Turn it off for cold-start measurements or when working offline; leave it on before a demo (see "Before a demo" above).
+
+### Live oil price
 
 The ticker at the top of every page shows WTI and Brent with coloured change, a 30-day sparkline, the as-of date **and how old it is**, and a status badge.
 
@@ -225,13 +450,7 @@ filter redacts any `api_key=` value and the key itself from every record. `backe
 It is **dev-only**: the app ignores a custom `EIA_BASE_URL` unless `PRICE_DEV_ALLOW_CUSTOM_EIA_URL=1` is also set, and then labels the price source "DEV STAND-IN for EIA (mock server, NOT EIA DATA)". Start it, then run the backend with `EIA_BASE_URL=http://127.0.0.1:8765/v2 PRICE_DEV_ALLOW_CUSTOM_EIA_URL=1 EIA_API_KEY=any-dummy-value`. Screenshots of every ticker state are in `docs/m6_screenshots/`, produced by `frontend/e2e/price_ticker.mjs`.
 
 
-### The `NEWS_WARMUP` setting
-
-`NEWS_WARMUP` (in `backend/.env` or the environment) controls whether the server fills the route-news cache at startup. **On by default** (`1`); `0`, `false`, `off` or `no` turns it off. The test suite sets it to `0` (`backend/tests/conftest.py`) so tests never call GDELT.
-Turn it off for cold-start measurements or when working offline; leave it on before a demo (see "Before a demo" above).
-
-
-## Vessels on the globe (Milestone 7)
+### Vessels on the globe
 
 The globe shows tankers in one of two modes. **Simulated mode is the default and the fallback** (no key, feed down, or the AIS toggle off). A **SIMULATED VESSELS** badge sits over the globe and cannot be hidden. In AIS mode it reads **AIS FEED · UNVERIFIED**.
 
@@ -252,21 +471,56 @@ When a scenario disrupts a route that has an alternate lane (for example a Suez 
 
 `GET /api/v1/vessels/status` returns the same status as JSON.
 
-### What AIS can and cannot tell you
+#### What AIS can and cannot tell you
 - **Coverage has gaps.** Free feeds rely on receivers near coasts; open-ocean stretches can be empty.
 - **Vessels can switch their transponder off**, especially around the Gulf and in sanctioned trades ("dark fleet"). A missing ship is not an absent ship, and counts from AIS are lower bounds.
 - **Destination is typed in by the crew** and is often stale, abbreviated or wrong. The panel labels it "self-reported, unreliable".
 - **Free tiers are limited.** AISStream allows 3 subscribed connections per account (and 3 per IP), one subscription change per second, and states it has no SLA or uptime guarantee. It documents bandwidth limits for uncompressed connections from September 2026.
 - **AIS does not say what a tanker carries**, or whether it is loaded. Types 80 to 89 only mean "tanker". Draught is self-reported.
 
-### Performance (software WebGL, so a lower bound)
+#### Performance (software WebGL, so a lower bound)
 Measured with `frontend/e2e/vessels_fps.mjs` in headless Chromium on the CPU (SwiftShader), three rounds, 8 seconds each:
 
-| Setup | fps |
-|---|---|
-| No routes, no vessels | 34.7 to 39.2 |
-| All routes, no vessels | 31.1 to 34.2 |
-| All routes + 2,000 vessels | 31.0 to 34.0 |
+| Setup | fps, M7 run | fps, final v1.0 run |
+|---|---|---|
+| No routes, no vessels | 34.7 to 39.2 | 33.0 to 39.8 |
+| All routes, no vessels | 31.1 to 34.2 | 31.0 to 34.3 |
+| **All routes + 2,000 vessels** | 31.0 to 34.0 | **30.2 to 34.0** |
 
 The first version (cones, updated every frame) measured **19.3 fps**, under the 20 fps line, so it was fixed before moving on: one-triangle arrowheads, vessels on the far side of the globe are not drawn, and the simulation updates at 20 Hz (motion is about 6 px per second, so this is not visible). Earlier baselines were 33.6 fps without routes and 30.3 with routes.
 The drawing is a single `InstancedMesh` plus one `LineSegments` for the trails.
+
+**Results page load** (navigation to the KPI strip, production build, fresh browser context, median of 5 runs, `frontend/e2e/results_load.mjs`): M5 about 500 ms; v1.0 about 560 ms (+60 ms, about 12%, the price ticker's extra requests). On the Vite dev server: about 1.0 to 1.1 s at M5 against about 1.2 s now. The JS bundle grew from 1,630 KB to 1,657 KB (+1.7%). The report API itself answers in about 20 ms.
+
+## Limitations
+
+The full list, with what was observed, is in **`LIMITATIONS_AND_FUTURE_WORK.md`**. The ones to say out loud:
+
+- **A small, partly estimated sample.** 21 events, hand-scored `conflict_intensity`, several estimated `supply_loss_pct` values, a borrowed elasticity. The ±13.09 pp band is the formula's honest error on those events.
+- **The formula is linear and validated to 8% supply loss.** Bigger shocks (a Hormuz blockade is 15.5%) are extrapolations and are marked as such.
+- **Baselines are pre-crisis years**, so results are what-ifs from a normal year, not forecasts of 2026 conditions.
+- **EIA prices are weekly-released daily closes**, never live. Without a key the ticker shows a 2026-08-18 row.
+- **The live AIS feed is unverified**, its provider's terms are unconfirmed, and AIS itself cannot show dark vessels, destinations you can trust, or cargo.
+- **Lithium per EV is NMC-811 only** and uses a chosen 60 kWh pack; the project's original 0.008 t per EV is unsourced.
+- **The older news pipeline uses a NewsAPI Developer key**, which is outside that plan's terms for production use.
+- **Frame rates are from software rendering** (a lower bound); a real GPU was not measured.
+
+## Tests
+
+| What | Command | Result at v1.0 |
+|---|---|---|
+| Backend (pytest): calculation engine, golden values, report consistency, route API snapshots, news, price feed, AIS adapter, frontend consistency, repo hygiene | `cd backend ; python -m pytest` | **319 passed, 1 expected failure** (the recorded negation case in `test_news_real_headlines.py`) |
+| Frontend type-check, lint, production build | `cd frontend ; npx tsc -b ; npx oxlint ; npm run build` | tsc clean; lint 1 warning (a pre-existing `set-state-in-effect` note in `ChokepointPanel.tsx`); build OK |
+| Claims audit: every number in the README, DEMO_SCRIPT and LIMITATIONS rebuilt from the running app | `cd backend ; python tools\check_claims.py` | **50 of 50 claims match** (also run inside the pytest suite) |
+| Browser walkthroughs (real Chromium, software WebGL), screenshots in `docs/` | `frontend/e2e/*.mjs` (see its README) | Run per milestone; M8 and M9 runs had 0 console errors (the "backend down" state shows 10 browser-logged 502s, which is expected) |
+
+The backend suite includes tests that read the frontend source (colour tokens, units, minimum text size, no vessel statistics on route or Results code, no key in the bundle) and the repo (every environment variable listed in `.env.example`, no key value in tracked files or in git history).
+
+## Repo hygiene and secrets
+
+- `backend/.env` holds real keys and is **git-ignored and untracked**. `backend/.env.example` lists every variable the code reads (checked by a test) with **no values**.
+- The 31.8 MB `backend/data/globalEnergyOwnership.xlsx` is **git-ignored and untracked**; its download source is in the quick start above.
+- Searched on 30 Oct 2026: none of the key values in the local `.env` appears in any tracked file or in any of the repository's commits on any branch (a `git log -S` search per value). The check is repeatable: `python -m pytest tests/test_repo_hygiene.py`.
+- Keys are read on the server only. `httpx` logs full request URLs at INFO, which would write `api_key=` into logs, so that logging is off and a log filter redacts the EIA and AIS keys (a test proves the leak is real without it).
+- Generated or dev-only files are labelled: `tools/mock_eia_server.py` is dev-only and the app cannot reach it without two explicit settings; `docs/*_screenshots/` are evidence from real browser runs.
+
