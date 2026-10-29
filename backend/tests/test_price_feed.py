@@ -395,3 +395,16 @@ def test_no_application_module_imports_the_mock_server():
 def test_the_mock_server_file_is_marked_dev_only_in_its_header_and_banner():
     text = (BACKEND / "tools" / "mock_eia_server.py").read_text(encoding="utf-8")
     assert text.startswith('"""DEV-ONLY') and "NOT EIA. NOT LIVE" in text and "PRICE_DEV_ALLOW_CUSTOM_EIA_URL" in text
+
+
+def test_csv_rows_are_cached_until_the_file_changes(tmp_path):
+    f = tmp_path / "prices.csv"
+    f.write_text("date,wti,brent\n2026-08-17,86.0,95.0\n2026-08-18,86.5,95.3\n", encoding="utf-8")
+    prov = pf.CsvProvider(f)
+    first = prov.all_rows()
+    first[0]["wti"] = 999                                   # a caller editing its copy must not corrupt the cache
+    assert prov.all_rows()[0]["wti"] == 86.0
+    import os, time
+    f.write_text("date,wti,brent\n2026-08-19,90.0,99.0\n", encoding="utf-8")
+    os.utime(f, (time.time() + 5, time.time() + 5))
+    assert [r["date"] for r in prov.all_rows()] == ["2026-08-19"]

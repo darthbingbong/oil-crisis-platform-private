@@ -1,4 +1,3 @@
-// M7 performance check: fps with no routes, routes only (?vessels=0, a DEV-only switch) and routes + 2,000 vessels. Software WebGL, so a lower bound.
 import { chromium } from "playwright-core"; import os from "node:os"; import path from "node:path";
 const exe = path.join(os.homedir(), "AppData/Local/ms-playwright/chromium-1243/chrome-win64/chrome.exe");
 const browser = await chromium.launch({ executablePath: exe, args: ["--use-angle=swiftshader","--enable-unsafe-swiftshader","--ignore-gpu-blocklist","--enable-webgl"] });

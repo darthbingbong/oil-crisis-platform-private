@@ -226,16 +226,21 @@ class CsvProvider:
 
     def __init__(self, path: Path = CSV_PATH):
         self._path = path
+        self._cache: tuple[float, list[dict]] | None = None     # (file mtime, rows): parsing with pandas on every request blocked the event loop for ~30 ms
 
     async def fetch_recent(self, days: int) -> list[dict]:
         return self.all_rows()[-(days + 20):]
 
     def all_rows(self) -> list[dict]:
+        mtime = self._path.stat().st_mtime
+        if self._cache is not None and self._cache[0] == mtime:
+            return [dict(r) for r in self._cache[1]]            # copies: callers may edit their rows
         df = pd.read_csv(self._path)
         out = []
         for d, w, b in zip(df["date"], df["wti"], df["brent"]):
             out.append({"date": str(d)[:10], "wti": _to_price(w), "brent": _to_price(b)})
-        return out
+        self._cache = (mtime, out)
+        return [dict(r) for r in out]
 
 
 # ---------------------------------------------------------------------------
