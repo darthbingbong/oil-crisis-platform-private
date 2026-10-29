@@ -75,7 +75,7 @@ export default function AlertFeed({ alerts, status }: Props) {
                   <div className="flex items-center gap-2">
                     <ClassifierTag classifier={a.classifier_used} />
                     {delta && (
-                      <span className="data-readout text-xs" style={{ color: delta.color }}>
+                      <span className="data-readout text-xs" style={{ color: delta.color }} title="Simulated change to the MODEL BASELINE price caused by this headline. Not a market price move.">
                         {delta.text}
                       </span>
                     )}

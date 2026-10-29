@@ -1,0 +1,34 @@
+// M8.3: the honesty badges and warnings still show where they should (checked in a real browser, with the real backend).
+import { chromium } from "playwright-core"; import os from "node:os"; import path from "node:path";
+const BASE = "http://localhost:5173";
+const exe = path.join(os.homedir(), "AppData/Local/ms-playwright/chromium-1243/chrome-win64/chrome.exe");
+const b = await chromium.launch({ executablePath: exe, args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist", "--enable-webgl"] });
+const p = await b.newPage({ viewport: { width: 1440, height: 900 } }); const errs = []; p.on("console", (m) => m.type() === "error" && errs.push(m.text())); p.on("pageerror", (e) => errs.push(e.message));
+const has = async (sel) => (await p.locator(sel).count()) > 0;
+const check = (name, ok, extra = "") => console.log(`${ok ? "PASS" : "FAIL"}  ${name} ${extra}`);
+await p.goto(`${BASE}/`); await p.waitForSelector('[data-testid="price-ticker"][data-state="ready"]', { timeout: 60000 }); await p.waitForFunction(() => window.__vessels?.count > 0, null, { timeout: 60000 }); await p.waitForTimeout(1500);
+const body = async () => (await p.locator("body").innerText());
+check("dashboard: SIMULATED VESSELS badge", (await p.locator('[data-testid="vessel-badge"]').innerText()).includes("SIMULATED"));
+check("dashboard: price status badge is DAILY_CLOSE or OFFLINE_FALLBACK", /DAILY_CLOSE|OFFLINE_FALLBACK/.test(await p.locator('[data-testid="price-status"]').innerText()), "(" + (await p.locator('[data-testid="price-status"]').innerText()).trim() + ")");
+check("dashboard: price age is shown", await has('[data-testid="price-age"]'), "(" + (await p.locator('[data-testid="price-age"]').innerText()) + ")");
+check("dashboard: model baseline is labelled MODEL BASELINE, not a price quote", (await body()).includes("MODEL BASELINE"));
+check("dashboard: no standalone LIVE label", !/\bLIVE\b/.test(await body()));
+check("dashboard: scenario badge says (simulated)", (await body()).includes("SCENARIO (SIMULATED)") || (await body()).includes("SCENARIO (simulated)"));
+check("dashboard: no 'Predicted' label", !/Predicted/.test(await body()));
+await p.locator('[data-testid="vessel-info-button"]').hover(); await p.waitForTimeout(300);
+check("vessel tooltip: AIS limits listed", (await p.locator('[data-testid="vessel-info"]').innerText()).includes("transponder") && (await p.locator('[data-testid="vessel-info"]').innerText()).includes("carrying"));
+// outside the validated range: Hormuz blockade
+await p.goto(`${BASE}/results?route=hormuz&type=blockade&blocked=100&dur=30&conf=8&dem=0&ev=100&li=10&horizon=5`); await p.waitForSelector('[data-testid="kpi-strip"]', { timeout: 60000 }); await p.waitForTimeout(1200);
+check("results (Hormuz): 'not validated at this magnitude' warning", await has('[data-testid="band-not-validated"]'));
+check("results (Hormuz): price chart marks the extrapolation", (await body()).toLowerCase().includes("beyond the validated range"));
+check("results (Hormuz): estimate tags present", (await body()).includes("estimate"), "(" + ((await body()).match(/estimate/gi) ?? []).length + " mentions)");
+check("results (Hormuz): ticker + status badge on Results", await has('[data-testid="price-status"]'));
+check("results: no standalone LIVE label", !/\bLIVE\b/.test(await body()));
+check("results: no 'Predicted' label", !/Predicted/.test(await body()));
+const fc = [...(await body()).matchAll(/.{30}forecast.{20}/gi)].map((m) => m[0].replace(/\s+/g, " "));
+console.log("   'forecast' contexts:", JSON.stringify(fc));
+await p.goto(`${BASE}/results?route=suez&type=detour&detour=20&dur=60&conf=5&dem=0&ev=100&li=10&horizon=5`); await p.waitForSelector('[data-testid="kpi-strip"]', { timeout: 60000 }); await p.waitForTimeout(1000);
+check("results (Suez): inside the validated range -> band shown, no extrapolation warning", !(await has('[data-testid="band-not-validated"]')));
+check("results (Suez): price KPI shows the measured error", (await p.locator('[data-testid="kpi-strip"]').innerText()).includes("measured error"));
+check("results (Suez): assumptions flagged 'estimate / assumption'", /estimate \/ assumption/i.test(await body()));
+console.log("console errors:", errs.length); await b.close();

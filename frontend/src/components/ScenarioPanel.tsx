@@ -356,7 +356,7 @@ export default function ScenarioPanel({
       <div className="hairline" />
 
       <div>
-        <div className="section-label mb-3">Predicted price change</div>
+        <div className="section-label mb-3">Modelled price change</div>
         <div
           data-testid="predicted-price-change"
           className="data-readout font-medium leading-none"

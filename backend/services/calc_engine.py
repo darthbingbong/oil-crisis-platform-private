@@ -198,7 +198,7 @@ def price_caveats(supply_loss: float, conflict_intensity: float, demand_change_p
         notes.append(
             f"This scenario also involves a {demand_change_pct:.1f}% demand change. Phase 1 testing found demand-driven "
             "events (like 2020 COVID or 2008) behave differently from pure supply shocks, and this formula does not yet "
-            "account for that, so treat the price prediction as less reliable when demand_change_pct is far from zero.")
+            "account for that, so treat the price estimate as less reliable when demand_change_pct is far from zero.")
     if conflict_intensity >= 7 and supply_loss < 2:
         notes.append(
             f"Conflict intensity is high ({conflict_intensity:g}) but modeled supply loss is low. Historically (e.g. the "

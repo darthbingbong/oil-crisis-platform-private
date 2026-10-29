@@ -93,7 +93,7 @@ export function localSimulate(req: SimulateRequest): SimulateResponse {
     parts.push(
       `Note: this scenario also involves a ${req.demand_change_pct.toFixed(1)}% demand change. ` +
         `Demand-driven events (like 2020 COVID or 2008) behave differently from pure supply ` +
-        `shocks, and this formula does not yet account for that -- treat this prediction as ` +
+        `shocks, and this formula does not yet account for that -- treat this estimate as ` +
         `less reliable when demand_change_pct is far from zero.`
     );
   }

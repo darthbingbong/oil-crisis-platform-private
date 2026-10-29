@@ -224,7 +224,7 @@ def simulate(req: SimulateRequest):
         parts.append(f"Note: this scenario also involves a {req.demand_change_pct:.1f}% demand "
                       f"change. Phase 1 testing found demand-driven events (like 2020 COVID or "
                       f"2008) behave differently from pure supply shocks, and this formula does "
-                      f"not yet account for that -- treat this prediction as less reliable when "
+                      f"not yet account for that -- treat this estimate as less reliable when "
                       f"demand_change_pct is far from zero.")
 
     if req.conflict_intensity >= 7 and req.supply_loss_pct < 2:
