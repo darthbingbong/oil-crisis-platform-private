@@ -30,5 +30,5 @@ console.log("   'forecast' contexts:", JSON.stringify(fc));
 await p.goto(`${BASE}/results?route=suez&type=detour&detour=20&dur=60&conf=5&dem=0&ev=100&li=10&horizon=5`); await p.waitForSelector('[data-testid="kpi-strip"]', { timeout: 60000 }); await p.waitForTimeout(1000);
 check("results (Suez): inside the validated range -> band shown, no extrapolation warning", !(await has('[data-testid="band-not-validated"]')));
 check("results (Suez): price KPI shows the measured error", (await p.locator('[data-testid="kpi-strip"]').innerText()).includes("measured error"));
-check("results (Suez): assumptions flagged 'estimate / assumption'", /estimate \/ assumption/i.test(await body()));
+check("results (Suez): assumptions flagged 'estimate / assumption'", /estimate \/ assumption/i.test((await p.locator("body").textContent()) ?? ""));
 console.log("console errors:", errs.length); await b.close();
