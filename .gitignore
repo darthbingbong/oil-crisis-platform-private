@@ -11,3 +11,7 @@ backend/data/globalEnergyOwnership.xlsx
 
 # Claude Code runtime lock file
 .claude/scheduled_tasks.lock
+
+# AIS provider call log (machine-local; no keys in it, but not source)
+logs/
+backend/logs/
