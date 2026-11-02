@@ -24,6 +24,16 @@ def _a(text: str, source: str | None = None, url: str | None = None, is_estimate
     return {"text": text, "source": source, "source_url": url, "is_estimate": is_estimate}
 
 
+def _voyage_assumptions(route: dict) -> list[dict]:
+    """Where the baseline voyage length comes from: a planned sea distance (sourced) and the 14-knot speed (assumption)."""
+    d = route.get("voyage_derivation") or {}
+    if d.get("provider"):
+        return [_a(f"Baseline voyage length T is a planned sea distance of {d['distance_nm']:,.0f} nm (ShipFinder route planning, {d['representative_voyage']}, "
+                   f"retrieved {d['retrieved_at_utc'][:10]}). A planned route, not a measured voyage.", "ShipFinder route planning"),
+                _a("Tanker speed of 14 knots turns that distance into days (project assumption).", is_estimate=True)]
+    return [_a("Baseline voyage length is derived from distance at 14 knots over illustrative waypoints, not a surveyed distance.", is_estimate=True)]
+
+
 def _displaced(route: dict, flow: float, req: dict, cfg: CalcConfig, bypass: float) -> tuple[float, float, dict]:
     """Returns (displaced_bpd, transit_gap_bbl, details) for the chosen disruption type."""
     if req["disruption_type"] == "blockade":
@@ -150,8 +160,7 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
               if req["disruption_type"] == "blockade" and not bypass_known else []),
             *([_a(f"Fixed tanker fleet (worst case): fleet_constrained={req['fleet_constrained']}. Delivery rate scales by T/(T+dt) = "
                   f"{detail['delivery_factor']:.3f}, T = {detail['baseline_voyage_days']} days.", is_estimate=True),
-               _a("Baseline voyage length is derived from distance at 14 knots over illustrative waypoints, not a surveyed distance.",
-                  is_estimate=True)] if req["disruption_type"] == "detour" else []),
+               *_voyage_assumptions(route)] if req["disruption_type"] == "detour" else []),
         ],
     }
 

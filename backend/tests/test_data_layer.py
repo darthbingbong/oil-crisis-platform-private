@@ -127,7 +127,11 @@ def test_voyage_days_are_derived_from_distance_at_14_knots(routes):
     for r in routes:
         d = r.model_extra.get("voyage_derivation")
         if d and r.baseline_voyage_days:
-            assert d["is_estimate"] is True
+            if d.get("provider"):       # M10: planned sea distance from ShipFinder, not an estimate; provenance must be complete
+                assert d["is_estimate"] is False and d["service"] in ("route_port", "route_point") and d["plan_id"] and d["retrieved_at_utc"], r.id
+                assert d["previous_hand_estimate"]["days"], r.id
+            else:
+                assert d["is_estimate"] is True
             assert r.baseline_voyage_days == pytest.approx(d["distance_nm"] / (14 * 24), abs=0.06), r.id
 
 

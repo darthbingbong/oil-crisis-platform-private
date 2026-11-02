@@ -15,6 +15,13 @@ from main import app
 client = TestClient(app)
 SNAP = Path(__file__).resolve().parent / "snapshots"
 
+# M10: voyage lengths are ShipFinder planned distances (data/ais_route_plans.json) at 14 kn, not hand-waypoint sums. Expected values are derived from the stored
+# distances, and pinned below so the change from v1.0 (Suez 21.2 -> 19.5 days, default detour 12.7 -> 14.0 days) is on record.
+_PLANS = json.loads((Path(__file__).resolve().parent.parent / "data" / "ais_route_plans.json").read_text(encoding="utf-8"))["plans"]
+SUEZ_T = round(_PLANS["ras_tanura_rotterdam_suez"]["distance_nm"] / 336, 1)
+DEFAULT_DETOUR = round((_PLANS["ras_tanura_rotterdam_cape"]["distance_nm"] - _PLANS["ras_tanura_rotterdam_suez"]["distance_nm"]) / 336, 1)
+assert (SUEZ_T, DEFAULT_DETOUR) == (19.5, 14.0)
+
 # (url path exactly as a client could send it, snapshot file)
 LEGACY_CALLS = [
     ("/api/v1/routes/hormuz", "routes_hormuz_before.json"),
@@ -139,9 +146,10 @@ def test_report_hormuz_blockade_headline_and_sensitivity():
 def test_report_suez_detour_defaults_to_2023_baseline_and_derived_detour():
     j = post(route_id="suez", disruption_type="detour", duration_days=60).json()
     assert j["baseline"]["year"] == 2023 and j["baseline"]["flow_bpd"] == 8_800_000
-    assert j["scenario"]["detour_days"] == pytest.approx(12.7)
+    assert j["scenario"]["detour_days"] == pytest.approx(DEFAULT_DETOUR)
     T = j["sections"]["barrels"]["numbers"]["baseline_voyage_days"]
-    assert j["kpis"]["displaced_bpd"] == pytest.approx(8_800_000 * (1 - T / (T + 12.7)))
+    assert T == pytest.approx(SUEZ_T)
+    assert j["kpis"]["displaced_bpd"] == pytest.approx(8_800_000 * (1 - T / (T + DEFAULT_DETOUR)))
 
 
 def test_report_baseline_year_override_shows_red_sea_depression():
@@ -208,9 +216,9 @@ def test_cape_lane_is_rejected_as_not_a_route_you_would_disrupt():
 
 def test_report_records_the_users_detour_days_next_to_the_route_default():
     user = post(route_id="suez", disruption_type="detour", detour_days=20).json()["scenario"]
-    assert user["detour_days"] == 20 and user["detour_days_source"] == "user" and user["detour_days_default"] == pytest.approx(12.7)
+    assert user["detour_days"] == 20 and user["detour_days_source"] == "user" and user["detour_days_default"] == pytest.approx(DEFAULT_DETOUR)
     dflt = post(route_id="suez", disruption_type="detour").json()["scenario"]
-    assert dflt["detour_days"] == pytest.approx(12.7) and dflt["detour_days_source"] == "route default"
+    assert dflt["detour_days"] == pytest.approx(DEFAULT_DETOUR) and dflt["detour_days_source"] == "route default"
 
 
 def test_report_ev_section_compares_with_sourced_production_and_year():

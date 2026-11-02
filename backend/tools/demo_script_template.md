@@ -49,7 +49,7 @@
 | Deficit | required - cap = @@s_li@@ - @@s_cap@@ | **@@s_deficit@@ t LCE** |
 | One-time transit gap | flow x detour days = @@s_flow@@ x @@s_detour@@ | **@@s_gap@@ barrels** |
 
-*Rounding note: the app carries unrounded values (barrels displaced is 4,271,844.66), so a hand calculation from the rounded figures above can differ in the last digits (for example 60,809,714 EVs by hand against 60,809,709 on screen). Say so if someone checks.*
+*Rounding note: the app carries unrounded values (barrels displaced is @@s_displaced_exact@@), so a hand calculation from the rounded figures above can differ in the last digits (for example @@s_evs_by_hand@@ EVs by hand against @@s_evs@@ on screen). Say so if someone checks.*
 
 - **Say:** "Every row is either a source, a formula, or an assumption the page flags. The price is the one number I validated, against 21 historical events: the formula's average error is @@band@@ percentage points."
 

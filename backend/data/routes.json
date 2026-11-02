@@ -32,6 +32,13 @@
       ],
       "source": "EIA press release 7 April 2026 and Short-Term Energy Outlook (October 2026), as returned by search; read the linked pages for current figures.",
       "is_estimate": false
+    },
+    "voyage_distances": {
+      "source": "ShipFinder route planning (api.elaneglobal.com), 5 Port-to-Port calls, 2 Point-to-Point cross-checks; derived values in data/ais_route_plans.json",
+      "retrieved_at_utc": "2026-11-02T13:45:40Z",
+      "speed_knots": 14.0,
+      "replaces": "the great-circle sums over hand-placed waypoints used up to v1.0 (kept per route as voyage_derivation.previous_hand_estimate)",
+      "note": "Routes are still drawn from illustrative waypoints; only the voyage length comes from the planner."
     }
   },
   "routes": [
@@ -118,8 +125,8 @@
       "bypass_capacity_bpd": 4700000,
       "bypass_note": "EIA's latest combined estimate for Saudi East-West (5.0 Mb/d rated) plus UAE Abu Dhabi Crude Oil Pipeline (1.8 Mb/d rated), about 4.7 Mb/d. Older EIA pieces estimated 3.5 Mb/d (with Iran's Goreh-Jask) and 2.6 Mb/d 'effective unused'. Pipelines already carry some oil that never touches Hormuz, so real spare capacity may be lower: treat 2.6 Mb/d as a sensitivity.",
       "bypass_capacity_low_bpd": 2600000,
-      "baseline_voyage_days": 17.2,
-      "baseline_voyage_note": "Typical FULL voyage for cargoes using this route (not the transit time through the chokepoint): distance / 14 kn. Estimate: distance is from illustrative waypoints.",
+      "baseline_voyage_days": 17.5,
+      "baseline_voyage_note": "Typical FULL voyage for cargoes using this route (not the transit time through the chokepoint): planned sea distance (ShipFinder, retrieved 2026-11-02) / 14 kn.",
       "alt_route_id": "cape_good_hope",
       "source": "EIA, World Oil Transit Chokepoints; EIA Today in Energy 2025-06 'Amid regional conflict, the Strait of Hormuz remains critical oil chokepoint' and 2023 'The Strait of Hormuz is the world's most important oil transit chokepoint'",
       "source_url": "https://www.eia.gov/international/content/analysis/special_topics/World_Oil_Transit_Chokepoints",
@@ -127,8 +134,7 @@
       "is_estimate": false,
       "estimate_fields": [
         "top_importers[Other Asia]",
-        "top_importers[Rest of world]",
-        "baseline_voyage_days"
+        "top_importers[Rest of world]"
       ],
       "baseline_year": 2024,
       "flow_by_year_bpd": {
@@ -142,70 +148,21 @@
       "baseline_year_note": "Last full pre-disruption year in EIA's table (first-half 2025 figures are also stored).",
       "voyage_derivation": {
         "representative_voyage": "Ras Tanura to Ningbo via Hormuz and Malacca (largest importer, China)",
-        "waypoints_latlng": [
-          [
-            26.7,
-            50.15
-          ],
-          [
-            26.57,
-            56.25
-          ],
-          [
-            23.5,
-            60.5
-          ],
-          [
-            15.0,
-            66.0
-          ],
-          [
-            7.5,
-            76.0
-          ],
-          [
-            5.5,
-            80.5
-          ],
-          [
-            5.5,
-            90.0
-          ],
-          [
-            5.5,
-            97.5
-          ],
-          [
-            2.5,
-            101.3
-          ],
-          [
-            1.25,
-            103.8
-          ],
-          [
-            5.0,
-            108.5
-          ],
-          [
-            12.0,
-            112.5
-          ],
-          [
-            22.0,
-            119.0
-          ],
-          [
-            29.9,
-            122.2
-          ]
-        ],
-        "distance_nm": 5784,
+        "distance_nm": 5870.9,
         "speed_knots": 14.0,
-        "days": 17.2,
-        "calculation": "5784 nm / (14 kn x 24 h) = 17.2 days",
-        "method_note": "Great-circle sum over illustrative waypoints. Real sea distance is longer, so days are a lower bound. Not a sourced distance.",
-        "is_estimate": true
+        "days": 17.5,
+        "calculation": "5870.9 nm / (14 kn x 24 h) = 17.5 days",
+        "method_note": "Planned sea distance from ShipFinder Port-to-Port route planning, SARTA to CNNBG, retrieved 2026-11-02. Days = distance / 14 kn, the project's tanker speed (an assumption). A planned route, not a measured voyage.",
+        "is_estimate": false,
+        "provider": "ShipFinder",
+        "service": "route_port",
+        "plan_id": "ras_tanura_ningbo",
+        "retrieved_at_utc": "2026-11-02T13:46:36Z",
+        "previous_hand_estimate": {
+          "distance_nm": 5784,
+          "days": 17.2,
+          "method": "great-circle sum over illustrative waypoints"
+        }
       }
     },
     {
@@ -258,16 +215,14 @@
       ],
       "bypass_capacity_bpd": 0,
       "bypass_note": "No pipeline crosses the strait. The only alternative is the Cape of Good Hope. (Saudi East-West ends at Yanbu on the Red Sea, so it feeds this lane rather than bypassing it.)",
-      "baseline_voyage_days": 21.2,
-      "baseline_voyage_note": "Typical FULL voyage for cargoes using this route (not the transit time through the chokepoint): distance / 14 kn. Estimate: distance is from illustrative waypoints.",
+      "baseline_voyage_days": 19.5,
+      "baseline_voyage_note": "Typical FULL voyage for cargoes using this route (not the transit time through the chokepoint): planned sea distance (ShipFinder, retrieved 2026-11-02) / 14 kn.",
       "alt_route_id": "cape_good_hope",
       "source": "EIA, World Oil Transit Chokepoints, Table 1",
       "source_url": "https://www.eia.gov/international/content/analysis/special_topics/World_Oil_Transit_Chokepoints",
       "data_year": 2023,
       "is_estimate": false,
-      "estimate_fields": [
-        "baseline_voyage_days"
-      ],
+      "estimate_fields": [],
       "baseline_year": 2023,
       "flow_by_year_bpd": {
         "2020": 5700000,
@@ -278,98 +233,25 @@
         "1H25": 4200000
       },
       "baseline_year_note": "2023 is the last normal year. EIA's 2024 figure is depressed by Red Sea attacks (4.1 vs 9.3 Mb/d). Both years are stored.",
-      "default_detour_days": 12.7,
-      "default_detour_days_note": "Cape voyage 33.9 d minus Suez voyage 21.2 d, same waypoint method (estimate, lower bound).",
+      "default_detour_days": 14.0,
+      "default_detour_days_note": "Cape voyage 33.5 d minus Suez voyage 19.5 d, both ShipFinder planned distances (11239.4 nm and 6540.2 nm, retrieved 2026-11-02) at 14 kn: (11239.4 - 6540.2) / 336 = 14.0 days.",
       "voyage_derivation": {
         "representative_voyage": "Ras Tanura to Rotterdam via Hormuz, Bab el-Mandeb and Suez",
-        "waypoints_latlng": [
-          [
-            26.7,
-            50.15
-          ],
-          [
-            26.57,
-            56.25
-          ],
-          [
-            23.5,
-            60.5
-          ],
-          [
-            15.0,
-            66.0
-          ],
-          [
-            12.0,
-            45.0
-          ],
-          [
-            12.6,
-            43.3
-          ],
-          [
-            15.5,
-            41.8
-          ],
-          [
-            20.0,
-            38.5
-          ],
-          [
-            27.7,
-            33.6
-          ],
-          [
-            29.95,
-            32.55
-          ],
-          [
-            31.27,
-            32.31
-          ],
-          [
-            34.0,
-            28.0
-          ],
-          [
-            36.0,
-            14.0
-          ],
-          [
-            36.0,
-            -5.5
-          ],
-          [
-            37.0,
-            -9.5
-          ],
-          [
-            43.5,
-            -9.5
-          ],
-          [
-            48.5,
-            -5.5
-          ],
-          [
-            50.0,
-            -2.0
-          ],
-          [
-            51.5,
-            2.5
-          ],
-          [
-            51.95,
-            4.1
-          ]
-        ],
-        "distance_nm": 7126,
+        "distance_nm": 6540.2,
         "speed_knots": 14.0,
-        "days": 21.2,
-        "calculation": "7126 nm / (14 kn x 24 h) = 21.2 days",
-        "method_note": "Great-circle sum over illustrative waypoints. Real sea distance is longer, so days are a lower bound. Not a sourced distance.",
-        "is_estimate": true
+        "days": 19.5,
+        "calculation": "6540.2 nm / (14 kn x 24 h) = 19.5 days",
+        "method_note": "Planned sea distance from ShipFinder Port-to-Port route planning, SARTA to NLRTM, retrieved 2026-11-02. Days = distance / 14 kn, the project's tanker speed (an assumption). A planned route, not a measured voyage.",
+        "is_estimate": false,
+        "provider": "ShipFinder",
+        "service": "route_port",
+        "plan_id": "ras_tanura_rotterdam_suez",
+        "retrieved_at_utc": "2026-11-02T13:45:40Z",
+        "previous_hand_estimate": {
+          "distance_nm": 7126,
+          "days": 21.2,
+          "method": "great-circle sum over illustrative waypoints"
+        }
       }
     },
     {
@@ -426,16 +308,14 @@
       ],
       "bypass_capacity_bpd": 2500000,
       "bypass_note": "SUMED pipeline (Ain Sukhna to Sidi Kerir), 2.5 Mb/d per EIA; Global Energy Monitor lists two parallel lines of 1.25 Mb/d each, which agrees. EIA's Suez figure already INCLUDES SUMED volumes, so a canal closure displaces only what SUMED cannot absorb.",
-      "baseline_voyage_days": 21.2,
-      "baseline_voyage_note": "Typical FULL voyage for cargoes using this route (not the transit time through the chokepoint): distance / 14 kn. Estimate: distance is from illustrative waypoints.",
+      "baseline_voyage_days": 19.5,
+      "baseline_voyage_note": "Typical FULL voyage for cargoes using this route (not the transit time through the chokepoint): planned sea distance (ShipFinder, retrieved 2026-11-02) / 14 kn.",
       "alt_route_id": "cape_good_hope",
       "source": "EIA, World Oil Transit Chokepoints, Table 1",
       "source_url": "https://www.eia.gov/international/content/analysis/special_topics/World_Oil_Transit_Chokepoints",
       "data_year": 2023,
       "is_estimate": false,
-      "estimate_fields": [
-        "baseline_voyage_days"
-      ],
+      "estimate_fields": [],
       "baseline_year": 2023,
       "flow_by_year_bpd": {
         "2020": 5400000,
@@ -446,98 +326,25 @@
         "1H25": 4900000
       },
       "baseline_year_note": "2023 is the last normal year. EIA's 2024 figure is depressed by Red Sea attacks (4.8 vs 8.8 Mb/d). Both years are stored.",
-      "default_detour_days": 12.7,
-      "default_detour_days_note": "Cape voyage 33.9 d minus Suez voyage 21.2 d, same waypoint method (estimate, lower bound).",
+      "default_detour_days": 14.0,
+      "default_detour_days_note": "Cape voyage 33.5 d minus Suez voyage 19.5 d, both ShipFinder planned distances (11239.4 nm and 6540.2 nm, retrieved 2026-11-02) at 14 kn: (11239.4 - 6540.2) / 336 = 14.0 days.",
       "voyage_derivation": {
         "representative_voyage": "Ras Tanura to Rotterdam via Hormuz, Bab el-Mandeb and Suez",
-        "waypoints_latlng": [
-          [
-            26.7,
-            50.15
-          ],
-          [
-            26.57,
-            56.25
-          ],
-          [
-            23.5,
-            60.5
-          ],
-          [
-            15.0,
-            66.0
-          ],
-          [
-            12.0,
-            45.0
-          ],
-          [
-            12.6,
-            43.3
-          ],
-          [
-            15.5,
-            41.8
-          ],
-          [
-            20.0,
-            38.5
-          ],
-          [
-            27.7,
-            33.6
-          ],
-          [
-            29.95,
-            32.55
-          ],
-          [
-            31.27,
-            32.31
-          ],
-          [
-            34.0,
-            28.0
-          ],
-          [
-            36.0,
-            14.0
-          ],
-          [
-            36.0,
-            -5.5
-          ],
-          [
-            37.0,
-            -9.5
-          ],
-          [
-            43.5,
-            -9.5
-          ],
-          [
-            48.5,
-            -5.5
-          ],
-          [
-            50.0,
-            -2.0
-          ],
-          [
-            51.5,
-            2.5
-          ],
-          [
-            51.95,
-            4.1
-          ]
-        ],
-        "distance_nm": 7126,
+        "distance_nm": 6540.2,
         "speed_knots": 14.0,
-        "days": 21.2,
-        "calculation": "7126 nm / (14 kn x 24 h) = 21.2 days",
-        "method_note": "Great-circle sum over illustrative waypoints. Real sea distance is longer, so days are a lower bound. Not a sourced distance.",
-        "is_estimate": true
+        "days": 19.5,
+        "calculation": "6540.2 nm / (14 kn x 24 h) = 19.5 days",
+        "method_note": "Planned sea distance from ShipFinder Port-to-Port route planning, SARTA to NLRTM, retrieved 2026-11-02. Days = distance / 14 kn, the project's tanker speed (an assumption). A planned route, not a measured voyage.",
+        "is_estimate": false,
+        "provider": "ShipFinder",
+        "service": "route_port",
+        "plan_id": "ras_tanura_rotterdam_suez",
+        "retrieved_at_utc": "2026-11-02T13:45:40Z",
+        "previous_hand_estimate": {
+          "distance_nm": 7126,
+          "days": 21.2,
+          "method": "great-circle sum over illustrative waypoints"
+        }
       }
     },
     {
@@ -616,16 +423,15 @@
       "bypass_capacity_bpd": 10000000,
       "bypass_note": "Lombok and Sunda Straits are alternate sea lanes, not pipelines. The 8 + 2 Mb/d capacity comes from this project's earlier bypass_routes.csv and is marked ESTIMATE there; EIA names the alternatives but gives no capacity.",
       "bypass_is_estimate": true,
-      "baseline_voyage_days": 17.2,
-      "baseline_voyage_note": "Typical FULL voyage for cargoes using this route (not the transit time through the chokepoint): distance / 14 kn. Estimate: distance is from illustrative waypoints.",
+      "baseline_voyage_days": 17.5,
+      "baseline_voyage_note": "Typical FULL voyage for cargoes using this route (not the transit time through the chokepoint): planned sea distance (ShipFinder, retrieved 2026-11-02) / 14 kn.",
       "alt_route_id": "cape_good_hope",
       "source": "EIA, World Oil Transit Chokepoints, Table 1; bypass capacity from backend/data/bypass_routes.csv (project estimate)",
       "source_url": "https://www.eia.gov/international/content/analysis/special_topics/World_Oil_Transit_Chokepoints",
       "data_year": 2024,
       "is_estimate": true,
       "estimate_fields": [
-        "bypass_capacity_bpd",
-        "baseline_voyage_days"
+        "bypass_capacity_bpd"
       ],
       "baseline_year": 2024,
       "flow_by_year_bpd": {
@@ -639,70 +445,21 @@
       "baseline_year_note": "Last full pre-disruption year in EIA's table (first-half 2025 figures are also stored).",
       "voyage_derivation": {
         "representative_voyage": "Ras Tanura to Ningbo via Hormuz and Malacca",
-        "waypoints_latlng": [
-          [
-            26.7,
-            50.15
-          ],
-          [
-            26.57,
-            56.25
-          ],
-          [
-            23.5,
-            60.5
-          ],
-          [
-            15.0,
-            66.0
-          ],
-          [
-            7.5,
-            76.0
-          ],
-          [
-            5.5,
-            80.5
-          ],
-          [
-            5.5,
-            90.0
-          ],
-          [
-            5.5,
-            97.5
-          ],
-          [
-            2.5,
-            101.3
-          ],
-          [
-            1.25,
-            103.8
-          ],
-          [
-            5.0,
-            108.5
-          ],
-          [
-            12.0,
-            112.5
-          ],
-          [
-            22.0,
-            119.0
-          ],
-          [
-            29.9,
-            122.2
-          ]
-        ],
-        "distance_nm": 5784,
+        "distance_nm": 5870.9,
         "speed_knots": 14.0,
-        "days": 17.2,
-        "calculation": "5784 nm / (14 kn x 24 h) = 17.2 days",
-        "method_note": "Great-circle sum over illustrative waypoints. Real sea distance is longer, so days are a lower bound. Not a sourced distance.",
-        "is_estimate": true
+        "days": 17.5,
+        "calculation": "5870.9 nm / (14 kn x 24 h) = 17.5 days",
+        "method_note": "Planned sea distance from ShipFinder Port-to-Port route planning, SARTA to CNNBG, retrieved 2026-11-02. Days = distance / 14 kn, the project's tanker speed (an assumption). A planned route, not a measured voyage.",
+        "is_estimate": false,
+        "provider": "ShipFinder",
+        "service": "route_port",
+        "plan_id": "ras_tanura_ningbo",
+        "retrieved_at_utc": "2026-11-02T13:46:36Z",
+        "previous_hand_estimate": {
+          "distance_nm": 5784,
+          "days": 17.2,
+          "method": "great-circle sum over illustrative waypoints"
+        }
       }
     },
     {
@@ -763,16 +520,14 @@
       ],
       "bypass_capacity_bpd": null,
       "bypass_note": "EIA names the Baku-Tbilisi-Ceyhan and Iraq-Turkey pipelines as alternatives but gives no bypass capacity. See the btc route for its nameplate capacity. Value not verified, so left null.",
-      "baseline_voyage_days": 5.1,
-      "baseline_voyage_note": "Typical FULL voyage for cargoes using this route (not the transit time through the chokepoint): distance / 14 kn. Estimate: distance is from illustrative waypoints.",
+      "baseline_voyage_days": 5.0,
+      "baseline_voyage_note": "Typical FULL voyage for cargoes using this route (not the transit time through the chokepoint): planned sea distance (ShipFinder, retrieved 2026-11-02) / 14 kn.",
       "alt_route_id": "btc",
       "source": "EIA, World Oil Transit Chokepoints, Table 1 (Dardanelles row; Bosporus figures are lower, 3.3 Mb/d in 2024)",
       "source_url": "https://www.eia.gov/international/content/analysis/special_topics/World_Oil_Transit_Chokepoints",
       "data_year": 2024,
       "is_estimate": false,
-      "estimate_fields": [
-        "baseline_voyage_days"
-      ],
+      "estimate_fields": [],
       "baseline_year": 2024,
       "flow_by_year_bpd": {
         "2020": 3200000,
@@ -785,70 +540,21 @@
       "baseline_year_note": "Last full pre-disruption year in EIA's table (first-half 2025 figures are also stored).",
       "voyage_derivation": {
         "representative_voyage": "Novorossiysk to Trieste via the Turkish Straits",
-        "waypoints_latlng": [
-          [
-            44.7,
-            37.8
-          ],
-          [
-            42.0,
-            29.0
-          ],
-          [
-            41.2,
-            29.1
-          ],
-          [
-            41.0,
-            29.0
-          ],
-          [
-            40.8,
-            28.5
-          ],
-          [
-            40.7,
-            27.5
-          ],
-          [
-            40.2,
-            26.4
-          ],
-          [
-            39.7,
-            25.5
-          ],
-          [
-            36.8,
-            23.3
-          ],
-          [
-            36.5,
-            19.0
-          ],
-          [
-            39.5,
-            18.5
-          ],
-          [
-            42.5,
-            16.0
-          ],
-          [
-            44.5,
-            13.3
-          ],
-          [
-            45.65,
-            13.75
-          ]
-        ],
-        "distance_nm": 1704,
+        "distance_nm": 1666.4,
         "speed_knots": 14.0,
-        "days": 5.1,
-        "calculation": "1704 nm / (14 kn x 24 h) = 5.1 days",
-        "method_note": "Great-circle sum over illustrative waypoints. Real sea distance is longer, so days are a lower bound. Not a sourced distance.",
-        "is_estimate": true
+        "days": 5.0,
+        "calculation": "1666.4 nm / (14 kn x 24 h) = 5.0 days",
+        "method_note": "Planned sea distance from ShipFinder Port-to-Port route planning, RUNVS to ITTRS, retrieved 2026-11-02. Days = distance / 14 kn, the project's tanker speed (an assumption). A planned route, not a measured voyage.",
+        "is_estimate": false,
+        "provider": "ShipFinder",
+        "service": "route_port",
+        "plan_id": "novorossiysk_trieste",
+        "retrieved_at_utc": "2026-11-02T13:46:52Z",
+        "previous_hand_estimate": {
+          "distance_nm": 1704,
+          "days": 5.1,
+          "method": "great-circle sum over illustrative waypoints"
+        }
       }
     },
     {
@@ -922,15 +628,13 @@
       "bypass_capacity_bpd": null,
       "bypass_note": "No sourced bypass. EIA notes the Kiel Canal carries about 0.2 Mb/d, mostly products, and is excluded from the 4.9 Mb/d figure.",
       "baseline_voyage_days": 4.2,
-      "baseline_voyage_note": "Typical FULL voyage for cargoes using this route (not the transit time through the chokepoint): distance / 14 kn. Estimate: distance is from illustrative waypoints.",
+      "baseline_voyage_note": "Typical FULL voyage for cargoes using this route (not the transit time through the chokepoint): planned sea distance (ShipFinder, retrieved 2026-11-02) / 14 kn.",
       "alt_route_id": null,
       "source": "EIA, World Oil Transit Chokepoints, Table 1",
       "source_url": "https://www.eia.gov/international/content/analysis/special_topics/World_Oil_Transit_Chokepoints",
       "data_year": 2024,
       "is_estimate": false,
-      "estimate_fields": [
-        "baseline_voyage_days"
-      ],
+      "estimate_fields": [],
       "baseline_year": 2024,
       "flow_by_year_bpd": {
         "2020": 3100000,
@@ -943,74 +647,21 @@
       "baseline_year_note": "Last full pre-disruption year in EIA's table (first-half 2025 figures are also stored).",
       "voyage_derivation": {
         "representative_voyage": "Primorsk to Rotterdam via the Danish Straits",
-        "waypoints_latlng": [
-          [
-            60.35,
-            28.6
-          ],
-          [
-            59.8,
-            24.0
-          ],
-          [
-            59.0,
-            20.0
-          ],
-          [
-            57.0,
-            18.5
-          ],
-          [
-            55.0,
-            14.0
-          ],
-          [
-            54.8,
-            12.5
-          ],
-          [
-            54.7,
-            11.0
-          ],
-          [
-            55.3,
-            10.9
-          ],
-          [
-            55.8,
-            11.0
-          ],
-          [
-            56.8,
-            11.3
-          ],
-          [
-            57.8,
-            10.7
-          ],
-          [
-            58.0,
-            8.0
-          ],
-          [
-            56.5,
-            3.5
-          ],
-          [
-            53.5,
-            3.5
-          ],
-          [
-            51.95,
-            4.1
-          ]
-        ],
-        "distance_nm": 1425,
+        "distance_nm": 1423.2,
         "speed_knots": 14.0,
         "days": 4.2,
-        "calculation": "1425 nm / (14 kn x 24 h) = 4.2 days",
-        "method_note": "Great-circle sum over illustrative waypoints. Real sea distance is longer, so days are a lower bound. Not a sourced distance.",
-        "is_estimate": true
+        "calculation": "1423.2 nm / (14 kn x 24 h) = 4.2 days",
+        "method_note": "Planned sea distance from ShipFinder Port-to-Port route planning, RUPRI to NLRTM, retrieved 2026-11-02. Days = distance / 14 kn, the project's tanker speed (an assumption). A planned route, not a measured voyage.",
+        "is_estimate": false,
+        "provider": "ShipFinder",
+        "service": "route_port",
+        "plan_id": "primorsk_rotterdam",
+        "retrieved_at_utc": "2026-11-02T13:46:59Z",
+        "previous_hand_estimate": {
+          "distance_nm": 1425,
+          "days": 4.2,
+          "method": "great-circle sum over illustrative waypoints"
+        }
       }
     },
     {
@@ -1109,94 +760,21 @@
       "baseline_year_note": "2023 (6.2 Mb/d) is the last year before Red Sea diversions; 2024 (9.3) is inflated by them.",
       "voyage_derivation": {
         "representative_voyage": "Ras Tanura to Rotterdam via the Cape of Good Hope",
-        "waypoints_latlng": [
-          [
-            26.7,
-            50.15
-          ],
-          [
-            26.57,
-            56.25
-          ],
-          [
-            23.5,
-            60.5
-          ],
-          [
-            5.0,
-            55.0
-          ],
-          [
-            -10.0,
-            48.0
-          ],
-          [
-            -25.0,
-            38.0
-          ],
-          [
-            -33.5,
-            28.0
-          ],
-          [
-            -35.4,
-            20.0
-          ],
-          [
-            -34.5,
-            17.5
-          ],
-          [
-            -28.0,
-            13.0
-          ],
-          [
-            -15.0,
-            8.0
-          ],
-          [
-            0.0,
-            2.0
-          ],
-          [
-            15.0,
-            -17.5
-          ],
-          [
-            30.0,
-            -15.0
-          ],
-          [
-            37.0,
-            -9.5
-          ],
-          [
-            43.5,
-            -9.5
-          ],
-          [
-            48.5,
-            -5.5
-          ],
-          [
-            50.0,
-            -2.0
-          ],
-          [
-            51.5,
-            2.5
-          ],
-          [
-            51.95,
-            4.1
-          ]
-        ],
-        "distance_nm": 11401,
+        "distance_nm": 11239.4,
         "speed_knots": 14.0,
-        "days": 33.9,
-        "calculation": "11401 nm / (14 kn x 24 h) = 33.9 days",
-        "method_note": "Great-circle sum over illustrative waypoints. Real sea distance is longer, so days are a lower bound. Not a sourced distance.",
-        "is_estimate": true
+        "days": 33.5,
+        "calculation": "11239.4 nm / (14 kn x 24 h) = 33.5 days",
+        "method_note": "Planned sea distance from ShipFinder Port-to-Port route planning, SARTA to NLRTM (avoid=2, Suez Canal), retrieved 2026-11-02. Days = distance / 14 kn, the project's tanker speed (an assumption). A planned route, not a measured voyage.",
+        "is_estimate": false,
+        "provider": "ShipFinder",
+        "service": "route_port",
+        "plan_id": "ras_tanura_rotterdam_cape",
+        "retrieved_at_utc": "2026-11-02T13:46:26Z",
+        "previous_hand_estimate": {
+          "distance_nm": 11401,
+          "days": 33.9,
+          "method": "great-circle sum over illustrative waypoints"
+        }
       }
     },
     {

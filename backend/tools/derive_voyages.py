@@ -64,6 +64,9 @@ def voyage(label, pts):
 def main():
     doc = json.loads(DATA.read_text(encoding="utf-8"))
     routes = {r["id"]: r for r in doc["routes"]}
+    if any(r.get("voyage_derivation", {}).get("provider") for r in doc["routes"]):
+        raise SystemExit("routes.json now holds ShipFinder planned distances (tools/apply_route_plans.py). This hand-waypoint script would overwrite them with "
+                         "estimates, so it refuses to run. Restore the file from git first if you really mean to.")
 
     ningbo = [RAS_TANURA, HORMUZ, *ARABIAN_SEA, *MALACCA_LEG, NINGBO]
     suez_v = [RAS_TANURA, HORMUZ, *ARABIAN_SEA, *SUEZ_LEG]

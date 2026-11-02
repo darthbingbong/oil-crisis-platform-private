@@ -52,6 +52,8 @@ def values(client: TestClient) -> dict[str, str]:
         "ticker_status": price["status"], "ticker_say": say,
         "suez_flow_mbd": f"{s['baseline']['flow_bpd'] / 1e6:g}", "s_flow": n(s["baseline"]["flow_bpd"]),
         "s_T": f"{sb['baseline_voyage_days']:g}", "s_detour": f"{sb['detour_days']:g}", "s_factor": f"{sb['delivery_factor']:.6f}",
+        "s_displaced_exact": f"{sb['displaced_bpd']:,.2f}",
+        "s_evs_by_hand": n(round(sb["displaced_bpd"]) * CFG.gasoline_gal_per_bbl * 365 / CFG.gal_per_vehicle_year * 1.0),
         "s_displaced": n(sb["displaced_bpd"]), "s_supply_loss": f"{sb['supply_loss_pct']:.3f}", "s_price": f"{k['price_impact_pct']:.1f}",
         "s_evs": n(k["evs_required"]), "s_evs_m": f"{k['evs_required'] / 1e6:.1f}", "s_li": n(k["extra_lithium_t_lce"]), "s_li_mt": f"{k['extra_lithium_t_lce'] / 1e6:.2f}",
         "s_li_hi_mt": f"{k['extra_lithium_range_t_lce'][1] / 1e6:.2f}", "s_cap": n(cap), "s_deficit": n(k["lithium_deficit_t_lce"]),

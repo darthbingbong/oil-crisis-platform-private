@@ -175,10 +175,10 @@ function ReportBody({ report, onLithium }: { report: ReportResponse; onLithium: 
             {s.detour_days_source === "user" ? (
               <>
                 <span className="section-label" style={{ color: "var(--color-crude)", margin: "0 6px" }}>your input</span>
-                {s.detour_days_default != null && <>(the route&apos;s derived default is {s.detour_days_default} days: the Cape voyage minus the Suez voyage, an estimate from illustrative waypoints).</>}
+                {s.detour_days_default != null && <>(the route&apos;s derived default is {s.detour_days_default} days: the Cape voyage minus the Suez voyage, both planned sea distances from ShipFinder route planning at 14 knots).</>}
               </>
             ) : (
-              <><span className="section-label" style={{ color: "var(--color-ash)", margin: "0 6px" }}>route default, derived</span>(an estimate from illustrative waypoints; change it in the scenario).</>
+              <><span className="section-label" style={{ color: "var(--color-ash)", margin: "0 6px" }}>route default, derived</span>(Cape minus Suez planned sea distance at 14 knots; change it in the scenario).</>
             )}
           </p>
         )}

@@ -83,19 +83,19 @@ await page.waitForSelector('[data-testid="kpi-strip"]', { timeout: 60000 });
 await page.waitForTimeout(1500);
 const kpi = (await text("kpi-strip"));
 console.log("      KPI strip:", kpi);
-check("KPI price impact +27.6%", kpi.includes("+27.6%"));
-check("KPI barrels displaced 4,271,845", kpi.includes("4,271,845"));
-check("KPI EVs required 60.81 M", kpi.includes("60.81 M"));
-check("KPI extra lithium 1.94 M t", kpi.includes("1.94 M t"));
-check("KPI lithium deficit 1.17 M t", kpi.includes("1.17 M t"));
+check("KPI price impact +28.8%", kpi.includes("+28.8%"));
+check("KPI barrels displaced 4,455,696", kpi.includes("4,455,696"));
+check("KPI EVs required 63.43 M", kpi.includes("63.43 M"));
+check("KPI extra lithium 2.03 M t", kpi.includes("2.03 M t"));
+check("KPI lithium deficit 1.25 M t", kpi.includes("1.25 M t"));
 check("results URL carries the scenario", /route=suez/.test(page.url()) && /detour=20/.test(page.url()) && /dur=60/.test(page.url()), `(${page.url().replace(BASE, "")})`);
 await shot("demo_04_results_top");
 
 // ---- 2:30 the arithmetic: each number in the demo table is on the Results page
 console.log("\n--- 2:30 to 3:30  The arithmetic");
 const results = (await page.locator("body").textContent()) ?? "";
-for (const n of ["4,271,845", "8,800,000", "176,000,000", "1,942,140", "771,835", "1,170,305", "60,809,709", "13.09"]) check(`Results page shows ${n}`, results.includes(n));
-check("Results page shows the 21.2 day voyage / 20-day detour", /20 days/.test(results) && /12\.7 days/.test(results));
+for (const n of ["4,455,696", "8,800,000", "176,000,000", "2,025,726", "771,835", "1,253,891", "63,426,835", "13.09"]) check(`Results page shows ${n}`, results.includes(n));
+check("Results page shows the 19.5 day voyage / 20-day detour", /20 days/.test(results) && /14 days/.test(results));
 await shot("demo_05_results_full", true);
 
 // ---- 3:30 Hormuz
