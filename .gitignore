@@ -15,3 +15,5 @@ backend/data/globalEnergyOwnership.xlsx
 # AIS provider call log (machine-local; no keys in it, but not source)
 logs/
 backend/logs/
+backend/data/ais_raw/
+backend/data/ais_backups/

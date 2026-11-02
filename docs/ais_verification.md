@@ -45,10 +45,33 @@ Not called (metered): Vessel Position, Fleet Position, Vessel History Track, bot
 
 ## 5. Terms
 
-The docs pages describe no licence, display or caching rules. `shipfinder.com/terms`, `/terms-of-service` and `/privacy` return the single-page-app shell (identical size), not terms text. **Terms not found.** Whether results may be displayed in a presentation and stored as snapshots is unconfirmed. The user should read the terms they accepted when creating the key (or ask `support@elaneglobal.com`) before snapshots are committed or shared.
+The public docs pages describe no licence, display or caching rules, and `shipfinder.com/terms`, `/terms-of-service` and `/privacy` return the site's single-page-app shell (identical size), not terms text. **The terms text was therefore never read by me.**
 
-## 6. Open questions for the user
+**Confirmed by the project owner on 2026-11-02, after reading the terms they accepted:** showing the data in the presentation is allowed, and saving it (snapshots, fixtures, route-planning results) is allowed. Rules that follow:
 
-1. What does the console show for Vessels Nearby and Vessel Search now (used count, any limit)?
-2. Do the terms the user accepted allow showing data in a presentation and saving it?
-3. Is a seed-vessel design acceptable for "tankers near a chokepoint" (see the M10 report), or should the live-tanker layer be dropped?
+* Raw provider data lives only in git-ignored folders (`backend/data/ais_raw/`, `backend/data/ais_backups/`, `logs/`). It is not committed.
+* `tools/backup_ais_data.py` copies the raw folder and the call log to a local backup (`%USERPROFILE%\oil-crisis-backups\ais_<time>\`) and deletes the copy if it contains the key. Run it before the key expires on 2026-11-13.
+* Derived voyage distances in `routes.json` may be committed because the app needs them; each carries its source, provider and retrieval date.
+* Tests that must run on a clean export use small hand-written fixtures that are committed; recordings of real responses stay in the ignored folder and tests that use them skip when the folder is absent.
+
+## 6. Facts gathered for the budget plan (2026-11-02, unmetered calls only, no Vessels Nearby)
+
+**Port codes (Port Information, verified):** Ras Tanura `SARTA`, Ningbo `CNNBG`, Rotterdam `NLRTM`, Novorossiysk `RUNVS`, Trieste `ITTRS`, Primorsk `RUPRI`, Fujairah `AEFJR`, Singapore `SGSIN`, Yanbu `SAYNB`, Houston `USHOU`. Some terminal rows come back without a code or country (`Singapore Refinery Company`, `BTC Terminal Ceyhan`), so code parsing must tolerate missing fields. Port Information has no coordinates.
+
+**Route planning (from the docs, not yet called):** both services return `data.distance` in **nautical miles** and `data.route[]` of `{lng, lat}`. Port-to-Port takes `start_port_code`, `end_port_code`, optional `avoid` (waypoint IDs, up to 10) and `through` (up to 30). Point-to-Point takes `start_point` and `end_point` as `lng,lat` (or `end_port_code`). Avoid IDs: 1 Malacca, 2 Suez Canal, 3 Sunda, 4 Panama, 5 Lombok, 7 Bab el-Mandeb, 17 Cape of Good Hope, 22 Gibraltar, 38 Dover. A Cape voyage is therefore `avoid=2`.
+
+**Candidate seed vessels for Vessels Nearby (Vessel Search only; positions and ship types NOT verified, because Search returns neither):**
+
+| Candidate | MMSI | Last report | Why it might work | Status |
+|---|---|---|---|---|
+| ISTANBUL BOSTANCI light (AIS aid to navigation, MMSI starts 99) | 992711166 | 2 min | fixed transmitter near the Marmara end of the Bosphorus | location unverified |
+| PORTSAID ENTRANCE (aid to navigation) | 996221004 | about 192 days | fixed, but its last report is stale | unusable as it stands |
+| FSO AFRICA, FSO ASIA, FSO ARJUNA PRIMA (floating storage) | 538002388, 538003426, 525021322 | 0 min | permanently moored, so a fixed circle | locations unverified (not known to be near any chokepoint) |
+| FUJAIRAH PILOT 1 | 470499000 | 0 min | near Fujairah, but a pilot boat moves | unreliable seed |
+
+No candidate was found for Hormuz, Bab el-Mandeb, Malacca or the Danish and Cape approaches. Confirming any seed's position costs one Vessels Nearby call each, which is on hold until the owner reports the console numbers.
+
+## 7. Open questions for the user
+
+1. What does the console show now for Vessels Nearby and Vessel Search (used count, any limit)?
+2. Is a seed-vessel design acceptable for "tankers near a chokepoint", or should the live-tanker layer be dropped (see `docs/ais_budget_proposal.md`)?
