@@ -68,7 +68,7 @@ logger = logging.getLogger("price_feed")
 # ---------------------------------------------------------------------------
 # Keeping the key out of logs
 # ---------------------------------------------------------------------------
-_KEY_PARAM = re.compile(r"(api_key=)[^&\s'\"\)]+", re.IGNORECASE)
+_KEY_PARAM = re.compile(r"(?<![A-Za-z0-9])((?:api_)?key=)[^&\s'\"\)]+", re.IGNORECASE)     # api_key=... (EIA) and key=... (ShipFinder)
 
 
 _KEY_JSON = re.compile(r'("APIKey"\s*:\s*")[^"]*(")', re.IGNORECASE)
