@@ -45,6 +45,7 @@ def main() -> int:
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--only", help="plan id")
     ap.add_argument("--again", action="store_true", help="repeat a plan that is already stored (spends another call)")
+    ap.add_argument("--from-raw", action="store_true", help="make NO call: check and store the latest raw copy of this plan (after a check was corrected)")
     args = ap.parse_args()
     store = load_plans()
     if args.list or not args.only:
@@ -60,8 +61,17 @@ def main() -> int:
         print(f"{plan.id} is already stored ({store['plans'][plan.id]['distance_nm']:,.0f} nm); not calling again.")
         return 0
 
-    client = sf.ShipFinderClient()
     p = plan.params
+    if args.from_raw:
+        raws = sorted(RAW_DIR.glob(f"{plan.id}_*.json"))
+        if not raws:
+            print("no raw copy of this plan; nothing to check")
+            return 2
+        saved = json.loads(raws[-1].read_text(encoding="utf-8"))
+        body, retrieved = saved["response"], saved["retrieved_at_utc"]
+        print(f"{plan.id}: using raw copy {raws[-1].name} (no call made)")
+        return finish(plan, body, store, retrieved)
+    client = sf.ShipFinderClient()
     try:
         if plan.service == "route_port":
             body = client.route_plan_port_to_port(p["start_port"], p["end_port"], avoid=p.get("avoid"), raw_dir=RAW_DIR, raw_name=plan.id)
@@ -74,6 +84,11 @@ def main() -> int:
     b = client.budget()[plan.service]
     data = body["data"]
     print(f"{plan.id}: provider returned {data.get('distance')} nm, {len(data.get('route') or [])} waypoints (raw copy saved). Budget {plan.service}: {b['used']} of {b['quota']} used.")
+    return finish(plan, body, store, time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()))
+
+
+def finish(plan, body, store, retrieved) -> int:
+    p, data = plan.params, body["data"]
     problems = rp.check(plan, body, store["plans"])
     if problems:
         print("IMPLAUSIBLE, NOT STORED:")
@@ -83,7 +98,7 @@ def main() -> int:
     nm = float(data["distance"])
     store["plans"][plan.id] = {"distance_nm": round(nm, 1), "voyage_days_at_14kn": rp.voyage_days(nm), "waypoints": len(data["route"]), "service": plan.service,
                                "params": {k: v for k, v in p.items()}, "replaces": list(plan.replaces), "estimate_nm_before": plan.estimate_nm, "provider": "ShipFinder",
-                               "retrieved_at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "checks": "passed", "note": plan.note}
+                               "retrieved_at_utc": f"{retrieved[:4]}-{retrieved[4:6]}-{retrieved[6:8]}T{retrieved[9:11]}:{retrieved[11:13]}:{retrieved[13:15]}Z", "checks": "passed", "note": plan.note}
     PLANS_FILE.write_text(json.dumps(store, indent=1, ensure_ascii=False), encoding="utf-8")
     print(f"checks passed. Stored: {nm:,.0f} nm = {rp.voyage_days(nm)} days at 14 kn (was {plan.estimate_nm:,.0f} nm = {rp.voyage_days(plan.estimate_nm)} days).")
     return 0

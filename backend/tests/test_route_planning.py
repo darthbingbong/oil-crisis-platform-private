@@ -91,3 +91,22 @@ def test_every_plan_has_an_estimate_a_band_and_known_boxes():
         assert all(b in rp.BOX for b in p.must_pass + p.must_avoid)
     assert len({p.id for p in rp.PLANS}) == 7 and sum(p.service == "route_port" for p in rp.PLANS) == 5
     assert math.isclose(rp.gc_nm((0, 0), (0, 1)), 60.0, rel_tol=0.01)
+
+
+def test_a_canal_crossed_by_one_long_segment_between_sparse_waypoints_counts_as_passed():
+    """Seen in the first real response: Suez is drawn as (29.5 N, 32.5 E) to (31.5 N, 32.5 E) with no waypoint inside the canal box."""
+    sparse = wp((26.7, 50.2), (26.5, 56.3), (23.0, 60.0), (13.0, 50.0), (12.7, 43.4), (26.0, 35.5), (28.5, 33.5), (29.5, 32.5), (31.5, 32.5), (32.5, 31.0),
+                (36.0, 14.0), (36.0, -5.5), (43.5, -9.5), (48.5, -5.5), (51.9, 4.0))
+    assert not any(rp._in("suez_canal", p) for p in sparse) and rp.crosses("suez_canal", sparse) > 0
+    assert rp.check(rp.PLAN_BY_ID["ras_tanura_rotterdam_suez"], body(sparse)) == []
+
+
+def test_a_cape_route_that_slips_through_the_canal_between_waypoints_is_still_rejected():
+    sneaky = wp((26.7, 50.2), (26.5, 56.3), (13.0, 50.0), (28.5, 33.5), (29.5, 32.5), (31.5, 32.5), (32.5, 31.0), (-34.5, 25.0), (-35.0, 19.0), (0.0, 2.0), (37.0, -9.5),
+                (48.5, -5.5), (51.9, 4.0))
+    problems = rp.check(rp.PLAN_BY_ID["ras_tanura_rotterdam_cape"], body(sneaky, nm=rp.polyline_nm(sneaky)), {"ras_tanura_rotterdam_suez": {"distance_nm": 3000}})
+    assert any("avoid suez_canal" in p for p in problems)
+
+
+def test_a_route_that_goes_round_the_box_does_not_cross_it():
+    assert rp.crosses("suez_canal", CAPE_ROUTE) == 0 and rp.crosses("red_sea", CAPE_ROUTE) == 0

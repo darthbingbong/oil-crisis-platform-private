@@ -79,6 +79,19 @@ def _in(box: str, p: dict) -> bool:
     return la0 <= p["lat"] <= la1 and lo0 <= p["lng"] <= lo1
 
 
+def crosses(box: str, route: list[dict], step_deg: float = 0.05) -> int:
+    """Number of sample points, taken along every SEGMENT of the route (not only at its waypoints), that fall inside the box.
+    The planner draws a canal as one long straight segment between two sparse waypoints (Suez: 29.5 N to 31.5 N), so waypoints alone miss it."""
+    hits = 0
+    for a, b in zip(route, route[1:]):
+        n = max(1, int(max(abs(b["lat"] - a["lat"]), abs(b["lng"] - a["lng"])) / step_deg))
+        for i in range(n + 1):
+            f = i / n
+            if _in(box, {"lat": a["lat"] + f * (b["lat"] - a["lat"]), "lng": a["lng"] + f * (b["lng"] - a["lng"])}):
+                hits += 1
+    return hits
+
+
 def check(plan: Plan, body: dict, stored: dict[str, dict] | None = None) -> list[str]:
     """Returns the list of problems (empty = plausible). `stored` holds already-accepted results by plan id for the relation checks."""
     stored = stored or {}
@@ -96,12 +109,11 @@ def check(plan: Plan, body: dict, stored: dict[str, dict] | None = None) -> list
     if abs(line - nm) / nm > 0.08:
         problems.append(f"reported distance {nm:.0f} nm differs from the waypoint line length {line:.0f} nm by more than 8%")
     for b in plan.must_pass:
-        if not any(_in(b, p) for p in route):
+        if not crosses(b, route):
             problems.append(f"route does not pass through {b}")
     for b in plan.must_avoid:
-        hits = sum(_in(b, p) for p in route)
-        if hits:
-            problems.append(f"route should avoid {b} but {hits} waypoints are inside it")
+        if crosses(b, route):
+            problems.append(f"route should avoid {b} but it passes through it")
     if plan.id == "ras_tanura_rotterdam_cape":
         suez = stored.get("ras_tanura_rotterdam_suez")
         if not suez:

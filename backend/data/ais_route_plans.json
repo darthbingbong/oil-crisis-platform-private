@@ -1,0 +1,149 @@
+{
+ "_meta": {
+  "description": "Real sea distances from ShipFinder route planning for the representative voyages. Derived values only (no waypoints, no raw responses). Raw responses are kept in backend/data/ais_raw/route_plans/ (git-ignored).",
+  "provider": "ShipFinder (api.elaneglobal.com)",
+  "speed_knots": 14.0,
+  "distance_unit": "nautical miles"
+ },
+ "plans": {
+  "ras_tanura_rotterdam_suez": {
+   "distance_nm": 6540.2,
+   "voyage_days_at_14kn": 19.5,
+   "waypoints": 61,
+   "service": "route_port",
+   "params": {
+    "start_port": "SARTA",
+    "end_port": "NLRTM"
+   },
+   "replaces": [
+    "bab_el_mandeb",
+    "suez"
+   ],
+   "estimate_nm_before": 7126,
+   "provider": "ShipFinder",
+   "retrieved_at_utc": "2026-11-02T13:45:40Z",
+   "checks": "passed",
+   "note": "Ras Tanura to Rotterdam via Hormuz, Bab el-Mandeb and Suez"
+  },
+  "ras_tanura_rotterdam_cape": {
+   "distance_nm": 11239.4,
+   "voyage_days_at_14kn": 33.5,
+   "waypoints": 47,
+   "service": "route_port",
+   "params": {
+    "start_port": "SARTA",
+    "end_port": "NLRTM",
+    "avoid": [
+     2
+    ]
+   },
+   "replaces": [
+    "cape_good_hope"
+   ],
+   "estimate_nm_before": 11401,
+   "provider": "ShipFinder",
+   "retrieved_at_utc": "2026-11-02T13:46:26Z",
+   "checks": "passed",
+   "note": "same ports, avoid=2 (Suez Canal) forces the Cape"
+  },
+  "ras_tanura_ningbo": {
+   "distance_nm": 5870.9,
+   "voyage_days_at_14kn": 17.5,
+   "waypoints": 32,
+   "service": "route_port",
+   "params": {
+    "start_port": "SARTA",
+    "end_port": "CNNBG"
+   },
+   "replaces": [
+    "hormuz",
+    "malacca"
+   ],
+   "estimate_nm_before": 5784,
+   "provider": "ShipFinder",
+   "retrieved_at_utc": "2026-11-02T13:46:36Z",
+   "checks": "passed",
+   "note": "Ras Tanura to Ningbo via Hormuz and Malacca"
+  },
+  "novorossiysk_trieste": {
+   "distance_nm": 1666.4,
+   "voyage_days_at_14kn": 5.0,
+   "waypoints": 21,
+   "service": "route_port",
+   "params": {
+    "start_port": "RUNVS",
+    "end_port": "ITTRS"
+   },
+   "replaces": [
+    "turkish_straits"
+   ],
+   "estimate_nm_before": 1704,
+   "provider": "ShipFinder",
+   "retrieved_at_utc": "2026-11-02T13:46:52Z",
+   "checks": "passed",
+   "note": "Novorossiysk to Trieste via the Turkish Straits"
+  },
+  "primorsk_rotterdam": {
+   "distance_nm": 1423.2,
+   "voyage_days_at_14kn": 4.2,
+   "waypoints": 22,
+   "service": "route_port",
+   "params": {
+    "start_port": "RUPRI",
+    "end_port": "NLRTM"
+   },
+   "replaces": [
+    "danish_straits"
+   ],
+   "estimate_nm_before": 1425,
+   "provider": "ShipFinder",
+   "retrieved_at_utc": "2026-11-02T13:46:59Z",
+   "checks": "passed",
+   "note": "Primorsk to Rotterdam via the Danish Straits"
+  },
+  "xcheck_ras_tanura_ningbo_point": {
+   "distance_nm": 5853.7,
+   "voyage_days_at_14kn": 17.4,
+   "waypoints": 32,
+   "service": "route_point",
+   "params": {
+    "start": [
+     50.15,
+     26.7
+    ],
+    "end": [
+     122.2,
+     29.9
+    ]
+   },
+   "replaces": [],
+   "estimate_nm_before": 5784,
+   "provider": "ShipFinder",
+   "retrieved_at_utc": "2026-11-02T13:47:14Z",
+   "checks": "passed",
+   "note": "point-to-point cross-check of the Port-to-Port result"
+  },
+  "xcheck_primorsk_rotterdam_point": {
+   "distance_nm": 1414.2,
+   "voyage_days_at_14kn": 4.2,
+   "waypoints": 22,
+   "service": "route_point",
+   "params": {
+    "start": [
+     28.6,
+     60.35
+    ],
+    "end": [
+     4.1,
+     51.95
+    ]
+   },
+   "replaces": [],
+   "estimate_nm_before": 1425,
+   "provider": "ShipFinder",
+   "retrieved_at_utc": "2026-11-02T13:47:22Z",
+   "checks": "passed",
+   "note": "point-to-point cross-check of the Port-to-Port result"
+  }
+ }
+}
