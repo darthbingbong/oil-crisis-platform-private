@@ -185,19 +185,19 @@ All of it is in `backend/services/calc_engine.py` as pure functions, driven by `
 | # | Step | Formula | Suez 20-day detour |
 |---|---|---|---|
 | 1 | Route flow (EIA, 2023 baseline) | from `routes.json` | 8,800,000 bpd (8.8 Mb/d) |
-| 2 | Voyage length T | great-circle distance of the illustrative waypoints / 14 knots | 21.2 days |
-| 3 | Delivery factor with a fixed tanker fleet | `T / (T + detour)` | 21.2 / 41.2 = 0.5146 |
-| 4 | Barrels displaced per day | `flow x (1 - delivery factor)` (blockade: `max(0, flow x blocked share - bypass)`) | 4,271,845 bpd |
-| 5 | Supply loss | `displaced / 103.3 Mb/d` | 4.135% of world supply |
-| 6 | Price impact (the validated formula) | `supply loss / 0.15` | **+27.6%** (±13.09 pp) |
-| 7 | Price path | held at the peak while the disruption lasts, then exponential decay, half-life = duration/2 clamped to 7 to 60 days, over 180 days | peak +27.6%, half-life 30 d |
-| 8 | EVs needed to offset the lost fuel | `displaced x 19.5 gal gasoline/bbl x 365 / 500 gal per vehicle-year x EV share` | 60,809,709 EVs |
+| 2 | Voyage length T | planned sea distance Ras Tanura to Rotterdam (ShipFinder route planning, 6,540.2 nm, retrieved 2026-11-02) / 14 knots | 19.5 days |
+| 3 | Delivery factor with a fixed tanker fleet | `T / (T + detour)` | 19.5 / 39.5 = 0.4937 |
+| 4 | Barrels displaced per day | `flow x (1 - delivery factor)` (blockade: `max(0, flow x blocked share - bypass)`) | 4,455,696 bpd |
+| 5 | Supply loss | `displaced / 103.3 Mb/d` | 4.313% of world supply |
+| 6 | Price impact (the validated formula) | `supply loss / 0.15` | **+28.8%** (±13.09 pp) |
+| 7 | Price path | held at the peak while the disruption lasts, then exponential decay, half-life = duration/2 clamped to 7 to 60 days, over 180 days | peak +28.8%, half-life 30 d |
+| 8 | EVs needed to offset the lost fuel | `displaced x 19.5 gal gasoline/bbl x 365 / 500 gal per vehicle-year x EV share` | 63,426,835 EVs |
 | 9 | Lithium per EV (sourced case) | `0.10 kg Li/kWh x 60 kWh x 5.323 (LCE per Li) / 1000` | 0.0319 t LCE (the project's own 0.008 is shown for comparison) |
-| 10 | Lithium required | `EVs x t LCE per EV` | 1,942,140 t LCE (1.94 to 2.91 Mt across 60/70/90 kWh packs) |
-| 11 | Supply cap and deficit | cap = `availability x 1,543,670 t LCE (2025 world production) x years`; deficit = `max(0, required - cap)` | 10% x 1,543,670 x 5 = 771,835 t; deficit **1,170,305 t** |
+| 10 | Lithium required | `EVs x t LCE per EV` | 2,025,726 t LCE (2.03 to 3.04 Mt across 60/70/90 kWh packs) |
+| 11 | Supply cap and deficit | cap = `availability x 1,543,670 t LCE (2025 world production) x years`; deficit = `max(0, required - cap)` | 10% x 1,543,670 x 5 = 771,835 t; deficit **1,253,891 t** |
 | 12 | Importer shortfall | displaced x each group's share of route flow (EIA group shares only) | not available for Suez (EIA gives no breakdown) |
-| 13 | Economy (indicative) | IMF coefficients x price move per 10% x min(duration, 365)/365 | +0.18 pp inflation, -0.09 to -0.05% output |
-| 14 | Tanker tonne-miles (derived) | `detour / T` | +94.3% |
+| 13 | Economy (indicative) | IMF coefficients x price move per 10% x min(duration, 365)/365 | +0.19 pp inflation, -0.09 to -0.05% output |
+| 14 | Tanker tonne-miles (derived) | `detour / T` | +102.6% |
 | 15 | One-time transit gap | `flow x detour days` | 176,000,000 barrels |
 
 ## Every assumption
@@ -209,7 +209,7 @@ Everything below is either borrowed, chosen, or estimated, and is flagged in the
 3. **The formula is linear** and validated only up to 8% supply loss (see Methodology).
 4. **Price path shape** (hold at the peak, then exponential decay with half-life of half the duration, clamped to 7 to 60 days, 180-day window) is an assumption.
 5. **Tanker fleet is fixed** for a detour (worst case): delivery scales by `T/(T+detour)`. `fleet=0` on the Results page lets the fleet expand (zero displaced).
-6. **Voyage days** are great-circle distance over illustrative waypoints at 14 knots, so they are lower bounds. The default Suez detour (12.7 days) is derived the same way.
+6. **Voyage days** are a planned sea distance from ShipFinder route planning (5 Port-to-Port calls, retrieved 2026-11-02, 2 Point-to-Point cross-checks within 0.6%) divided by 14 knots. The distance is sourced; the 14-knot speed is the project's assumption. The default Suez detour (14 days) is the Cape plan minus the Suez plan, 11,239.4 and 6,540.2 nm. The globe lines are still illustrative.
 7. **Baseline flows** are the last normal year (2023 for Suez, Bab el-Mandeb and the Cape, 2024 elsewhere). Real conditions in 2026 differ (Hormuz effectively closed); results are a what-if from a normal baseline.
 8. **Hormuz bypass capacity** changed between EIA estimates (4.7, 3.5, 2.6 Mb/d); the headline uses 4.7 and the Results page shows 2.6 as a labelled sensitivity.
 9. **Importer shares** are group-level (EIA publishes nothing finer for most routes) and some are derived by subtraction; reserve cover days are not available.
@@ -238,6 +238,13 @@ Everything below is either borrowed, chosen, or estimated, and is flagged in the
 | Real-GPU frame rate | **Not measured.** All fps figures are from software rendering (a lower bound) |
 
 ## Changelog / corrected values
+
+### Changed in M10 (numbers that moved)
+
+- **Voyage days now come from real planned sea distances** (ShipFinder route planning, retrieved 2026-11-02) instead of great-circle sums over hand-placed waypoints. Suez and Bab el-Mandeb 21.2 to **19.5** days, Hormuz and Malacca 17.2 to **17.5**, Turkish Straits 5.1 to **5.0**, Danish Straits 4.2 (unchanged), the Cape voyage 33.9 to 33.5, and the **default Suez detour 12.7 to 14.0 days**. The old estimates stay in `routes.json` as `voyage_derivation.previous_hand_estimate`. Full table: `docs/m10_route_planning_before_after.md`.
+- **The Suez 20-day example changed**: price impact +27.6% to **+28.8%**, barrels displaced 4,271,845 to 4,455,696 bpd, EVs 60.8 M to 63.4 M, extra lithium 1.94 to 2.03 Mt LCE, deficit 1.17 to 1.25 Mt. Only the voyage length T changed (21.2 to 19.5 days, so the delivery factor moved from 0.5146 to 0.4937); the formula, flows and factors did not. DEMO_SCRIPT was regenerated from the API.
+- The provider-sourced voyage lengths are no longer flagged as estimates (`is_estimate: false` on the derivation). Malacca stays an estimate route because its bypass capacity is.
+- Raw provider responses are kept only in git-ignored folders; the committed file `backend/data/ais_route_plans.json` holds derived values with source and retrieval date.
 
 ### Changed in M6 to M8 (behaviour you can see)
 

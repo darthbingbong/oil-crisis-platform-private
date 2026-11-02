@@ -1,6 +1,6 @@
 # Demo script: 5 minutes for a professor
 
-> **Generated, not typed.** Every number below was produced by the running API on 2026-10-30 by `backend/tools/make_demo_script.py` (it calls `/api/v1/simulate/report` and reads `backend/services/config.py`). Re-run it if you change anything: `cd backend ; python tools\make_demo_script.py`. The ticker figures are the one thing that changes daily; say the as-of date aloud on the day.
+> **Generated, not typed.** Every number below was produced by the running API on 2026-11-02 by `backend/tools/make_demo_script.py` (it calls `/api/v1/simulate/report` and reads `backend/services/config.py`). Re-run it if you change anything: `cd backend ; python tools\make_demo_script.py`. The ticker figures are the one thing that changes daily; say the as-of date aloud on the day.
 
 **The one-sentence pitch.** "You pick a route on the globe, blockade it or force a detour, and the app gives the price impact from a formula I can do by hand, then how many electric cars and how much lithium it would take to replace the lost oil, with every assumption on the page."
 
@@ -15,7 +15,7 @@
 
 ### 0:00 to 0:45. The dashboard and what is real on it
 
-- **Say:** "Top bar: WTI and Brent from the EIA API. The badge says DAILY_CLOSE. WTI 103.37 and Brent 123.10 dollars a barrel, as of 2026-10-27, 2 days old (figures at the time this script was generated). It is a daily close published weekly, so I never call it live."
+- **Say:** "Top bar: WTI and Brent from the EIA API. The badge says DAILY_CLOSE. WTI 103.37 and Brent 123.10 dollars a barrel, as of 2026-10-27, 6 days old (figures at the time this script was generated). It is a daily close published weekly, so I never call it live."
 - **Point at** the amber **SIMULATED VESSELS** badge and the **MODEL BASELINE** price in the header: "Those tankers are not real ships and that price is a simulation. Both are labelled, and neither feeds any result."
 - **Point at** the history chart: "24 real events since 1973. This is the data the price formula was tested on."
 
@@ -30,26 +30,26 @@
 - **Do:** choose **Detour**, press **Simulate disruption on this route**, set **20 days** and a **60-day** duration, then **Run full simulation**. (Or open the prepared tab.)
 - **Say:** "Ships avoid the canal and go round the Cape. With a fixed tanker fleet, a longer trip means fewer deliveries."
 - **If you notice the URL says `conf=6`:** the dashboard's conflict-intensity slider defaults to 6 and the prepared link uses 5. It changes **no number** here, because the price formula uses supply loss only. Say that if asked.
-- **KPIs on screen:** price impact **27.6%**, barrels displaced **4,271,845**, EVs required **60.8 million**, extra lithium **1.94 Mt**, deficit **1.17 Mt**.
+- **KPIs on screen:** price impact **28.8%**, barrels displaced **4,455,696**, EVs required **63.4 million**, extra lithium **2.03 Mt**, deficit **1.25 Mt**.
 
 ### 2:30 to 3:30. The arithmetic, by hand (this is the credibility moment)
 
 | Step | Working | Result |
 |---|---|---|
 | Flow through Suez + SUMED (EIA, 2023) | given | **8,800,000 bpd** |
-| Normal voyage length T | distance of the drawn route / 14 knots | **21.2 days** |
-| Delivery factor with a fixed fleet | T / (T + detour) = 21.2 / (21.2 + 20) | **0.514563** |
-| Barrels displaced per day | 8,800,000 x (1 - 0.514563) | **4,271,845 bpd** |
-| Supply loss | 4,271,845 / 103,300,000 world supply | **4.135%** |
-| Price impact | supply loss / 0.15 (elasticity) = 4.135 / 0.15 | **+27.6%** (± 13.09 pp) |
-| EVs to offset the lost fuel | 4,271,845 x 19.5 gal/bbl x 365 / 500 gal per vehicle-year | **60,809,709** |
+| Normal voyage length T | distance of the drawn route / 14 knots | **19.5 days** |
+| Delivery factor with a fixed fleet | T / (T + detour) = 19.5 / (19.5 + 20) | **0.493671** |
+| Barrels displaced per day | 8,800,000 x (1 - 0.493671) | **4,455,696 bpd** |
+| Supply loss | 4,455,696 / 103,300,000 world supply | **4.313%** |
+| Price impact | supply loss / 0.15 (elasticity) = 4.313 / 0.15 | **+28.8%** (± 13.09 pp) |
+| EVs to offset the lost fuel | 4,455,696 x 19.5 gal/bbl x 365 / 500 gal per vehicle-year | **63,426,835** |
 | Lithium per EV | 0.10 kg Li/kWh x 60 kWh x 5.323 (LCE per Li) / 1000 | **0.031938 t LCE** |
-| Lithium required | 60,809,709 x 0.031938 | **1,942,140 t LCE** |
+| Lithium required | 63,426,835 x 0.031938 | **2,025,726 t LCE** |
 | Supply cap over 5 years | 10% x 1,543,670 t LCE (2025 world output) x 5 years | **771,835 t** |
-| Deficit | required - cap = 1,942,140 - 771,835 | **1,170,305 t LCE** |
+| Deficit | required - cap = 2,025,726 - 771,835 | **1,253,891 t LCE** |
 | One-time transit gap | flow x detour days = 8,800,000 x 20 | **176,000,000 barrels** |
 
-*Rounding note: the app carries unrounded values (barrels displaced is 4,271,844.66), so a hand calculation from the rounded figures above can differ in the last digits (for example 60,809,714 EVs by hand against 60,809,709 on screen). Say so if someone checks.*
+*Rounding note: the app carries unrounded values (barrels displaced is 4,455,696.20), so a hand calculation from the rounded figures above can differ in the last digits (for example 63,426,833 EVs by hand against 63,426,835 on screen). Say so if someone checks.*
 
 - **Say:** "Every row is either a source, a formula, or an assumption the page flags. The price is the one number I validated, against 21 historical events: the formula's average error is 13.09 percentage points."
 
@@ -80,7 +80,7 @@
 
 **"You used NewsAPI?"** Route news uses **GDELT**, not NewsAPI, precisely because NewsAPI's free Developer plan is for development and testing only. An *older* part of the project (the simulated model-baseline price and alert feed) still polls NewsAPI with a Developer key; that is outside the plan's terms for a public or production deployment, and I would switch it to a paid plan or remove the live polling before publishing.
 
-**"Why does the lithium number change so much?"** Because the per-EV figure is an assumption. The sourced case is **0.031938 t LCE per EV** (0.10 kg Li/kWh from ICCT for NMC-811 cathodes, a 60 kWh pack from IEA's regional averages, 5.323 to convert lithium to carbonate equivalent). It does not cover LFP batteries, which dominate in China. My original 0.008 t per EV had no source and is about 4.0 times lower; I kept it only as a comparison line. A larger EU or US pack raises the requirement to 2.91 Mt.
+**"Why does the lithium number change so much?"** Because the per-EV figure is an assumption. The sourced case is **0.031938 t LCE per EV** (0.10 kg Li/kWh from ICCT for NMC-811 cathodes, a 60 kWh pack from IEA's regional averages, 5.323 to convert lithium to carbonate equivalent). It does not cover LFP batteries, which dominate in China. My original 0.008 t per EV had no source and is about 4.0 times lower; I kept it only as a comparison line. A larger EU or US pack raises the requirement to 3.04 Mt.
 
 **"What is the 10% lithium availability?"** A scenario input, not a forecast. USGS shows 2025 production (290,000 t of lithium) exceeded consumption (263,000 t) by 27,000 t, about 9% of production, so very little output is spare. Change it on the Results page and the deficit moves.
 

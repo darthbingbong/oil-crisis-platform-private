@@ -1,0 +1,198 @@
+{
+ "routes": {
+  "hormuz": {
+   "baseline_voyage_days": 17.2,
+   "default_detour_days": null,
+   "is_estimate": false,
+   "estimate_fields": [
+    "top_importers[Other Asia]",
+    "top_importers[Rest of world]",
+    "baseline_voyage_days"
+   ]
+  },
+  "bab_el_mandeb": {
+   "baseline_voyage_days": 21.2,
+   "default_detour_days": 12.7,
+   "is_estimate": false,
+   "estimate_fields": [
+    "baseline_voyage_days"
+   ]
+  },
+  "suez": {
+   "baseline_voyage_days": 21.2,
+   "default_detour_days": 12.7,
+   "is_estimate": false,
+   "estimate_fields": [
+    "baseline_voyage_days"
+   ]
+  },
+  "malacca": {
+   "baseline_voyage_days": 17.2,
+   "default_detour_days": null,
+   "is_estimate": true,
+   "estimate_fields": [
+    "bypass_capacity_bpd",
+    "baseline_voyage_days"
+   ]
+  },
+  "turkish_straits": {
+   "baseline_voyage_days": 5.1,
+   "default_detour_days": null,
+   "is_estimate": false,
+   "estimate_fields": [
+    "baseline_voyage_days"
+   ]
+  },
+  "danish_straits": {
+   "baseline_voyage_days": 4.2,
+   "default_detour_days": null,
+   "is_estimate": false,
+   "estimate_fields": [
+    "baseline_voyage_days"
+   ]
+  },
+  "cape_good_hope": {
+   "baseline_voyage_days": null,
+   "default_detour_days": null,
+   "is_estimate": false,
+   "estimate_fields": []
+  },
+  "east_west": {
+   "baseline_voyage_days": null,
+   "default_detour_days": null,
+   "is_estimate": false,
+   "estimate_fields": []
+  },
+  "habshan_fujairah": {
+   "baseline_voyage_days": null,
+   "default_detour_days": null,
+   "is_estimate": false,
+   "estimate_fields": []
+  },
+  "sumed": {
+   "baseline_voyage_days": null,
+   "default_detour_days": null,
+   "is_estimate": false,
+   "estimate_fields": []
+  },
+  "druzhba": {
+   "baseline_voyage_days": null,
+   "default_detour_days": null,
+   "is_estimate": true,
+   "estimate_fields": [
+    "capacity_bpd",
+    "annual_flow_bpd",
+    "owners[].share_pct"
+   ]
+  },
+  "btc": {
+   "baseline_voyage_days": null,
+   "default_detour_days": null,
+   "is_estimate": false,
+   "estimate_fields": []
+  },
+  "cpc": {
+   "baseline_voyage_days": null,
+   "default_detour_days": null,
+   "is_estimate": true,
+   "estimate_fields": [
+    "capacity_bpd"
+   ]
+  },
+  "taps": {
+   "baseline_voyage_days": null,
+   "default_detour_days": null,
+   "is_estimate": true,
+   "estimate_fields": [
+    "capacity_bpd"
+   ]
+  }
+ },
+ "cases": {
+  "suez_20d_detour_60d": {
+   "request": {
+    "route_id": "suez",
+    "disruption_type": "detour",
+    "detour_days": 20,
+    "duration_days": 60
+   },
+   "baseline_voyage_days": 21.2,
+   "detour_days": 20.0,
+   "displaced_bpd": 4271844.660194174,
+   "supply_loss_pct": 4.135377212191844,
+   "transit_gap_bbl": 176000000.0,
+   "price_impact_pct": 27.56918141461229,
+   "evs_required": 60809708.73786408,
+   "extra_lithium_t_lce": 1942140.477669903,
+   "lithium_deficit_t_lce": 1170305.477669903
+  },
+  "suez_default_detour_60d": {
+   "request": {
+    "route_id": "suez",
+    "disruption_type": "detour",
+    "duration_days": 60
+   },
+   "baseline_voyage_days": 21.2,
+   "detour_days": 12.7,
+   "displaced_bpd": 3296755.1622418873,
+   "supply_loss_pct": 3.19143771756233,
+   "transit_gap_bbl": 111760000.0,
+   "price_impact_pct": 21.276251450415536,
+   "evs_required": 46929309.73451326,
+   "extra_lithium_t_lce": 1498828.2943008845,
+   "lithium_deficit_t_lce": 726993.2943008845
+  },
+  "bab_el_mandeb_20d_detour_60d": {
+   "request": {
+    "route_id": "bab_el_mandeb",
+    "disruption_type": "detour",
+    "detour_days": 20,
+    "duration_days": 60
+   },
+   "baseline_voyage_days": 21.2,
+   "detour_days": 20.0,
+   "displaced_bpd": 4514563.106796117,
+   "supply_loss_pct": 4.370341826520926,
+   "transit_gap_bbl": 186000000.0,
+   "price_impact_pct": 29.135612176806177,
+   "evs_required": 64264805.82524271,
+   "extra_lithium_t_lce": 2052489.3684466018,
+   "lithium_deficit_t_lce": 1280654.3684466018
+  },
+  "hormuz_blockade_100pct_30d": {
+   "request": {
+    "route_id": "hormuz",
+    "disruption_type": "blockade",
+    "blocked_share_pct": 100,
+    "duration_days": 30,
+    "conflict_intensity": 8
+   },
+   "baseline_voyage_days": null,
+   "detour_days": null,
+   "displaced_bpd": 16000000.0,
+   "supply_loss_pct": 15.488867376573086,
+   "transit_gap_bbl": 0.0,
+   "price_impact_pct": 103.25911584382058,
+   "evs_required": 227760000.0,
+   "extra_lithium_t_lce": 7274198.88,
+   "lithium_deficit_t_lce": 6502363.88
+  },
+  "turkish_straits_10d_detour_60d": {
+   "request": {
+    "route_id": "turkish_straits",
+    "disruption_type": "detour",
+    "detour_days": 10,
+    "duration_days": 60
+   },
+   "baseline_voyage_days": 5.1,
+   "detour_days": 10.0,
+   "displaced_bpd": 2384105.9602649007,
+   "supply_loss_pct": 2.30794381439003,
+   "transit_gap_bbl": 36000000.0,
+   "price_impact_pct": 15.386292095933534,
+   "evs_required": 33937748.344370864,
+   "extra_lithium_t_lce": 1083903.8066225166,
+   "lithium_deficit_t_lce": 312068.8066225166
+  }
+ }
+}
