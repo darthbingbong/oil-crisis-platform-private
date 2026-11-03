@@ -64,9 +64,11 @@ def latest_sample() -> tuple[Path, dict]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["status", "sample", "watchlist", "manifest", "tracks", "tracks-snapshot"])
+    ap.add_argument("step", choices=["status", "sample", "watchlist", "manifest", "tracks", "tracks-snapshot", "location-sample"])
     ap.add_argument("--seed", type=int, default=DEFAULT_SEED)
     ap.add_argument("--allow-one-nearby-call", action="store_true")
+    ap.add_argument("--area", default="Strait of Malacca")
+    ap.add_argument("--wait", action="store_true", help="location-sample: sleep until the 30-minute spacing since the last Nearby call has passed")
     ap.add_argument("mmsis", nargs="*", type=int, help="tracks step: the vessels, one History Track call each")
     args = ap.parse_args()
     client = sf.ShipFinderClient()
@@ -93,6 +95,43 @@ def main() -> int:
             pts = body.get("data") or []
             print(f"track {m}: status 0, {len(pts)} points" + (f", first row keys {sorted(pts[0].keys())}" if pts else ""))
             backup()
+        status(client)
+        return 0
+
+    if args.step == "location-sample":
+        if not args.allow_one_nearby_call:
+            print("refused: pass --allow-one-nearby-call (the owner authorised exactly one call for this step)")
+            return 2
+        wait = wl.nearby_spacing_wait_s(client.service_state("vessels_nearby")["last_call"], time.time())
+        if wait > 0 and not args.wait:
+            print(f"refused: the last Nearby call was less than 30 minutes ago; {wait:.0f} s to go (use --wait)")
+            return 2
+        if wait > 0:
+            print(f"waiting {wait:.0f} s for the 30-minute spacing ...", flush=True)
+            time.sleep(wait + 5)
+        try:
+            body = wl.capture_nearby_sample(client, args.seed)
+        except sf.AISError as e:
+            print(f"NEARBY CALL FAILED: {e.kind}: {e}")
+            print("hold and breaker stay in place; nothing is retried; the watchlist keeps its single Huelva sample.")
+            return 3
+        fetched_at = time.time()
+        rows = body.get("data") or []
+        print(f"NEARBY OK: status 0, total {body.get('total')}, returned {len(rows)}, tankers typed by the provider {sum(wl.is_tanker(r) for r in rows)}")
+        backup()
+        seed_files = sorted((wl.RAW_DIR / "positions_location_search").glob(f"position_{args.seed}_*.json"))
+        seed_pos = None
+        if seed_files:
+            d = json.loads(seed_files[-1].read_text(encoding="utf-8"))
+            seed_pos = {**d["response"]["data"], "_fetched_at": time.mktime(time.strptime(d["retrieved_at_utc"], "%Y%m%dT%H%M%SZ")) - time.timezone}
+        snap = wl.load_watchlist()
+        if not snap:
+            print("no watchlist snapshot to extend; run the watchlist step first")
+            return 2
+        wl.add_location_sample(snap, body, args.seed, fetched_at, seed_pos, args.area)
+        wl.save_snapshot(snap)
+        print(f"watchlist now {len(snap['watchlist'])} vessels; extra sample: {snap['extra_samples'][-1]['label']}")
+        backup()
         status(client)
         return 0
 

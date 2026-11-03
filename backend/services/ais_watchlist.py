@@ -180,6 +180,49 @@ def fetch_track(client: sf.ShipFinderClient, mmsi: int, now: float, window_s: in
                        raw_dir=raw_dir, raw_name=f"track_{mmsi}")
 
 
+# ------------------------------------------------------------------------------------------------------------------ a second sample, for location variety
+HUELVA_AREA = "Huelva, Spain (Gulf of Cadiz)"
+NEARBY_SPACING_S = 30 * 60                    # owner's rule: a Nearby call no sooner than 30 minutes after the previous one (the client's own minimum is 30 s)
+EXTRA_TANKERS_FROM_SAMPLE = 3                 # plus the seed itself = at most 4 added to the watchlist
+
+
+def add_location_sample(snapshot: dict, body: dict, seed_mmsi: int, fetched_at: float, seed_position: dict | None, area: str, n_extra: int = EXTRA_TANKERS_FROM_SAMPLE) -> dict:
+    """Adds a second labelled sample and up to 1 + n_extra of its tankers (the seed, whose position was confirmed with Vessel Position, then tankers chosen for variety whose
+    positions come from the sample itself, labelled so). Never spends a provider call. The first sample's vessels are tagged with their area."""
+    for v in snapshot["watchlist"]:
+        v.setdefault("area", HUELVA_AREA)
+    rows = body["data"]
+    seed_row = next((r for r in rows if r.get("mmsi") == seed_mmsi), None)
+    seed_name = ((seed_position or seed_row or {}).get("ship_name") or "").strip() or f"MMSI {seed_mmsi}"
+    others = pick_watchlist([r for r in rows if r.get("mmsi") != seed_mmsi], n=n_extra)
+    added = []
+    if seed_position is not None and is_tanker(seed_position):
+        v = clean_vessel(seed_position, seed_position["_fetched_at"])
+        v.update(position_confirmed_by="Vessel Position", record_fetched_utc=utc_iso(seed_position["_fetched_at"]), flag_registry=None, flag_from_mmsi_prefix=ais_feed.flag_from_mmsi(seed_mmsi),
+                 typed_as_tanker_by="provider (ship type %s)" % seed_position["ship_type"], cargo_note="cargo type not confirmed by AIS", state_when_captured="SNAPSHOT", area=area)
+        added.append(v)
+    for r in others:
+        v = clean_vessel(r, fetched_at)
+        v.update(position_confirmed_by="Vessels Nearby sample only", record_fetched_utc=utc_iso(fetched_at), flag_registry=None, flag_from_mmsi_prefix=ais_feed.flag_from_mmsi(r["mmsi"]),
+                 typed_as_tanker_by="provider (ship type %s)" % r["ship_type"], cargo_note="cargo type not confirmed by AIS", state_when_captured="SNAPSHOT", area=area)
+        added.append(v)
+    snapshot["watchlist"].extend(added)
+    snapshot.setdefault("extra_samples", []).append({
+        "label": f"vessels within 10 nm of {seed_name}, seen at {utc_iso(fetched_at)[11:16]} UTC", "area": area, "seed": {"mmsi": seed_mmsi, "name": seed_name},
+        "fetched_utc": utc_iso(fetched_at), "radius_nm": 10, "provider_total": body.get("total"), "returned": len(rows), "tankers_typed_by_provider": sum(is_tanker(r) for r in rows),
+        "caveat": ("A sample around one vessel, NOT coverage of a chokepoint or any area. Vessels seen by the provider within this circle only; coverage gaps and vessels with AIS "
+                   "off are not included; the provider documents no cap on the number returned, so the count is not shown as a total."),
+        "vessels": [clean_vessel(r, fetched_at) for r in rows]})
+    snapshot["watchlist_label"] = ("A sample of real tankers near Huelva, Spain, and a few in the Strait of Malacca, each group seen at the time shown on it. "
+                                   "Not chokepoint traffic and not coverage of any area.")
+    return snapshot
+
+
+def nearby_spacing_wait_s(last_call_epoch: float | None, now: float) -> float:
+    """Seconds still to wait before the next Nearby call is allowed (30 minutes after the previous one)."""
+    return 0.0 if not last_call_epoch else max(0.0, NEARBY_SPACING_S - (now - last_call_epoch))
+
+
 # ------------------------------------------------------------------------------------------------------------------ saved tracks (shown after the key has expired)
 TRACKS_FILE = SNAP_DIR / "tracks.json"
 TRACK_MAX_POINTS = 500

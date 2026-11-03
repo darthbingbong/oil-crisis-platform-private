@@ -266,3 +266,43 @@ def test_the_saved_track_is_served_from_disk_with_no_provider_and_no_key(tmp_pat
     assert wl.load_track(1, path) is None and wl.load_track(224543980, tmp_path / "missing.json") is None
     (tmp_path / "broken.json").write_text("{not json", encoding="utf-8")
     assert wl.load_track(224543980, tmp_path / "broken.json") is None            # never an error
+
+
+# ------------------------------------------------------------------ second sample for location variety
+def base_snapshot():
+    picked = wl.pick_watchlist(SAMPLE["data"], n=3)
+    return wl.build_snapshot(SAMPLE, 538007007, NOW, picked, {}, None, {}, [], {})
+
+
+MALACCA_SAMPLE = {"status": 0, "msg": "", "total": 9, "data": [
+    row(538007985, 80, 278, 0.1, name="SINGAPORE ENERGY", lat=2.34, lng=101.96),
+    row(563000001, 81, 240, 12.0, lat=2.40, lng=101.90), row(477000009, 83, 180, 0.0, lat=2.30, lng=102.00), row(565000003, 80, 110, 7.0, lat=2.35, lng=101.97),
+    row(525000004, 89, 90, 0.0, lat=2.33, lng=101.99), row(412000005, 70, 200, 11.0), row(431000006, 36, 20, 4.0)]}
+
+
+def test_location_sample_adds_the_seed_and_up_to_three_tankers_with_honest_provenance():
+    snap = base_snapshot()
+    seed_pos = {**row(538007985, 80, 278, 0.1, name="SINGAPORE ENERGY", lat=2.34, lng=101.96, last_age=120), "_fetched_at": NOW + 600}
+    wl.add_location_sample(snap, MALACCA_SAMPLE, 538007985, NOW + 1200, seed_pos, "Strait of Malacca")
+    assert len(snap["watchlist"]) == 3 + 4                                            # the seed plus 3 chosen tankers
+    new = [v for v in snap["watchlist"] if v["area"] == "Strait of Malacca"]
+    assert new[0]["mmsi"] == 538007985 and new[0]["position_confirmed_by"] == "Vessel Position"
+    assert all(v["position_confirmed_by"] == "Vessels Nearby sample only" for v in new[1:])
+    assert all(80 <= v["ship_type"] <= 89 for v in new) and {v["mmsi"] for v in new}.isdisjoint({412000005, 431000006})
+    assert all(v["area"] == wl.HUELVA_AREA for v in snap["watchlist"][:3])
+    extra = snap["extra_samples"][0]
+    assert extra["label"] == f"vessels within 10 nm of SINGAPORE ENERGY, seen at {wl.utc_iso(NOW + 1200)[11:16]} UTC" and extra["returned"] == 7 and "NOT coverage" in extra["caveat"]
+    assert "Not chokepoint traffic" in snap["watchlist_label"] and "Huelva" in snap["watchlist_label"]
+    assert all(v["state_when_captured"] == "SNAPSHOT" and v["cargo_note"] == "cargo type not confirmed by AIS" for v in new)
+
+
+def test_a_seed_that_is_not_a_tanker_is_not_added_but_its_sample_still_is():
+    snap = base_snapshot()
+    wl.add_location_sample(snap, MALACCA_SAMPLE, 412000005, NOW + 1200, {**row(412000005, 70), "_fetched_at": NOW}, "Strait of Malacca")
+    assert 412000005 not in {v["mmsi"] for v in snap["watchlist"]} and len(snap["extra_samples"]) == 1
+
+
+def test_nearby_calls_are_spaced_by_thirty_minutes():
+    assert wl.nearby_spacing_wait_s(None, NOW) == 0
+    assert wl.nearby_spacing_wait_s(NOW - 600, NOW) == 1200
+    assert wl.nearby_spacing_wait_s(NOW - 1800, NOW) == 0 and wl.nearby_spacing_wait_s(NOW - 5000, NOW) == 0
