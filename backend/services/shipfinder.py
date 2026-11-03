@@ -10,7 +10,9 @@ Rules enforced here, in code:
   * CIRCUIT BREAKER: any non-zero provider status, timeout, HTTP error or unreadable reply stops that service and starts a back-off (30 minutes, doubled
     for each consecutive failure up to 4 hours; a success resets it). The breaker is persisted so a restart does not hammer the provider. Nothing here
     ever retries a call, in a loop or otherwise.
-  * MIN INTERVAL per service (seconds between two calls). A call made too soon is refused locally.
+  * MIN INTERVAL per service (seconds between two calls), and for Vessel Search a ceiling of 20 calls per minute. A call refused locally is not sent, counted or logged.
+  * Status 31 from Vessel Search (nothing matched) is an empty result: counted and logged like any call, but it does not trip the breaker. It is benign for that
+    service only; 31 from any other service, and every other non-zero status, still trips.
   * Kill switch AIS_ENABLED=0. No key means no calls. A MANUAL HOLD (set_hold) blocks one service until a person clears it (clear_hold); it is stored on disk.
   * Every real call is appended to logs/ais_calls.jsonl (service, time, http, provider status, latency, purpose; never the key).
   * The key never appears in an exception, log record, raw copy or state file.
@@ -48,7 +50,7 @@ if KEY_ENV not in price_feed.SECRET_ENV_NAMES:
 
 
 class AISError(Exception):
-    """kind: disabled | no_key | on_hold | breaker_open | too_soon | quota_cap | quota_exhausted | provider_status | http_error | timeout | bad_response"""
+    """kind: disabled | no_key | on_hold | breaker_open | too_soon | rate_limited | quota_cap | quota_exhausted | provider_status | http_error | timeout | bad_response"""
 
     def __init__(self, kind: str, message: str, status: int | None = None, retry_after_s: float | None = None):
         super().__init__(message)
@@ -67,6 +69,8 @@ class Service:
     path: str
     quota: int | None            # None = unmetered in the console
     min_interval_s: float
+    benign_statuses: frozenset = frozenset()   # provider statuses that are an ANSWER, not a failure (counted and logged, never trip the breaker)
+    max_per_minute: int | None = None          # extra ceiling on top of min_interval_s, so typing in a search box can never flood the provider
 
     @property
     def dev_cap(self) -> int | None:
@@ -74,7 +78,7 @@ class Service:
 
 
 SERVICES: dict[str, Service] = {
-    "vessel_search":    Service("/v1/AIS/VesselSearch", None, 1.0),
+    "vessel_search":    Service("/v1/AIS/VesselSearch", None, 1.0, frozenset({31}), 20),     # 31 = nothing matched (observed 2026-11-01); owner: an empty result
     "vessel_flag":      Service("/v1/AIS/VesselFlagInfo", None, 1.0),
     "port_info":        Service("/v1/Voyage/PortInfo", None, 1.0),
     "vessels_nearby":   Service("/v1/AIS/VesselsNearby", None, 30.0),     # owner's rule: at most one per 30 s
@@ -169,6 +173,9 @@ class ShipFinderClient:
         last = st.get("last_call")
         if last and now - last < svc.min_interval_s:
             raise AISError("too_soon", f"{service}: minimum interval {svc.min_interval_s:g} s", retry_after_s=svc.min_interval_s - (now - last))
+        recent = [x for x in st.get("recent", []) if now - x < 60]
+        if svc.max_per_minute and len(recent) >= svc.max_per_minute:
+            raise AISError("rate_limited", f"{service}: at most {svc.max_per_minute} calls per minute", retry_after_s=60 - (now - recent[0]))
         used = st.get("used", 0)
         if svc.quota is not None:
             if used >= svc.quota:
@@ -179,6 +186,7 @@ class ShipFinderClient:
         # ---- the request. From here on the call counts, whatever happens.
         st["last_call"] = now
         st["used"] = used + 1
+        st["recent"] = [*recent, now] if svc.max_per_minute else []
         self._save(state)
         http, status, msg, body, error = None, None, "", None, None
         t0 = time.time()
@@ -201,7 +209,7 @@ class ShipFinderClient:
             error = AISError("http_error", price_feed.redact(f"{service}: {type(e).__name__}: {e}", self._key))
         ms = round((time.time() - t0) * 1000)
 
-        if error is None and (http != 200 or status != 0):
+        if error is None and (http != 200 or not (status == 0 or status in svc.benign_statuses)):
             error = AISError("provider_status", f"{service}: http {http}, provider status {status} {price_feed.redact(msg, self._key)}".strip(), status=status)
         self._log(service, http, status, ms, purpose, error)
 
@@ -216,7 +224,7 @@ class ShipFinderClient:
             logger.warning("%s stopped for %d s after: %s", service, wait, error)
             error.retry_after_s = wait
             raise error
-        st.update(consecutive_failures=0, breaker_open_until=None, last_status=0, last_msg="")
+        st.update(consecutive_failures=0, breaker_open_until=None, last_status=status, last_msg="")
         self._save(state)
         if raw_dir is not None and raw_name:
             self.save_raw(raw_dir, raw_name, service, params, body)

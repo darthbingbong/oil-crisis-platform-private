@@ -63,3 +63,16 @@ def test_no_text_below_11px():
         if "text-[9px]" in text or "text-[8px]" in text:
             bad.append(str(p.relative_to(SRC)))
     assert not bad, bad
+
+
+def test_vessel_search_input_is_debounced_in_step_with_the_server_limit():
+    """The search box waits for a pause in typing and for a minimum length, so it can never flood the provider (server cap: 20 a minute)."""
+    text = (SRC / "hooks" / "useDebouncedQuery.ts").read_text(encoding="utf-8")
+    ms = int(re.search(r"SEARCH_DEBOUNCE_MS = (\d+)", text).group(1))
+    chars = int(re.search(r"SEARCH_MIN_CHARS = (\d+)", text).group(1))
+    assert ms >= 500 and chars >= 3
+    assert "clearTimeout" in text            # a keystroke cancels the pending request
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    from services import shipfinder
+    assert shipfinder.SERVICES["vessel_search"].max_per_minute == 20 and 31 in shipfinder.SERVICES["vessel_search"].benign_statuses

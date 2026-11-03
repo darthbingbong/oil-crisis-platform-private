@@ -279,3 +279,66 @@ def test_manual_hold_blocks_a_service_until_cleared_and_survives_a_restart(tmp_p
     c2.clear_hold("vessels_nearby")
     clock.advance(31)
     assert c2.call("vessels_nearby", {"mmsi": 1}, "t")["status"] == 0
+
+
+# ------------------------------------------------------------------ owner decision 2026-11-03: status 31 on Vessel Search is an empty result
+NO_MATCH = {"status": 31, "msg": "", "total": 0, "data": []}
+
+
+def test_search_status_31_is_an_empty_result_that_is_counted_and_logged_but_does_not_trip(tmp_path):
+    c, p, clock = make(tmp_path, Provider([NO_MATCH, {"status": 0, "msg": "", "total": 1, "data": [{"mmsi": 1}]}]))
+    assert c.vessel_search("NOSUCHSHIP") == []
+    assert c.budget()["vessel_search"]["breaker"] == "closed" and c.budget()["vessel_search"]["used"] == 1
+    assert c.service_state("vessel_search")["consecutive_failures"] == 0
+    lines = [json.loads(l) for l in (tmp_path / "ais_calls.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert [(l["service"], l["status"], l["error"]) for l in lines] == [("vessel_search", 31, None)]
+    clock.advance(1.5)
+    assert c.vessel_search("REAL") == [{"mmsi": 1}] and len(p.requests) == 2        # the next search is allowed straight away
+
+
+def test_status_31_from_any_other_service_still_trips_the_breaker(tmp_path):
+    c, p, clock = make(tmp_path, Provider([NO_MATCH]))
+    with pytest.raises(sf.AISError) as e:
+        c.port_info("x")
+    assert e.value.kind == "provider_status" and e.value.status == 31 and c.budget()["port_info"]["breaker"] == "open"
+
+
+@pytest.mark.parametrize("reply", [{"status": 38, "msg": "The number of queries exceeded"}, {"status": 21, "msg": "no permission"}, {"status": 6, "msg": "Key expired"}])
+def test_every_other_search_failure_still_trips_the_breaker(tmp_path, reply):
+    c, p, _ = make(tmp_path, Provider([reply]))
+    with pytest.raises(sf.AISError) as e:
+        c.vessel_search("x")
+    assert e.value.kind == "provider_status" and c.budget()["vessel_search"]["breaker"] == "open"
+
+
+def test_search_timeout_and_garbage_still_trip_even_though_31_does_not(tmp_path):
+    c, p, clock = make(tmp_path, Provider([httpx.ConnectTimeout("slow")]))
+    with pytest.raises(sf.AISError):
+        c.vessel_search("x")
+    assert c.budget()["vessel_search"]["breaker"] == "open"
+
+
+def test_search_is_limited_to_20_calls_a_minute_and_refusals_are_not_sent_or_counted(tmp_path):
+    assert sf.SERVICES["vessel_search"].max_per_minute == 20 and sf.SERVICES["vessel_search"].min_interval_s == 1.0
+    c, p, clock = make(tmp_path, Provider([NO_MATCH] * 40))              # typing that matches nothing must not flood the provider either
+    for _ in range(20):
+        c.vessel_search("abc")
+        clock.advance(1.1)                                              # 20 calls in 22 s: the minimum interval alone would allow 20 more
+    with pytest.raises(sf.AISError) as e:
+        c.vessel_search("abcd")
+    assert e.value.kind == "rate_limited" and len(p.requests) == 20 and c.budget()["vessel_search"]["used"] == 20
+    assert 0 < e.value.retry_after_s <= 60
+    clock.advance(40)                                                   # the oldest calls are now more than a minute old
+    c.vessel_search("abcde")
+    assert len(p.requests) == 21
+
+
+def test_the_per_minute_window_survives_a_restart(tmp_path):
+    c1, p1, clock = make(tmp_path, Provider([NO_MATCH] * 25))
+    for _ in range(20):
+        c1.vessel_search("a")
+        clock.advance(1.1)
+    c2, p2, _ = make(tmp_path, clock=clock)
+    with pytest.raises(sf.AISError) as e:
+        c2.vessel_search("a")
+    assert e.value.kind == "rate_limited" and p2.requests == []
