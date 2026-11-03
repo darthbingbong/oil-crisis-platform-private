@@ -3,6 +3,7 @@ r"""Refresh the ShipFinder snapshots within the budget. Run from backend/.
     python tools\prewarm_ais.py status
     python tools\prewarm_ais.py sample --allow-one-nearby-call [--seed 538007007]
     python tools\prewarm_ais.py watchlist
+    python tools\prewarm_ais.py manifest
 
 sample     EXACTLY ONE Vessels Nearby call around the seed vessel (default FRONT ALTAIR, MMSI 538007007). Refused unless --allow-one-nearby-call is given,
            because Nearby is on hold (it refused calls with status 38 on 2026-11-01). The raw response is saved at once to backend/data/ais_raw/nearby/ and
@@ -10,6 +11,9 @@ sample     EXACTLY ONE Vessels Nearby call around the seed vessel (default FRONT
 watchlist  Takes up to 8 tankers the provider itself typed as tankers from the latest saved sample (chosen for variety in flag, size and motion), confirms their
            positions with Vessel Position (hard ceiling: 14 calls for the key's whole life, stops at the first error) and their flags with Vessel Flag Information
            (unmetered), then writes backend/data/ais_raw/snapshots/watchlist.json and backs up.
+
+manifest   No provider call. Lists everything captured so far (samples, positions, flags, route plans, port lookups, search lists, tracks) with counts and the
+           latest capture time, in backend/data/ais_raw/snapshots/manifest.json, and backs up. This is the "first full snapshot" record.
 
 Raw provider data stays in git-ignored folders. The key expires on 2026-11-13; the final snapshot is due by 2026-11-10.
 """
@@ -59,13 +63,33 @@ def latest_sample() -> tuple[Path, dict]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["status", "sample", "watchlist"])
+    ap.add_argument("step", choices=["status", "sample", "watchlist", "manifest"])
     ap.add_argument("--seed", type=int, default=DEFAULT_SEED)
     ap.add_argument("--allow-one-nearby-call", action="store_true")
     args = ap.parse_args()
     client = sf.ShipFinderClient()
     if args.step == "status":
         status(client)
+        return 0
+
+    if args.step == "manifest":
+        parts = {}
+        for name, pattern in [("nearby_samples", "nearby/nearby_*.json"), ("vessel_positions", "positions/position_*.json"), ("vessel_flags", "flags/flag_*.json"),
+                              ("route_plans", "route_plans/*.json"), ("port_info_lookups", "port_info_lookup_*.json"), ("vessel_search_lists", "vessel_search_*.json"),
+                              ("vessel_tracks", "tracks/track_*.json")]:
+            files = sorted(wl.RAW_DIR.glob(pattern))
+            parts[name] = {"files": len(files), "latest_modified_utc": wl.utc_iso(max(f.stat().st_mtime for f in files)) if files else None}
+        watch = wl.load_watchlist()
+        manifest = {"kind": "SNAPSHOT MANIFEST", "written_utc": wl.utc_iso(time.time()), "key_expires": "2026-11-13", "final_snapshot_due": "2026-11-10", "parts": parts,
+                    "watchlist": {"vessels": len(watch["watchlist"]), "captured_utc": watch["captured_at_utc"], "sample_label": watch["sample"]["label"]} if watch else None,
+                    "provider_calls": client.budget(),
+                    "not_captured": ["vessel tracks (fetched on demand from the vessel panel, M12; 10 calls, 4 kept in reserve)", "any chokepoint or area coverage (this key cannot provide it)"]}
+        out = wl.SNAP_DIR / "manifest.json"
+        out.write_text(json.dumps(manifest, indent=1), encoding="utf-8")
+        for k, v in parts.items():
+            print(f"  {k:20} {v['files']:>3} files, latest {v['latest_modified_utc']}")
+        print("manifest written:", out.relative_to(BACKEND))
+        backup()
         return 0
 
     if args.step == "sample":
