@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@deck.gl/core": "9.3.12",
+    "@deck.gl/extensions": "9.3.12",
     "@deck.gl/layers": "9.3.12",
     "@deck.gl/react": "9.3.12",
     "@deck.gl/widgets": "9.3.12",
