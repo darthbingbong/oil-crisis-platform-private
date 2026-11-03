@@ -131,19 +131,27 @@ def position_reply(mmsi):
     return {"status": 0, "msg": "", "data": row(mmsi, last_age=30)}
 
 
-def test_positions_stop_at_the_hard_ceiling_of_14_calls(tmp_path):
-    mmsis = list(range(300_000_001, 300_000_021))
+def test_positions_stop_at_the_hard_ceiling_of_16_calls(tmp_path):
+    assert wl.POSITION_CALL_CEILING == 16 and wl.POSITION_ABSOLUTE_LIMIT == 19
+    mmsis = list(range(300_000_001, 300_000_025))
     c, p, clock = make(tmp_path, Provider([position_reply(m) for m in mmsis]))
     got, why = wl.fetch_positions(c, mmsis, raw_dir=tmp_path / "raw", sleep=clock.advance)
-    assert len(p.requests) == 14 and len(got) == 14 and "ceiling of 14" in why
-    assert c.budget()["vessel_position"]["used"] == 14 and c.budget()["vessel_position"]["left"] == 36
+    assert len(p.requests) == 16 and len(got) == 16 and "ceiling of 16" in why
+    assert c.budget()["vessel_position"]["used"] == 16 and c.budget()["vessel_position"]["left"] == 34
+
+
+def test_no_caller_can_push_positions_past_the_absolute_limit_of_19(tmp_path):
+    mmsis = list(range(400_000_001, 400_000_030))
+    c, p, clock = make(tmp_path, Provider([position_reply(m) for m in mmsis]))
+    got, why = wl.fetch_positions(c, mmsis, raw_dir=tmp_path / "raw", ceiling=50, sleep=clock.advance)     # even asking for 50
+    assert len(p.requests) == 19 and "ceiling of 19" in why
 
 
 def test_positions_count_calls_from_earlier_runs(tmp_path):
     c, p, clock = make(tmp_path, Provider([position_reply(m) for m in range(30)]))
     wl.fetch_positions(c, list(range(100_000_001, 100_000_009)), raw_dir=tmp_path / "raw", sleep=clock.advance)       # 8 calls
-    got, why = wl.fetch_positions(c, list(range(200_000_001, 200_000_011)), raw_dir=tmp_path / "raw", sleep=clock.advance)
-    assert len(p.requests) == 14 and len(got) == 6 and "ceiling" in why
+    got, why = wl.fetch_positions(c, list(range(200_000_001, 200_000_013)), raw_dir=tmp_path / "raw", sleep=clock.advance)
+    assert len(p.requests) == 16 and len(got) == 8 and "ceiling" in why
 
 
 def test_positions_stop_at_the_first_error_without_retry(tmp_path):
@@ -174,3 +182,87 @@ def test_snapshot_labels_the_sample_and_never_claims_coverage_or_cargo(tmp_path)
     assert "crude carrier" not in text and "sanction" not in text and "dark fleet" not in text
     p = wl.save_snapshot(snap, tmp_path / "snap" / "watchlist.json")
     assert wl.load_watchlist(p)["sample"]["seed"]["mmsi"] == 538007007 and wl.load_watchlist(tmp_path / "nope.json") is None
+
+
+# ------------------------------------------------------------------ tracks: thinning, record, one call, saved copy survives the key
+import math
+
+
+def synthetic_track(n=3000, t0=1_793_000_000):
+    """A voyage: out along a gentle arc, a loop, then a long straight leg, one point every 60 s."""
+    pts = []
+    for i in range(n):
+        f = i / n
+        lat = 36.0 + 2.0 * f + 0.2 * math.sin(f * 12)
+        lng = -8.0 + 3.0 * f
+        pts.append({"data_source": 0, "utc": t0 + 60 * i, "lng": lng, "lat": lat, "sog": 12.0 if f < 0.9 else 0.0, "cog": 45.0})
+    return pts
+
+
+def test_downsampling_keeps_the_ends_the_order_and_the_length_of_the_route():
+    pts = synthetic_track()
+    thin = wl.downsample_track(pts, 300)
+    assert len(thin) <= 300 and thin[0] == pts[0] and thin[-1] == pts[-1]
+    assert [p["utc"] for p in thin] == sorted(p["utc"] for p in thin)
+    full = sum(wl._nm(a, b) for a, b in zip(pts, pts[1:]))
+    short = sum(wl._nm(a, b) for a, b in zip(thin, thin[1:]))
+    assert abs(full - short) / full < 0.02
+
+
+def test_a_short_track_is_not_thinned():
+    pts = synthetic_track(50)
+    assert wl.downsample_track(pts, 500) == pts
+
+
+def saved_raw(points, mmsi=224543980, retrieved="20261103T161033Z", now=1_793_722_232, window=7 * 86400):
+    return {"service": "vessel_track", "params": {"mmsi": mmsi, "start_time": now - window, "end_time": now, "output": 1}, "retrieved_at_utc": retrieved,
+            "response": {"status": 0, "msg": "", "data": points}}
+
+
+def test_track_record_is_labelled_with_its_fetch_time_and_carries_honest_stats():
+    rec = wl.build_track_record(saved_raw(synthetic_track()), "OIZMENDI", "Spain")
+    assert rec["label"] == "past track, fetched at 2026-11-03 16:10 UTC" and rec["kind"] == "PAST TRACK"
+    assert rec["points_provider"] == 3000 and rec["points_stored"] <= wl.TRACK_MAX_POINTS and rec["points"][0][2] < rec["points"][-1][2]
+    assert rec["path_nm"] > rec["start_to_end_nm"] > 0 and rec["max_sog_kn"] == 12.0 and 80 <= rec["moving_share_pct"] <= 95
+    assert rec["window_utc"][0] < rec["window_utc"][1] and "not a surveyed route" in rec["note"]
+    assert rec["name"] == "OIZMENDI" and rec["flag"] == "Spain"
+
+
+def test_track_record_ignores_unusable_points_and_refuses_an_empty_track():
+    junk = [{"utc": 1, "lat": None, "lng": 2}, {"utc": "x", "lat": 1, "lng": 2}, {"lat": 1, "lng": 2}]
+    with pytest.raises(ValueError):
+        wl.build_track_record(saved_raw(junk), None)
+    rec = wl.build_track_record(saved_raw(junk + synthetic_track(10)), None)
+    assert rec["points_provider"] == 10
+
+
+def test_fetch_track_makes_one_call_with_a_seven_day_window_and_saves_the_raw_response(tmp_path):
+    c, p, clock = make(tmp_path, Provider([{"status": 0, "msg": "", "data": synthetic_track(20)}]))
+    body = wl.fetch_track(c, 224543980, 1_793_722_232, raw_dir=tmp_path / "raw")
+    q = dict(p.requests[0].url.params)
+    assert len(body["data"]) == 20 and len(p.requests) == 1 and p.requests[0].url.path == "/v1/History/VesselHistoryTrack"
+    assert int(q["end_time"]) - int(q["start_time"]) == 7 * 86400 and q["mmsi"] == "224543980" and q["output"] == "1"
+    saved = list((tmp_path / "raw").glob("track_224543980_*.json"))
+    assert len(saved) == 1 and "key" not in json.loads(saved[0].read_text(encoding="utf-8"))["params"]
+    assert c.budget()["vessel_track"]["used"] == 1 and c.budget()["vessel_track"]["left"] == 9
+
+
+@pytest.mark.parametrize("reply", [{"status": 28, "msg": "Track query time exceeds limit"}, httpx.ConnectTimeout("slow"), httpx.Response(200, text="oops")])
+def test_a_failed_track_call_stops_and_is_not_retried(tmp_path, reply):
+    c, p, clock = make(tmp_path, Provider([reply]))
+    with pytest.raises(sf.AISError):
+        wl.fetch_track(c, 224543980, 1_793_722_232, raw_dir=tmp_path / "raw")
+    assert len(p.requests) == 1 and c.budget()["vessel_track"]["breaker"] == "open" and not list((tmp_path / "raw").glob("*"))
+
+
+def test_the_saved_track_is_served_from_disk_with_no_provider_and_no_key(tmp_path, monkeypatch):
+    """After 2026-11-13 the panel reads this file: no key, kill switch on, provider unreachable, and it still returns the track with its date."""
+    rec = wl.build_track_record(saved_raw(synthetic_track(200)), "OIZMENDI", "Spain")
+    path = wl.save_tracks([rec], tmp_path / "tracks.json")
+    monkeypatch.setenv("AIS_ENABLED", "0")
+    monkeypatch.delenv("AIS_API_KEY", raising=False)
+    got = wl.load_track(224543980, path)
+    assert got["label"].startswith("past track, fetched at 2026-11-03") and len(got["points"]) == 200
+    assert wl.load_track(1, path) is None and wl.load_track(224543980, tmp_path / "missing.json") is None
+    (tmp_path / "broken.json").write_text("{not json", encoding="utf-8")
+    assert wl.load_track(224543980, tmp_path / "broken.json") is None            # never an error

@@ -4,7 +4,7 @@ What this key can and cannot do (docs/ais_verification.md, docs/DECISIONS.md D1 
   * Vessels Nearby is centred on ONE vessel with a fixed 10 nm radius. A response is therefore a SAMPLE ("vessels within 10 nm of <vessel>, seen at <time>"),
     never a count for a chokepoint or any area.
   * The watchlist is up to 8 tankers that the PROVIDER typed as tankers (ship type 80 to 89) in that sample. Their positions are confirmed one by one with
-    Vessel Position (metered: 50 calls, hard ceiling of 14 in total for the watchlist). Fleet Position is not used: it needs a fleet made in the console.
+    Vessel Position (metered: 50 calls, hard ceiling of 16 in total for the watchlist; at most 3 more, from the reserve, for the one-off location search, so never more than 19). Fleet Position is not used: it needs a fleet made in the console.
   * Nothing here claims what a tanker carries: AIS does not say crude from products.
 
 Freshness (MASTER_PROMPT_2.md section 3.3, applied honestly): there is no background poller on this key (Vessel Position allows 50 calls for the key's whole life),
@@ -29,7 +29,9 @@ WATCHLIST_FILE = SNAP_DIR / "watchlist.json"
 
 TANKER_TYPES = range(80, 90)                  # AIS ship types 80 to 89: tankers (the provider's own typing)
 MAX_WATCHLIST = 8
-POSITION_CALL_CEILING = 14                    # owner's hard stop for Vessel Position calls in total
+POSITION_CALL_CEILING = 16                    # owner's hard stop for the watchlist's Vessel Position calls in total (raised from 14 on 2026-11-03 so the final snapshot can refresh all 8)
+POSITION_EXPLORE_ALLOWANCE = 3                # the one-off location search may spend up to 3 more, out of the reserve
+POSITION_ABSOLUTE_LIMIT = POSITION_CALL_CEILING + POSITION_EXPLORE_ALLOWANCE   # 19 of 50: nothing may pass this
 POLL_INTERVAL_S = 60                          # a deliberate refresh counts as one poll
 LIVE_FETCH_MAX_AGE_S = 2 * POLL_INTERVAL_S    # "within two poll intervals"
 LIVE_MEDIAN_POSITION_AGE_S = 10 * 60          # "median position age under 10 minutes"
@@ -136,7 +138,9 @@ def capture_nearby_sample(client: sf.ShipFinderClient, seed_mmsi: int, raw_dir: 
 
 def fetch_positions(client: sf.ShipFinderClient, mmsis: list[int], raw_dir: Path = RAW_DIR / "positions", ceiling: int = POSITION_CALL_CEILING,
                     sleep: Callable[[float], None] = time.sleep) -> tuple[dict[int, dict], str | None]:
-    """Vessel Position, one call per vessel, never beyond `ceiling` calls in total for the key. Stops at the first error. Returns (rows by mmsi, why it stopped or None)."""
+    """Vessel Position, one call per vessel, never beyond `ceiling` calls in total for the key (and never beyond POSITION_ABSOLUTE_LIMIT whatever the caller passes).
+    Stops at the first error. Returns (rows by mmsi, why it stopped or None)."""
+    ceiling = min(ceiling, POSITION_ABSOLUTE_LIMIT)
     out: dict[int, dict] = {}
     for m in mmsis:
         if client.service_state("vessel_position")["used"] >= ceiling:
@@ -164,6 +168,110 @@ def fetch_flags(client: sf.ShipFinderClient, mmsis: list[int], raw_dir: Path = R
         if reg:
             out[m] = reg
     return out, None
+
+
+TRACK_WINDOW_S = 7 * 24 * 3600                # the docs give no per-call window limit (only "the latest month" of history); 7 days is well inside it
+
+
+def fetch_track(client: sf.ShipFinderClient, mmsi: int, now: float, window_s: int = TRACK_WINDOW_S, raw_dir: Path = RAW_DIR / "tracks") -> dict:
+    """ONE Vessel History Track call (metered: 10 for the key's whole life). The raw response is saved by the client before anything else happens.
+    Raises AISError on any non-zero status, timeout or unreadable reply (the breaker opens); the caller must stop and not retry."""
+    return client.call("vessel_track", {"mmsi": mmsi, "start_time": int(now - window_s), "end_time": int(now), "output": 1}, f"past track for MMSI {mmsi}, {window_s // 86400} days",
+                       raw_dir=raw_dir, raw_name=f"track_{mmsi}")
+
+
+# ------------------------------------------------------------------------------------------------------------------ saved tracks (shown after the key has expired)
+TRACKS_FILE = SNAP_DIR / "tracks.json"
+TRACK_MAX_POINTS = 500
+
+
+def _nm(a: dict, b: dict) -> float:
+    import math
+    la1, lo1, la2, lo2 = map(math.radians, (a["lat"], a["lng"], b["lat"], b["lng"]))
+    h = math.sin((la2 - la1) / 2) ** 2 + math.cos(la1) * math.cos(la2) * math.sin((lo2 - lo1) / 2) ** 2
+    return 2 * 3440.065 * math.asin(math.sqrt(h))
+
+
+def _rdp(pts: list[dict], eps: float) -> list[dict]:
+    """Ramer-Douglas-Peucker on a flat projection (iterative, so 7,000 points cannot overflow the stack). Keeps the first and last point."""
+    import math
+    if len(pts) < 3:
+        return pts
+    k = math.cos(math.radians(sum(p["lat"] for p in pts) / len(pts)))
+    xy = [(p["lng"] * k, p["lat"]) for p in pts]
+    keep = [False] * len(pts)
+    keep[0] = keep[-1] = True
+    stack = [(0, len(pts) - 1)]
+    while stack:
+        a, b = stack.pop()
+        (x1, y1), (x2, y2) = xy[a], xy[b]
+        dx, dy = x2 - x1, y2 - y1
+        norm = math.hypot(dx, dy)
+        best, idx = -1.0, -1
+        for i in range(a + 1, b):
+            x0, y0 = xy[i]
+            d = math.hypot(x0 - x1, y0 - y1) if norm == 0 else abs(dy * x0 - dx * y0 + x2 * y1 - y2 * x1) / norm
+            if d > best:
+                best, idx = d, i
+        if best > eps and idx > 0:
+            keep[idx] = True
+            stack += [(a, idx), (idx, b)]
+    return [p for p, k_ in zip(pts, keep) if k_]
+
+
+def downsample_track(points: list[dict], max_points: int = TRACK_MAX_POINTS) -> list[dict]:
+    """At most max_points points that keep the shape of the route (the tolerance is searched, not fixed). First and last points are always kept."""
+    if len(points) <= max_points:
+        return points
+    lo, hi = 0.0, 1.0                    # degrees
+    best = points[:2]
+    for _ in range(28):
+        mid = (lo + hi) / 2
+        r = _rdp(points, mid)
+        if len(r) > max_points:
+            lo = mid
+        else:
+            hi, best = mid, r
+    return best
+
+
+def build_track_record(saved: dict, name: str | None, flag: str | None = None) -> dict:
+    """From a raw saved History Track response (as written by the client) to the record the vessel panel shows."""
+    pts = sorted((p for p in saved["response"].get("data") or [] if isinstance(p.get("lat"), (int, float)) and isinstance(p.get("lng"), (int, float)) and isinstance(p.get("utc"), int)),
+                 key=lambda p: p["utc"])
+    if not pts:
+        raise ValueError("track has no usable points")
+    fetched = datetime.strptime(saved["retrieved_at_utc"], "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
+    thin = downsample_track(pts)
+    lats, lngs = [p["lat"] for p in pts], [p["lng"] for p in pts]
+    speeds = [p["sog"] for p in pts if isinstance(p.get("sog"), (int, float)) and p["sog"] >= 0]
+    return {
+        "mmsi": saved["params"]["mmsi"], "name": name, "flag": flag, "kind": "PAST TRACK",
+        "label": f"past track, fetched at {fetched.strftime('%Y-%m-%d %H:%M')} UTC",
+        "fetched_utc": fetched.strftime("%Y-%m-%dT%H:%M:%SZ"), "provider": "ShipFinder (Vessel History Track)",
+        "window_utc": [utc_iso(saved["params"]["start_time"]), utc_iso(saved["params"]["end_time"])],
+        "first_point_utc": utc_iso(pts[0]["utc"]), "last_point_utc": utc_iso(pts[-1]["utc"]),
+        "points_provider": len(pts), "points_stored": len(thin),
+        "path_nm": round(sum(_nm(a, b) for a, b in zip(pts, pts[1:])), 1), "start_to_end_nm": round(_nm(pts[0], pts[-1]), 1),
+        "max_sog_kn": max(speeds) if speeds else None, "moving_share_pct": round(100 * sum(s > 1 for s in speeds) / len(speeds)) if speeds else None,
+        "bbox": {"lat": [min(lats), max(lats)], "lng": [min(lngs), max(lngs)]},
+        "points": [[round(p["lng"], 5), round(p["lat"], 5), p["utc"], p.get("sog")] for p in thin],       # [lng, lat, unix seconds, sog]
+        "note": "A saved past track. AIS positions only; the line joins reported positions and is not a surveyed route. Thinned to keep its shape.",
+    }
+
+
+def save_tracks(records: list[dict], path: Path = TRACKS_FILE) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"kind": "SAVED PAST TRACKS", "tracks": records}, ensure_ascii=False), encoding="utf-8")
+    return path
+
+
+def load_track(mmsi: int, path: Path = TRACKS_FILE) -> dict | None:
+    """The saved track for a vessel, or None. Never raises: after the key expires the panel shows this record with its date."""
+    try:
+        return next((t for t in json.loads(path.read_text(encoding="utf-8")).get("tracks", []) if t.get("mmsi") == mmsi), None)
+    except (OSError, ValueError):
+        return None
 
 
 # ------------------------------------------------------------------------------------------------------------------ the snapshot

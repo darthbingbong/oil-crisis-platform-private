@@ -4,12 +4,13 @@ r"""Refresh the ShipFinder snapshots within the budget. Run from backend/.
     python tools\prewarm_ais.py sample --allow-one-nearby-call [--seed 538007007]
     python tools\prewarm_ais.py watchlist
     python tools\prewarm_ais.py manifest
+    python tools\prewarm_ais.py tracks MMSI [MMSI ...]
 
 sample     EXACTLY ONE Vessels Nearby call around the seed vessel (default FRONT ALTAIR, MMSI 538007007). Refused unless --allow-one-nearby-call is given,
            because Nearby is on hold (it refused calls with status 38 on 2026-11-01). The raw response is saved at once to backend/data/ais_raw/nearby/ and
            backup_ais_data.py runs straight after. On ANY non-zero status, timeout or unreadable reply the hold and breaker stay in place and nothing is retried.
 watchlist  Takes up to 8 tankers the provider itself typed as tankers from the latest saved sample (chosen for variety in flag, size and motion), confirms their
-           positions with Vessel Position (hard ceiling: 14 calls for the key's whole life, stops at the first error) and their flags with Vessel Flag Information
+           positions with Vessel Position (hard ceiling: 16 calls for the key's whole life, 19 with the one-off location search, stops at the first error) and their flags with Vessel Flag Information
            (unmetered), then writes backend/data/ais_raw/snapshots/watchlist.json and backs up.
 
 manifest   No provider call. Lists everything captured so far (samples, positions, flags, route plans, port lookups, search lists, tracks) with counts and the
@@ -63,13 +64,51 @@ def latest_sample() -> tuple[Path, dict]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["status", "sample", "watchlist", "manifest"])
+    ap.add_argument("step", choices=["status", "sample", "watchlist", "manifest", "tracks", "tracks-snapshot"])
     ap.add_argument("--seed", type=int, default=DEFAULT_SEED)
     ap.add_argument("--allow-one-nearby-call", action="store_true")
+    ap.add_argument("mmsis", nargs="*", type=int, help="tracks step: the vessels, one History Track call each")
     args = ap.parse_args()
     client = sf.ShipFinderClient()
     if args.step == "status":
         status(client)
+        return 0
+
+    if args.step == "tracks":
+        if not 1 <= len(args.mmsis) <= 3:
+            print("give 1 to 3 MMSIs (owner approved 3 track loads for now; 7 stay in reserve)")
+            return 2
+        for m in args.mmsis:
+            if client.service_state("vessel_track")["used"] >= 3:
+                print("stopped: 3 track loads already used (owner approved 3)")
+                break
+            time.sleep(sf.SERVICES["vessel_track"].min_interval_s + 0.5)
+            try:
+                body = wl.fetch_track(client, m, time.time())
+            except sf.AISError as e:
+                print(f"TRACK CALL FAILED for {m}: {e.kind}: {e}")
+                print("stopped; nothing is retried.")
+                backup()
+                return 3
+            pts = body.get("data") or []
+            print(f"track {m}: status 0, {len(pts)} points" + (f", first row keys {sorted(pts[0].keys())}" if pts else ""))
+            backup()
+        status(client)
+        return 0
+
+    if args.step == "tracks-snapshot":
+        watch = wl.load_watchlist() or {"watchlist": []}
+        names = {v["mmsi"]: (v["name"], v.get("flag_registry")) for v in watch["watchlist"]}
+        latest = {}
+        for f in sorted((wl.RAW_DIR / "tracks").glob("track_*.json")):
+            d = json.loads(f.read_text(encoding="utf-8"))
+            latest[d["params"]["mmsi"]] = d
+        records = [wl.build_track_record(d, *names.get(m, (None, None))) for m, d in latest.items()]
+        out = wl.save_tracks(records)
+        for r in records:
+            print(f"  {r['name']} ({r['mmsi']}): {r['points_provider']} points -> {r['points_stored']} stored, path {r['path_nm']} nm, start-to-end {r['start_to_end_nm']} nm, {r['label']}")
+        print("saved:", out.relative_to(BACKEND))
+        backup()
         return 0
 
     if args.step == "manifest":
@@ -100,7 +139,7 @@ def main() -> int:
             body = wl.capture_nearby_sample(client, args.seed)
         except sf.AISError as e:
             print(f"NEARBY CALL FAILED: {e.kind}: {e}")
-            print("hold and breaker stay in place; nothing is retried. Fall back to option B (Vessel Search + Vessel Position, at most 6 vessels, 14 Position calls in total).")
+            print("hold and breaker stay in place; nothing is retried. Fall back to option B (Vessel Search + Vessel Position, at most 6 vessels, Position calls within the 16 ceiling).")
             return 3
         rows = body.get("data") or []
         print(f"NEARBY OK: provider status 0, total {body.get('total')}, returned {len(rows)}, tankers typed by the provider {sum(wl.is_tanker(r) for r in rows)}")
