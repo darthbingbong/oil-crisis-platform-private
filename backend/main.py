@@ -55,6 +55,7 @@ from routers import news as route_news_router
 from routers import health as health_router
 from routers import price as price_router
 from routers import vessels as vessels_router
+from routers import watchlist as watchlist_router
 from routers import report as report_router
 from routers import routes as routes_router
 from services.ais_feed import get_hub
@@ -106,6 +107,7 @@ app.include_router(report_router.router)   # POST /api/v1/simulate/report
 app.include_router(price_router.router)
 app.include_router(health_router.router)    # GET /api/v1/health: state of each external feed
 app.include_router(vessels_router.router)   # WS /ws/vessels, GET /api/v1/vessels/status
+app.include_router(watchlist_router.router)  # GET /api/v1/vessels/watchlist: the saved real-tanker snapshot (never calls the provider)
 app.include_router(route_news_router.router)  # GET /api/v1/routes/{id}/news (GDELT) + DEV-ONLY /dev/news-feed
 
 # ---------------------------------------------------------------------------
