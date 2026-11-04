@@ -1,0 +1,6 @@
+2D map, all layers on, 2,000 simulated vessels moving, a real vessel selected, 1440x900, Chromium with software WebGL (SwiftShader). A lower bound.
+M12 reference: zoom 2 78 fps, zoom 5.5 114 fps.
+zoom 2, panel not scrolled to (no TradingView request): 104.2 fps, worst frame 28 ms
+zoom 2, all three widgets mounted and the panel on screen: 101.3 fps, worst frame 28 ms
+zoom 5.5, panel not scrolled to (no TradingView request): 125.4 fps, worst frame 21 ms
+zoom 5.5, all three widgets mounted and the panel on screen: 126.0 fps, worst frame 17 ms
