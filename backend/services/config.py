@@ -61,10 +61,9 @@ class CalcConfig:
     elasticity_abs: float = 0.15
     # Leave-one-out MAE of the formula on 21 daily-resolution events (phase1_analysis.py: 13.09).
     price_band_pp: float = 13.09
-    # ASSUMPTION: price decays exponentially toward baseline after the disruption ends.
-    # Half-life default = duration/2 clamped to [min, max] days (short disruptions fade fast).
-    half_life_min_days: float = 7.0
-    half_life_max_days: float = 60.0
+    # M14: the price formula was validated on the price change over 30 days and on nothing else. No other price horizon is computed or shown.
+    price_horizon_days: int = 30
+    # Days drawn by the barrels-displaced series. Arithmetic over the disruption's duration, NOT a price estimate.
     trajectory_days: int = 180
 
     # --- fleet and detour -------------------------------------------------

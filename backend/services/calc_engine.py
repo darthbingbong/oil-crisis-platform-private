@@ -54,24 +54,19 @@ def price_impact_pct(supply_loss: float, cfg: CalcConfig = DEFAULT_CONFIG) -> fl
     return supply_loss / cfg.elasticity_abs
 
 
-def default_half_life_days(duration_days: float, cfg: CalcConfig = DEFAULT_CONFIG) -> float:
-    return min(cfg.half_life_max_days, max(cfg.half_life_min_days, duration_days / 2.0))
+def price_outlook_path(price_pct: float, cfg: CalcConfig = DEFAULT_CONFIG) -> list[dict]:
+    """The 30-day price outlook as a daily list, day 0..price_horizon_days (30).
 
-
-def price_trajectory(peak_pct: float, duration_days: float, half_life_days: float | None = None,
-                     cfg: CalcConfig = DEFAULT_CONFIG) -> list[dict]:
-    """Daily price change vs baseline for day 0..trajectory_days.
-
-    Held at the peak while the disruption lasts, then exponential decay toward baseline with the
-    given half-life (ASSUMPTION). Band is +/- price_band_pp (Phase 1 leave-one-out MAE), constant in pp.
+    The ONLY validated number is the last point: the plain formula value `price_pct` (= supply loss / 0.15) at day 30, with the +/- price_band_pp
+    (Phase 1 leave-one-out MAE) attached to that day alone. The days in between are an ILLUSTRATIVE straight line from 0 to that figure: the formula gives
+    one 30-day number and says nothing about the path, so the line claims nothing more. There is no decay and no dependence on how long the disruption lasts.
     """
-    hl = half_life_days if half_life_days is not None else default_half_life_days(duration_days, cfg)
-    if hl <= 0:
-        raise ValueError("half_life_days must be positive")
+    horizon = cfg.price_horizon_days
     out = []
-    for day in range(cfg.trajectory_days + 1):
-        pct = peak_pct if day <= duration_days else peak_pct * 0.5 ** ((day - duration_days) / hl)
-        out.append({"day": day, "pct": pct, "low": pct - cfg.price_band_pp, "high": pct + cfg.price_band_pp})
+    for day in range(horizon + 1):
+        pct = price_pct * day / horizon
+        end = day == horizon
+        out.append({"day": day, "pct": pct, "low": pct - cfg.price_band_pp if end else None, "high": pct + cfg.price_band_pp if end else None})
     return out
 
 

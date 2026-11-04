@@ -285,6 +285,7 @@ def test_band_hidden_and_flagged_outside_validated_range():
     assert p["chart"]["band_validated"] is False
     assert all(pt["low"] is None and pt["high"] is None for pt in p["chart"]["trajectory"])
     assert any(pt["beyond_validated"] for pt in p["chart"]["trajectory"])
+    assert j["kpis"]["validation_badge"] == "OUTSIDE VALIDATED RANGE" and p["numbers"]["validation_badge"] == "OUTSIDE VALIDATED RANGE"
     assert p["chart"]["validated_price_ceiling_pct"] == pytest.approx(8 / 0.15)
     assert "not validated at this magnitude" in p["summary"] and "is not shown" in p["summary"]
 
@@ -293,12 +294,39 @@ def test_band_shown_inside_validated_range():
     j = post(route_id="suez", disruption_type="detour", detour_days=5, duration_days=30).json()
     assert j["kpis"]["outside_validated_range"] is False and j["kpis"]["price_band_pp"] == 13.09
     traj = j["sections"]["price"]["chart"]["trajectory"]
-    assert all(pt["low"] is not None for pt in traj) and not any(pt["beyond_validated"] for pt in traj)
+    assert traj[-1]["low"] is not None and traj[-1]["high"] is not None and not any(pt["beyond_validated"] for pt in traj)   # the band belongs to day 30
+    assert j["kpis"]["validation_badge"] == "VALIDATED 30 DAYS (≤ 8% supply loss)"
 
 
-def test_beyond_validated_flag_follows_the_decay_back_inside_the_range():
+def test_beyond_validated_flag_starts_where_the_illustrative_line_crosses_the_ceiling():
     traj = post(route_id="hormuz", duration_days=30).json()["sections"]["price"]["chart"]["trajectory"]
-    assert traj[0]["beyond_validated"] and not traj[-1]["beyond_validated"]   # decays below the 53.3% ceiling by day 180
+    assert not traj[0]["beyond_validated"] and traj[-1]["beyond_validated"]   # the line rises past the 53.3% ceiling before day 30
+    first = next(pt["day"] for pt in traj if pt["beyond_validated"])
+    assert 0 < first < 30 and all(pt["beyond_validated"] for pt in traj[first:])
+
+
+# ---- M14: one horizon, the plain formula, no decay ---------------------------------------------------------------------------------------------
+def test_price_outlook_is_30_days_only_and_exactly_the_plain_formula_for_every_duration():
+    for dur in (5, 10, 30, 60, 365):
+        j = post(route_id="suez", disruption_type="detour", detour_days=20, duration_days=dur).json()
+        p = j["sections"]["price"]
+        loss = j["sections"]["barrels"]["numbers"]["supply_loss_pct"]
+        traj = p["chart"]["trajectory"]
+        assert [pt["day"] for pt in traj] == list(range(31)), dur
+        assert traj[-1]["pct"] == pytest.approx(loss / 0.15) == pytest.approx(j["kpis"]["price_impact_pct"]), dur   # day 30 IS supply loss / 0.15
+        assert traj[-1]["pct"] == pytest.approx(p["numbers"]["move_30d_pct"]) and p["numbers"]["horizon_days"] == 30
+        assert "half_life_days" not in p["chart"] and "half_life_days" not in p["numbers"]
+    a = post(route_id="suez", disruption_type="detour", detour_days=20, duration_days=10).json()["sections"]["price"]["chart"]["trajectory"]
+    b = post(route_id="suez", disruption_type="detour", detour_days=20, duration_days=365).json()["sections"]["price"]["chart"]["trajectory"]
+    assert a == b          # how long the disruption lasts does not change the 30-day outlook
+
+
+def test_price_section_text_states_one_horizon_and_no_decay():
+    j = post(route_id="suez", disruption_type="detour", detour_days=20, duration_days=60).json()
+    text = " ".join([j["sections"]["price"]["summary"], j["sections"]["price"]["takeaway"], *(a["text"] for a in j["sections"]["price"]["assumptions"])]).lower()
+    for banned in ("half-life", "half life", "decay", "180", "90 days", "one year", "1-year", "1 year", "peak"):
+        assert banned not in text.replace("a week, 90 days, a year", ""), banned
+    assert "30 days" in text and "only horizon" in text and "illustrative path" in text
 
 
 def test_summaries_say_implies_never_will():

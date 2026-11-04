@@ -77,8 +77,7 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
     loss = ce.supply_loss_pct(displaced, cfg)
     price = ce.price_impact_pct(loss, cfg)
     dur = req["duration_days"]
-    hl = ce.default_half_life_days(dur, cfg)
-    traj = ce.price_trajectory(price, dur, hl, cfg)
+    traj = ce.price_outlook_path(price, cfg)
     dseries = ce.displaced_series(displaced, dur, gap, cfg)
 
     # --- validated range (Phase 1): the +/-13 pp band was measured only on events up to vmax supply loss ---
@@ -90,6 +89,8 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
         pt["beyond_validated"] = abs(pt["pct"]) > ceiling_pct
         if outside:  # do not show the band as if it applied
             pt["low"] = pt["high"] = None
+    horizon = cfg.price_horizon_days
+    badge = "OUTSIDE VALIDATED RANGE" if outside else f"VALIDATED {horizon} DAYS (≤ {vmax:g}% supply loss)"
 
     # sensitivity: blockade with the low bypass estimate (Hormuz)
     sensitivity = []
@@ -164,23 +165,23 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
         ],
     }
 
-    pk = traj[int(min(dur, cfg.trajectory_days))]["pct"]
-    core = (f"For a {loss:.2f}% supply loss the linear formula implies about a {price:+.1f}% price move (supply loss divided by {cfg.elasticity_abs}), "
-            f"held for {format(dur, 'g')} days and then decaying toward baseline with a {hl:g}-day half-life.")
+    core = (f"For a {loss:.2f}% supply loss the linear formula implies about a {price:+.1f}% price move over {horizon} days (supply loss divided by {cfg.elasticity_abs}). "
+            f"{horizon} days is the only horizon the formula was validated on, and the {format(dur, 'g')}-day length of the disruption does not change this figure. "
+            f"The line on the chart is an illustrative path up to the {horizon}-day value, not a forecast of the days in between.")
     if outside:
         second = (f"This is outside the validated range: the largest validated event, {ref['name']}, had a supply loss of {ref['supply_loss_pct']:g}% and an actual "
                   f"price move of {ref['actual_price_move_pct']:+.1f}%, and the plus or minus {cfg.price_band_pp:g} percentage point error band, measured only on events "
                   f"up to {vmax:g}% supply loss, is not validated at this magnitude and is not shown.")
     else:
-        second = f"The shaded band is plus or minus {cfg.price_band_pp:g} percentage points, the formula's average error across {ref['n_events']} historical events."
+        second = f"The bar at day {horizon} is plus or minus {cfg.price_band_pp:g} percentage points, the formula's average error across {ref['n_events']} historical events."
     s_price = {
         "title": "Oil price trajectory",
         "summary": core + " " + second,
-        "takeaway": (f"The linear formula implies a peak of {pk:+.1f}%, outside the validated range (largest validated event: {ref['actual_price_move_pct']:+.1f}% at {ref['supply_loss_pct']:g}% supply loss)."
-                     if outside else f"The linear formula implies a peak of {pk:+.1f}%, with a ±{cfg.price_band_pp:g} pp band."),
-        "chart": {"trajectory": traj, "half_life_days": hl, "band_validated": not outside,
+        "takeaway": (f"The linear formula implies a {horizon}-day price move of {price:+.1f}%, outside the validated range (largest validated event: {ref['actual_price_move_pct']:+.1f}% at {ref['supply_loss_pct']:g}% supply loss)."
+                     if outside else f"The linear formula implies a {horizon}-day price move of {price:+.1f}%, with a ±{cfg.price_band_pp:g} pp band."),
+        "chart": {"trajectory": traj, "horizon_days": horizon, "band_validated": not outside,
                   "validated_price_ceiling_pct": ceiling_pct, "validated_reference": ref},
-        "numbers": {"peak_pct": price, "band_pp": cfg.price_band_pp, "band_validated": not outside, "half_life_days": hl,
+        "numbers": {"peak_pct": price, "move_30d_pct": price, "horizon_days": horizon, "validation_badge": badge, "band_pp": cfg.price_band_pp, "band_validated": not outside,
                     "outside_validated_range": outside, "validated_supply_loss_max_pct": vmax},
         "sensitivity": sensitivity,
         "assumptions": [
@@ -188,8 +189,9 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
                "backend/PHASE1_SUMMARY.md; phase1_analysis.py"),
             _a(f"Band of ±{cfg.price_band_pp} pp = leave-one-out mean absolute error of the formula on {ref['n_events']} daily-resolution events, all with supply loss up to {vmax:g}% (small sample). It does not apply beyond that.",
                "phase1_analysis.py output: 13.09 pp"),
-            _a(f"Exponential decay after the disruption with a {hl:g}-day half-life (default: half the duration, clamped to {cfg.half_life_min_days:g} to {cfg.half_life_max_days:g} days).",
-               is_estimate=True),
+            _a(f"Horizon: {horizon} days only. The formula was tested on the price change over {horizon} days; no other horizon (a week, 90 days, a year) is estimated, and how long the disruption lasts does not change this figure.",
+               "backend/PHASE1_SUMMARY.md; docs/outlook_validation.md"),
+            _a(f"The straight line from the starting price to the {horizon}-day value is an illustrative path, not a model: the formula gives one {horizon}-day number and nothing about the days in between.", is_estimate=True),
             _a("Price is assumed to move linearly with supply loss; this is unverified for very large shocks and no nonlinear model or cap is applied.", is_estimate=True),
         ],
     }
@@ -332,7 +334,7 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
                      "flow_by_year_bpd": flows},
         "current_conditions": cur,
         "kpis": {
-            "price_impact_pct": price, "price_band_pp": cfg.price_band_pp if not outside else None,
+            "price_impact_pct": price, "price_horizon_days": horizon, "validation_badge": badge, "price_band_pp": cfg.price_band_pp if not outside else None,
             "outside_validated_range": outside,
             "validated_note": (f"Outside the validated range: {loss:.1f}% supply loss; validated events reach {vmax:g}%. Linear-formula extrapolation, not a forecast."
                                if outside else None), "displaced_bpd": displaced,
