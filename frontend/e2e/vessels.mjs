@@ -117,9 +117,9 @@ if (clicked) {
 // ---- D: AIS mode with no key
 await page.goto("http://localhost:5173/", { waitUntil: "load" });
 await page.waitForFunction(() => window.__vessels?.count > 0, null, { timeout: 60000 });
-await page.locator('[data-testid="vessel-mode-ais"]').click();
-await page.waitForFunction(() => document.querySelector('[data-testid="vessel-note"]')?.textContent?.includes("unavailable"), null, { timeout: 15000 });
-console.log("D. AIS mode, no key:", await txt("vessel-note"), "| badge:", await txt("vessel-badge"));
+// after M15: with no AISStream key the live-feed toggle is disabled and explained (it used to be pressable and then show an error)
+await page.waitForFunction(() => document.querySelector('[data-testid="vessel-feed-explain"]'), null, { timeout: 15000 });
+console.log("D. AISStream not configured:", await txt("vessel-feed-explain"), "| toggle disabled:", await page.locator('[data-testid="vessel-mode-ais"]').isDisabled(), "| badge:", await txt("vessel-badge"));
 await shot("m7_4_ais_mode_no_key", await globeClip());
 
 fs.writeFileSync(path.join(OUT, "m7_console.txt"), logs.join("\n"));

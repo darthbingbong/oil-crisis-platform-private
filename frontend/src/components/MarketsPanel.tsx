@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { usePrice } from "../hooks/usePrice";
+import { usePriceState } from "../hooks/priceContext";
 import { CFD_NOTE, EIA_HELP, FORMULA_BAND_PP, INDICES_NOTE, TABS, TAB_LABEL, TV_SCRIPT_URL, WIDGET_CHIP, WIDGET_HELP, widgetConfig, widgetHeight, wtiScenario, type MarketTab } from "../lib/markets";
 import { TOKENS } from "../lib/constants";
 import type { PriceLive } from "../types";
@@ -111,7 +111,7 @@ export default function MarketsPanel({ scenario }: { scenario: ScenarioNumbers |
   const [visited, setVisited] = useState<MarketTab[]>(["indices"]);
   const openTab = (t: MarketTab) => { setTab(t); setVisited((v) => (v.includes(t) ? v : [...v, t])); };
   const [showScenario, setShowScenario] = useState(false);
-  const price = usePrice();
+  const price = usePriceState();
   const tabsId = useId();
   // Nothing is requested from TradingView until the panel has been scrolled into view once (on a laptop it sits below the map), so a visitor who never
   // looks at the Markets panel never loads it and the map keeps all its frames.

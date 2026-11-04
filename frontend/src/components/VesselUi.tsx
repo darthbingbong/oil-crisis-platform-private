@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { AisStatus, StreamPhase } from "../hooks/useVesselStream";
+import { useAisStreamConfigured, type AisStatus, type StreamPhase } from "../hooks/useVesselStream";
 import type { VesselInfo } from "../lib/vesselSim";
 import { AIS_LIMITS } from "../lib/aisLimits";
 import { SIM } from "../lib/vesselSim";
@@ -20,11 +20,13 @@ interface ControlsProps {
 /** Permanent badge for the vessel layer. In simulated mode it always reads SIMULATED; there is no way to hide it. */
 export function VesselControls({ mode, setMode, showingAis, phase, status, aisCount }: ControlsProps) {
   const [open, setOpen] = useState(false);
+  const streamConfigured = useAisStreamConfigured();
+  const notConfigured = streamConfigured === false;       // the live AISStream feed has no key on this server
   const unavailable = mode === "ais" && !showingAis;
   const note =
     mode !== "ais" ? null
       : phase === "connecting" ? "Connecting to the AIS feed. Showing simulated vessels meanwhile."
-      : status?.state === "no_key" ? "AIS feed unavailable: no AISStream key is configured on the server. Showing simulated vessels."
+      : status?.state === "no_key" ? "The live AISStream feed is not configured (no AISStream key on this server). Showing simulated vessels."
       : status?.state === "error" ? `AIS feed error (${status.detail}). Showing simulated vessels.`
       : phase === "closed" ? "AIS connection closed. Showing simulated vessels."
       : status && status.state !== "streaming" ? "Waiting for the first AIS frames. Showing simulated vessels."
@@ -64,17 +66,24 @@ export function VesselControls({ mode, setMode, showingAis, phase, status, aisCo
               type="button"
               data-testid={`vessel-mode-${m}`}
               aria-pressed={mode === m}
+              disabled={m === "ais" && notConfigured}
+              title={m === "ais" && notConfigured ? "Not configured: the live AISStream feed needs an AISStream key on the server. The real ShipFinder tankers are the SNAPSHOT layer, not this feed." : undefined}
               onClick={() => setMode(m)}
               className="section-label"
-              style={{ padding: "3px 8px", cursor: "pointer", background: mode === m ? "rgba(244,241,234,0.14)" : "rgba(3,3,3,0.8)", color: mode === m ? "var(--color-bone)" : "var(--color-ash)" }}
+              style={{ padding: "3px 8px", cursor: m === "ais" && notConfigured ? "not-allowed" : "pointer", opacity: m === "ais" && notConfigured ? 0.5 : 1, background: mode === m ? "rgba(244,241,234,0.14)" : "rgba(3,3,3,0.8)", color: mode === m ? "var(--color-bone)" : "var(--color-ash)" }}
             >
-              {m === "simulated" ? "Simulated" : "AIS feed"}
+              {m === "simulated" ? "Simulated" : "AISStream live"}
             </button>
           ))}
         </div>
       </div>
 
-      {(note || unavailable) && (
+      {notConfigured && (
+        <div data-testid="vessel-feed-explain" className="text-xs" style={{ marginTop: 6, color: "var(--color-ash)", background: "rgba(3,3,3,0.8)", padding: "4px 8px", borderRadius: 3 }}>
+          Live AISStream feed: not configured (no AISStream key on this server). The real tankers marked SNAPSHOT are saved ShipFinder positions, not this feed.
+        </div>
+      )}
+      {(note || unavailable) && !notConfigured && (
         <div data-testid="vessel-note" className="text-xs" style={{ marginTop: 6, color: "var(--color-crude)", background: "rgba(3,3,3,0.8)", padding: "4px 8px", borderRadius: 3 }}>
           {note}
         </div>

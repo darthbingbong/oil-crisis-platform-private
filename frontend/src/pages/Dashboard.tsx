@@ -120,7 +120,7 @@ export default function Dashboard() {
     refetchConflicts();
   }, [refetchConflicts]);
 
-  const { status: streamStatus, priceState, alerts, lastEventId } = useNewsStream();
+  const { status: streamStatus, alerts, lastEventId } = useNewsStream();
 
   // A live price-moving event -> the historical chart should pick up the
   // new row. lastEventId starts null (snapshot doesn't set it) so this
@@ -143,7 +143,7 @@ export default function Dashboard() {
   return (
     <div className="h-screen flex flex-col bg-void">
       <PriceTicker />
-      <Header backendStatus={backendStatus} priceState={priceState} streamStatus={streamStatus} view={view} onViewChange={handleViewChange} search={<VesselSearch onSelect={handleVesselChange} />} />
+      <Header backendStatus={backendStatus} view={view} onViewChange={handleViewChange} search={<VesselSearch onSelect={handleVesselChange} />} />
       {watchData?.key_expired && (
         <div data-testid="key-expired-banner" role="status" className="text-xs data-readout" style={{ margin: "0 16px 8px", padding: "6px 10px", color: "var(--color-alarm)", border: "1px solid rgba(255,59,59,0.4)", borderRadius: 4 }}>
           {watchData.key_line}. No AIS calls are made; every real vessel shown is a saved position.

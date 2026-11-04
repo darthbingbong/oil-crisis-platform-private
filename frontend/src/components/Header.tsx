@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { useAnimatedNumber } from "../lib/useAnimatedNumber";
-import type { StreamStatus } from "../hooks/useNewsStream";
-import type { PriceState } from "../types";
+import { usePriceState } from "../hooks/priceContext";
+import type { PriceLive } from "../types";
 import type { ViewMode } from "../lib/viewState";
 import ViewToggle from "./ViewToggle";
 
@@ -9,8 +8,6 @@ type BackendStatus = "loading" | "live" | "mock";
 
 interface Props {
   backendStatus: BackendStatus;
-  priceState: PriceState | null;
-  streamStatus: StreamStatus;
   /** GLOBE | MAP switch (shown when both are given) */
   view?: ViewMode;
   onViewChange?: (v: ViewMode) => void;
@@ -24,7 +21,7 @@ const BADGE: Record<BackendStatus, { text: string; color: string }> = {
   mock: { text: "OFFLINE · MOCK DATA", color: "var(--color-alarm)" },
 };
 
-export default function Header({ backendStatus, priceState, streamStatus, view, onViewChange, search }: Props) {
+export default function Header({ backendStatus, view, onViewChange, search }: Props) {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -33,7 +30,9 @@ export default function Header({ backendStatus, priceState, streamStatus, view, 
   }, []);
 
   const badge = BADGE[backendStatus];
-  const animatedPrice = useAnimatedNumber(priceState?.crude_price_usd ?? 0, 800);
+  const price = usePriceState();
+  const live: PriceLive | null = price.kind === "ready" ? price.live : price.kind === "error" ? price.last?.live ?? null : null;
+  const fallback = live?.status === "OFFLINE_FALLBACK";
 
   return (
     <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 sm:px-8 py-5">
@@ -60,19 +59,19 @@ export default function Header({ backendStatus, priceState, streamStatus, view, 
 
       <div className="flex items-center gap-5 shrink-0">
         {view && onViewChange && <ViewToggle view={view} onChange={onViewChange} />}
-        {priceState && (
+        {live && live.wti !== null && (
           <div
             className="hidden md:flex items-baseline gap-2"
-            style={{ opacity: streamStatus === "open" ? 1 : 0.5, transition: "opacity 300ms ease" }}
-            data-testid="model-baseline"
-            title={`Model baseline (simulation, not a market price). Source: a hand-set seed of $82.50 (unsourced, "real-ish recent Brent") moved by the price engine, +/-2% at most per classified news headline, drifting back toward the seed. Last updated ${priceState.last_updated_at.slice(0, 19).replace("T", " ")} UTC. For real prices see the EIA ticker above.`}
+            data-testid="baseline-price"
+            title={`WTI baseline: the latest sourced WTI spot close, EIA Open Data API v2 (series RWTC), dated ${live.as_of} (${live.age_days === 0 ? "today" : `${live.age_days} day${live.age_days === 1 ? "" : "s"} old`}), status ${live.status}${fallback ? " (a saved fallback row, not current)" : ""}. It is the same number as the WTI card in the ticker and the starting price of the WTI scenario card in the Markets panel. The Results page and the scenario panel give percentage moves only, so they have no separate price baseline. A daily close published weekly, never a live quote.`}
           >
             <span className="section-label whitespace-nowrap" style={{ color: "var(--color-ash)" }}>
-              MODEL BASELINE
+              WTI BASELINE
             </span>
-            <span className="data-readout text-sm" style={{ color: "var(--color-crude)" }}>
-              ${animatedPrice.toFixed(2)}
+            <span className="data-readout text-sm" style={{ color: fallback ? "var(--color-alarm)" : "var(--color-crude)" }}>
+              ${live.wti.toFixed(2)}
             </span>
+            <span className="text-xs whitespace-nowrap" style={{ color: "var(--color-ash)" }}>EIA {live.as_of}{fallback ? " · saved fallback" : ""}</span>
           </div>
         )}
         <div className="data-readout text-xs hidden sm:block" style={{ color: "var(--color-ash)" }}>

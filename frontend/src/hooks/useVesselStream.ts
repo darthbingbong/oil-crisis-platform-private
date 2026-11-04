@@ -9,6 +9,18 @@ export interface AisStatus {
   vessel_count: number;
 }
 
+/** Is the live AISStream adapter configured on the server? One REST read of /api/v1/vessels/status. null while unknown. It says nothing about the ShipFinder snapshot
+ * layer (the saved real tankers), which has its own key and its own endpoint. */
+export function useAisStreamConfigured(): boolean | null {
+  const [configured, setConfigured] = useState<boolean | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/v1/vessels/status").then((r) => r.json()).then((s: { state?: string }) => { if (!cancelled) setConfigured(s.state !== "no_key"); }).catch(() => { if (!cancelled) setConfigured(null); });
+    return () => { cancelled = true; };
+  }, []);
+  return configured;
+}
+
 export type StreamPhase = "off" | "connecting" | "open" | "closed";
 
 const PUSH_EVERY_MS = 1000;                 // vessel list handed to the renderer at most once a second

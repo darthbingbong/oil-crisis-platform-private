@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 import { Line, LineChart, ResponsiveContainer, Tooltip, YAxis } from "recharts";
-import { usePrice } from "../hooks/usePrice";
+import { usePriceState } from "../hooks/priceContext";
 import { TOKENS } from "../lib/constants";
 import type { PriceHistory, PriceLive, PriceStatus } from "../types";
 
@@ -107,7 +107,7 @@ const bar: React.CSSProperties = {
 
 /** Top ticker: WTI and Brent with coloured change, a 30-day sparkline, the as-of date (and how old it is), and an honest status badge. */
 export default function PriceTicker() {
-  const state = usePrice();
+  const state = usePriceState();
 
   if (state.kind === "loading") {
     return (
