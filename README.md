@@ -63,8 +63,9 @@ Restart the backend (keys are read at startup; `Ctrl+C`, then run the `uvicorn` 
 # fill the route-news cache and refresh the demo snapshot (5 to 15 minutes; do not run while the backend is also warming up)
 cd C:\oil-crisis-platform\backend ; python tools\prewarm_news.py --snapshot
 
-# run the backend tests (from backend\, venv active)
-python -m pytest
+# run the backend tests. Always use the backend virtual environment: the system Python has no
+# `anthropic` package, so a bare `python -m pytest` fails at test_news.py with ModuleNotFoundError.
+cd C:\oil-crisis-platformackend ; .env\Scripts\python.exe -m pytest
 
 # type-check, lint and build the frontend (from frontend\)
 npx tsc -b ; npx oxlint ; npm run build
@@ -516,7 +517,7 @@ The full list, with what was observed, is in **`LIMITATIONS_AND_FUTURE_WORK.md`*
 
 | What | Command | Result at v1.0 |
 |---|---|---|
-| Backend (pytest): calculation engine, golden values, report consistency, route API snapshots, news, price feed, AIS adapter, frontend consistency, repo hygiene | `cd backend ; python -m pytest` | **319 passed, 1 expected failure** (the recorded negation case in `test_news_real_headlines.py`) |
+| Backend (pytest): calculation engine, golden values, report consistency, route API snapshots, news, price feed, AIS adapter, frontend consistency, repo hygiene | `cd backend ; .env\Scripts\python.exe -m pytest` (the venv, not the system Python) | **319 passed, 1 expected failure** (the recorded negation case in `test_news_real_headlines.py`) |
 | Frontend type-check, lint, production build | `cd frontend ; npx tsc -b ; npx oxlint ; npm run build` | tsc clean; lint 1 warning (a pre-existing `set-state-in-effect` note in `ChokepointPanel.tsx`); build OK |
 | Claims audit: every number in the README, DEMO_SCRIPT and LIMITATIONS rebuilt from the running app | `cd backend ; python tools\check_claims.py` | **50 of 50 claims match** (also run inside the pytest suite) |
 | Browser walkthroughs (real Chromium, software WebGL), screenshots in `docs/` | `frontend/e2e/*.mjs` (see its README) | Run per milestone; M8 and M9 runs had 0 console errors (the "backend down" state shows 10 browser-logged 502s, which is expected) |
