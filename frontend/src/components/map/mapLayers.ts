@@ -115,6 +115,14 @@ function simBinary(s: SimVessels): object {
   return data;
 }
 
+/** The data array deck.gl gets for a track: one object per track, so a redraw 20 times a second does not hand the layer a new array to rebuild each time. */
+const trackWrap = new WeakMap<[number, number][], [number, number][][]>();
+function trackData(track: [number, number][]): [number, number][][] {
+  let hit = trackWrap.get(track);
+  if (!hit) { hit = [track]; trackWrap.set(track, hit); }
+  return hit;
+}
+
 export interface MapLayerInput {
   pieces: RoutePiece[];
   routes: RouteSummary[];
@@ -136,7 +144,7 @@ export interface MapLayerInput {
 /** The part of the map that never moves between camera changes: graticule, country outlines, sea names. Drawn on its OWN canvas under the live layers, so a moving
  *  vessel does not make the browser redraw ~100,000 coastline vertices 20 times a second (on software rendering that alone was 1.7 frames a second). */
 export interface CountryLevel { index: number; data: object }
-export function buildBaseLayers(levels: CountryLevel[], active: number, zoom: number): Layer[] {
+export function buildBaseLayers(levels: CountryLevel[], active: number, zoom: number, track: [number, number][] | null = null): Layer[] {
   const layers: Layer[] = [];
   layers.push(new PathLayer<LngLat[]>({ id: "graticule", data: GRATICULE, getPath: (d) => d, getColor: C.grid, getWidth: 1, widthUnits: "pixels", pickable: false }));
   // One layer per level of detail that has been needed so far. Changing a layer's data makes deck.gl re-tessellate every polygon on the main thread (seconds on software
@@ -149,6 +157,11 @@ export function buildBaseLayers(levels: CountryLevel[], active: number, zoom: nu
     fontFamily: "Inter, system-ui, sans-serif", fontWeight: 500, characterSet: "auto", getTextAnchor: "middle", getAlignmentBaseline: "center", pickable: false,
   }));
 
+  // The saved past track of the selected real vessel, [lng, lat] points in time order. It never moves, so it lives on the static canvas with the coastlines: drawn on the
+  // live canvas it was redrawn 20 times a second and cost a quarter of the frame rate on software rendering.
+  if (track && track.length > 1) {
+    layers.push(new PathLayer<[number, number][]>({ id: "vessel-track", data: trackData(track), getPath: (d) => d, getColor: [89, 224, 201, 255], getWidth: 2.5, widthUnits: "pixels", capRounded: false, jointRounded: false, pickable: false }));
+  }
   return layers;
 }
 

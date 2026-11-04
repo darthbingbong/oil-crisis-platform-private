@@ -14,6 +14,8 @@ interface Props {
   /** GLOBE | MAP switch (shown when both are given) */
   view?: ViewMode;
   onViewChange?: (v: ViewMode) => void;
+  /** the vessel search box, between the title and the controls */
+  search?: React.ReactNode;
 }
 
 const BADGE: Record<BackendStatus, { text: string; color: string }> = {
@@ -22,7 +24,7 @@ const BADGE: Record<BackendStatus, { text: string; color: string }> = {
   mock: { text: "OFFLINE · MOCK DATA", color: "var(--color-alarm)" },
 };
 
-export default function Header({ backendStatus, priceState, streamStatus, view, onViewChange }: Props) {
+export default function Header({ backendStatus, priceState, streamStatus, view, onViewChange, search }: Props) {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -53,6 +55,8 @@ export default function Header({ backendStatus, priceState, streamStatus, view, 
           {badge.text}
         </span>
       </div>
+
+      {search && <div data-testid="header-search" className="order-last sm:order-none" style={{ flex: "1 1 240px", maxWidth: 380, minWidth: 200 }}>{search}</div>}
 
       <div className="flex items-center gap-5 shrink-0">
         {view && onViewChange && <ViewToggle view={view} onChange={onViewChange} />}

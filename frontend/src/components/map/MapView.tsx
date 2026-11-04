@@ -13,7 +13,8 @@ import LocationDetail from "../globe/LocationDetail";
 import RoutePanel from "../RoutePanel";
 import { VesselPanel } from "../VesselUi";
 import LayersPanel from "./LayersPanel";
-import WatchVesselPanel from "./WatchVesselPanel";
+import RealVesselPanel from "../RealVesselPanel";
+import type { VesselExtras } from "../../hooks/useVesselExtras";
 import { buildBaseLayers, buildLayers, type CountryLevel, makeSimVessels, packSimVessels, routePieces, watchGroupLabels } from "./mapLayers";
 import { SEA_LABELS } from "../../lib/mapGeometry";
 import { DETAIL_LEVELS, detailIndex, simplifyCountries } from "../../lib/mapSimplify";
@@ -38,6 +39,10 @@ interface Props {
   cameraFromUrl: boolean;
   onCameraChange: (c: MapCamera) => void;
   watchlist: WatchlistState;
+  /** the selected real vessel (shared with the globe through the URL) and its saved track and Nearby sample */
+  vessel: number | null;
+  onVesselChange: (mmsi: number | null) => void;
+  extras: VesselExtras;
 }
 
 type Hover = { kind: "route" | "location" | "sim" | "watch"; x: number; y: number; id?: string; index?: number; mmsi?: number } | null;
@@ -80,7 +85,7 @@ export default function MapView(props: Props) {
   const [viewState, setViewState] = useState<MapViewState>({ longitude: props.camera.lon, latitude: props.camera.lat, zoom: props.camera.zoom, pitch: 0, bearing: 0 });
   const [hover, setHover] = useState<Hover>(null);
   const [selectedSim, setSelectedSim] = useState<number | null>(null);
-  const [selectedWatch, setSelectedWatch] = useState<number | null>(null);
+  const selectedWatch = props.vessel, setSelectedWatch = props.onVesselChange;
   const [frame, setFrame] = useState(0);
   const timeRef = useRef(0);
 
@@ -93,6 +98,7 @@ export default function MapView(props: Props) {
 
   // ---- layers on/off
   const wl = watchlist.data;
+  const wlVessels = useMemo<WatchVessel[]>(() => (wl?.status === "SNAPSHOT" ? wl.vessels : []), [wl]);
   const haveSnapshot = !!wl && wl.status === "SNAPSHOT" && wl.vessels.length > 0;
   // The URL is the shared store, but a checkbox must answer at once: the choice is held locally too and follows the URL when that changes (back button, shared link).
   const [localLayers, setLocalLayers] = useState<LayerId[] | null>(props.layers);
@@ -153,6 +159,14 @@ export default function MapView(props: Props) {
     else if (selectedLocation) { flownTo.current = selectedId; flyTo(selectedLocation.lat, selectedLocation.lng, 5.2); }
   }, [selectedId, selectedRoute, selectedLocation, flyTo]);
   useEffect(() => { if (!selectedId) flownTo.current = null; }, [selectedId]);
+  // a vessel chosen somewhere else (the search box, a shared link, the globe) is flown to once; one clicked on this map is already under the pointer
+  const flownVessel = useRef<number | null>(props.cameraFromUrl ? props.vessel : null);
+  useEffect(() => {
+    if (props.vessel === null) { flownVessel.current = null; return; }
+    if (flownVessel.current === props.vessel) return;
+    const v = wlVessels.find((x) => x.mmsi === props.vessel);
+    if (v) { flownVessel.current = props.vessel; flyTo(v.lat, v.lng, 9); }
+  }, [props.vessel, wlVessels, flyTo]);
 
   // ---- camera back to the URL (debounced; the URL is never read again after the first render, so there is no loop)
   const firstCamera = useRef(true);
@@ -164,7 +178,11 @@ export default function MapView(props: Props) {
 
   // ---- layers
   const pieces = useMemo(() => routePieces(routes), [routes]);
-  const watch: WatchVessel[] = wl?.status === "SNAPSHOT" ? wl.vessels : [];
+  const watch = wlVessels;
+  const trackLine = useMemo<[number, number][] | null>(
+    () => (props.extras.mmsi === props.vessel && props.extras.track?.status === "SAVED" ? props.extras.track.points.map((p) => [p[0], p[1]] as [number, number]) : null),
+    [props.extras, props.vessel]
+  );
   const selectedSimInfo: VesselInfo | null = sim && selectedSim !== null ? sim.info(selectedSim) : null;
   const hoveredRouteId = hover?.kind === "route" ? hover.id ?? null : null;
   // Country outlines at the level of detail the zoom can show (lib/mapSimplify.ts). Each level is one deck.gl layer that is built ONCE, the first time it is needed, and
@@ -189,7 +207,7 @@ export default function MapView(props: Props) {
   const countryLevels = useMemo<CountryLevel[]>(() => [...loadedLevels.current.have.entries()].sort((a, b) => a[0] - b[0]).map(([index, data]) => ({ index, data })), [countries, levelCount]);
   const seaLabelCount = SEA_LABELS.filter((s) => viewState.zoom >= s.minZoom).length;     // the labels shown are fully decided by how many pass the zoom test
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const baseLayers = useMemo(() => buildBaseLayers(countryLevels, activeDetail, viewState.zoom), [countryLevels, activeDetail, seaLabelCount]);
+  const baseLayers = useMemo(() => buildBaseLayers(countryLevels, activeDetail, viewState.zoom, trackLine), [countryLevels, activeDetail, seaLabelCount, trackLine]);
   const layers = buildLayers({
     pieces, routes, locations, on, hoveredRouteId, selectedRouteId: selectedRoute?.id ?? null, disrupted, conflictIntensity: props.conflictIntensity,
     time: reducedMotion ? 0.7 * 2.4 : timeRef.current, zoom: viewState.zoom, sim: sim && on.has("simulated") ? simPack : null,
@@ -211,9 +229,10 @@ export default function MapView(props: Props) {
     if (id === "routes") { setSelectedSim(null); setSelectedWatch(null); onSelectedChange((info.object as { id: string }).id); }
     else if (id === "chokepoints" || id === "places") { setSelectedSim(null); setSelectedWatch(null); onSelectedChange((info.object as Location).id); }
     else if (id === "vessels-sim") { setSelectedWatch(null); setSelectedSim(info.index); }
-    else if (id === "vessels-watch") { setSelectedSim(null); setSelectedWatch((info.object as WatchVessel).mmsi); }
-  }, [onSelectedChange]);
+    else if (id === "vessels-watch") { const m = (info.object as WatchVessel).mmsi; flownVessel.current = m; setSelectedSim(null); setSelectedWatch(m); }
+  }, [onSelectedChange, setSelectedWatch]);
 
+  const closeVessel = useCallback(() => setSelectedWatch(null), [setSelectedWatch]);
   const closePanels = useCallback(() => onSelectedChange(null), [onSelectedChange]);
   const resetView = useCallback(() => flyTo(DEFAULT_CAMERA.lat, DEFAULT_CAMERA.lon, DEFAULT_CAMERA.zoom), [flyTo]);
   const zoomBy = useCallback((d: number) => setViewState((vs) => ({ ...vs, zoom: clampZoom(vs.zoom + d), transitionDuration: reducedMotion ? 0 : 250, transitionInterpolator: new FlyToInterpolator({ speed: 3 }) })), [reducedMotion]);
@@ -260,7 +279,14 @@ export default function MapView(props: Props) {
         ref={deckRef}
         views={MAP_VIEW}
         viewState={viewState}
-        onViewStateChange={({ viewState: vs }) => { setViewState(vs as MapViewState); noteCameraMoved(); }}
+        onViewStateChange={({ viewState: vs, interactionState }) => {
+          // deck.gl announces its initial view twice right after it starts, with an interaction state in which nothing is happening and no flight has ever run
+          // ({ isDragging: false } only). Taking that as a move would put the view back to where it started and cancel a flight requested at load (a shared link that names
+          // a vessel). A real drag, zoom or flight always has a true flag or an `inTransition` field.
+          if (interactionState && !("inTransition" in interactionState) && !Object.values(interactionState).some(Boolean)) return;
+          setViewState(vs as MapViewState);
+          noteCameraMoved();
+        }}
         controller={CONTROLLER}
         layers={layers}
         pickingRadius={6}
@@ -284,6 +310,13 @@ export default function MapView(props: Props) {
           <div data-testid="watch-badge" className="data-readout" style={{ fontSize: 11, color: "var(--color-ion)", background: "rgba(3,3,3,0.9)", border: "1px solid rgba(89,224,201,0.4)", borderRadius: 4, padding: "5px 9px", textAlign: "right" }}>
             SNAPSHOT {fmtUtc(wl!.captured_at_utc)} · {wl!.vessels.length} REAL TANKERS
             <span style={{ display: "block", color: "var(--color-ash)" }}>{wl!.label}</span>
+            <span data-testid="ais-key-line" style={{ display: "block", color: wl!.key_expired ? "var(--color-alarm)" : "var(--color-ash)" }}>{wl!.key_line}</span>
+          </div>
+        )}
+        {trackLine && props.extras.track && (
+          <div data-testid="track-badge" className="data-readout" style={{ fontSize: 11, color: "var(--color-ion)", background: "rgba(3,3,3,0.9)", border: "1px solid rgba(89,224,201,0.4)", borderRadius: 4, padding: "5px 9px", textAlign: "right" }}>
+            {props.extras.track.label.toUpperCase()}
+            {props.extras.track.motion_note && <span style={{ display: "block", color: "var(--color-caution)" }}>{props.extras.track.motion_note}</span>}
           </div>
         )}
         {on.has("simulated") && sim && (
@@ -347,7 +380,7 @@ export default function MapView(props: Props) {
       )}
 
       {selectedSimInfo && <VesselPanel info={selectedSimInfo} onClose={() => setSelectedSim(null)} />}
-      {selectedWatchVessel && <WatchVesselPanel vessel={selectedWatchVessel} onClose={() => setSelectedWatch(null)} />}
+      {selectedWatchVessel && <RealVesselPanel vessel={selectedWatchVessel} extras={props.extras} keyLine={wl?.key_expired ? wl.key_line : null} onClose={closeVessel} />}
       <Panels route={selectedRoute} location={selectedLocation} conflicts={props.conflicts} currentConditions={props.currentConditions} onClose={closePanels} onSimulate={props.onSimulateRoute} />
     </div>
   );

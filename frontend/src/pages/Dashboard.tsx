@@ -12,6 +12,9 @@ import { useLiveOrMock, type DataStatus } from "../hooks/useLiveOrMock";
 import { useNewsStream } from "../hooks/useNewsStream";
 import { useRoutes } from "../hooks/useRoutes";
 import { useWatchlist } from "../hooks/useWatchlist";
+import { useVesselExtras } from "../hooks/useVesselExtras";
+import VesselSearch from "../components/VesselSearch";
+import { fmtUtc } from "../lib/format";
 import { getConflicts, getRefineries } from "../lib/api";
 import { buildLocations } from "../lib/locations";
 import { parseScenario } from "../lib/scenarioParams";
@@ -40,6 +43,9 @@ export default function Dashboard() {
   const viewParams = useMemo(() => parseViewParams(search), [search]);
   const view = viewParams.view;
   const watchlist = useWatchlist();
+  const extras = useVesselExtras(viewParams.vessel);
+  const watchData = watchlist.data;
+  const watchVessels = useMemo(() => (watchData?.status === "SNAPSHOT" ? watchData.vessels : []), [watchData]);
   const cameraRef = useRef<MapCamera | null>(null);
   // Every write starts from the browser's CURRENT address, not from the last rendered copy: a camera write that fires just after a layer toggle must not
   // undo it (React Router may not have re-rendered between the two).
@@ -47,12 +53,14 @@ export default function Dashboard() {
     (patch: Partial<ViewWrite>, replace = true) => {
       const prev = new URLSearchParams(window.location.search);
       const cur = parseViewParams(prev);
-      setSearch(writeViewParams(prev, { view: cur.view, camera: cur.cameraFromUrl ? cur.camera : undefined, layers: cur.layers, selected: cur.selected, ...patch }), { replace });
+      setSearch(writeViewParams(prev, { view: cur.view, camera: cur.cameraFromUrl ? cur.camera : undefined, layers: cur.layers, selected: cur.selected, vessel: cur.vessel, ...patch }), { replace });
     },
     [setSearch]
   );
   const handleViewChange = useCallback((v: ViewMode) => updateView({ view: v, camera: v === "map" ? cameraRef.current ?? undefined : null }, false), [updateView]);
-  const handleSelectedChange = useCallback((id: string | null) => updateView({ selected: id }), [updateView]);
+  // a route or place and a real vessel are never open together: choosing one clears the other
+  const handleSelectedChange = useCallback((id: string | null) => updateView(id ? { selected: id, vessel: null } : { selected: null }), [updateView]);
+  const handleVesselChange = useCallback((mmsi: number | null) => updateView(mmsi ? { vessel: mmsi, selected: null } : { vessel: null }), [updateView]);
   const handleLayersChange = useCallback((ids: LayerId[]) => updateView({ layers: ids }), [updateView]);
   const handleCameraChange = useCallback((c: MapCamera) => { cameraRef.current = c; updateView({ camera: c }); }, [updateView]);
   const [prefill, setPrefill] = useState<RouteScenarioPrefill | null>(() => {
@@ -132,7 +140,12 @@ export default function Dashboard() {
   return (
     <div className="h-screen flex flex-col bg-void">
       <PriceTicker />
-      <Header backendStatus={backendStatus} priceState={priceState} streamStatus={streamStatus} view={view} onViewChange={handleViewChange} />
+      <Header backendStatus={backendStatus} priceState={priceState} streamStatus={streamStatus} view={view} onViewChange={handleViewChange} search={<VesselSearch onSelect={handleVesselChange} />} />
+      {watchData?.key_expired && (
+        <div data-testid="key-expired-banner" role="status" className="text-xs data-readout" style={{ margin: "0 16px 8px", padding: "6px 10px", color: "var(--color-alarm)", border: "1px solid rgba(255,59,59,0.4)", borderRadius: 4 }}>
+          {watchData.key_line}. No AIS calls are made; every real vessel shown is a saved position.
+        </div>
+      )}
       <main className="flex-1 flex flex-col overflow-y-auto lg:grid lg:grid-cols-[1fr_400px] lg:overflow-hidden gap-0">
         <div className="flex flex-col lg:min-h-0">
           <div className="min-h-[320px] h-[320px] md:h-[480px] lg:h-auto lg:flex-1 relative">
@@ -148,6 +161,12 @@ export default function Dashboard() {
                 onSimulateRoute={handleSimulateRoute}
                 selectedId={viewParams.selected}
                 onSelectedChange={handleSelectedChange}
+                watchVessels={watchVessels}
+                vesselMmsi={viewParams.vessel}
+                onVesselChange={handleVesselChange}
+                extras={extras}
+                keyLine={watchData?.key_expired ? watchData.key_line : null}
+                watchBadge={watchData?.status === "SNAPSHOT" && watchVessels.length ? { title: `SNAPSHOT ${fmtUtc(watchData.captured_at_utc)} · ${watchVessels.length} REAL TANKERS`, label: watchData.label ?? "", keyLine: watchData.key_line, expired: watchData.key_expired } : null}
               />
             ) : (
               <Suspense fallback={<div data-testid="map-loading" className="h-full flex items-center justify-center text-xs" style={{ color: "var(--color-ash)" }}>Loading the map...</div>}>
@@ -168,6 +187,9 @@ export default function Dashboard() {
                   cameraFromUrl={viewParams.cameraFromUrl}
                   onCameraChange={handleCameraChange}
                   watchlist={watchlist}
+                  vessel={viewParams.vessel}
+                  onVesselChange={handleVesselChange}
+                  extras={extras}
                 />
               </Suspense>
             )}
