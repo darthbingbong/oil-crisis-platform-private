@@ -128,6 +128,52 @@ sens = h["sections"]["price"]["sensitivity"]
 claim("README.md", f"{sens[0]['bypass_bpd'] / 1e6:g} Mb/d", "Hormuz bypass headline")
 claim("README.md", f"{sens[1]['bypass_bpd'] / 1e6:g} Mb/d", "Hormuz bypass sensitivity")
 
+# ---------------------------------------------------------------------------------------------------------------- M15: endpoints, env vars, the vessels, the Markets card, the demo script as a whole
+spec = main.app.openapi()
+readme = DOCS["README.md"]
+norm = lambda t: re.sub(r"\{[^}]*\}", "{}", t)
+readme_n = norm(readme)
+for path_ in sorted(spec["paths"]):
+    if path_.startswith("/api/v1/"):
+        results.append((norm(path_) in readme_n, "README.md", "every served endpoint is in the endpoint table", path_))
+for line in (BACKEND / ".env.example").read_text(encoding="utf-8").splitlines():
+    m_ = re.match(r"^([A-Z][A-Z0-9_]+)=", line)
+    if m_:
+        results.append((f"`{m_.group(1)}`" in readme, "README.md", "every variable in .env.example is in the environment table", m_.group(1)))
+
+wl_ = client.get("/api/v1/vessels/watchlist").json()
+trk_ = client.get("/api/v1/vessels/538006502/track").json()
+cap_ = wl_["captured_at_utc"].replace("T", " ")[:16] + " UTC"
+claim("DEMO_SCRIPT.md", f"SNAPSHOT {cap_} · {len(wl_['vessels'])} REAL TANKERS", "the real-tanker badge text (watchlist endpoint)")
+claim("DEMO_SCRIPT.md", wl_["key_line"], "the AIS key line (watchlist endpoint)")
+claim("DEMO_SCRIPT.md", trk_["label"], "the saved track label (track endpoint)")
+claim("DEMO_SCRIPT.md", f"{trk_['path_nm']:g} nm sailed, {trk_['start_to_end_nm']:g} nm start to end", "the headline track distances (track endpoint)")
+claim("README.md", "Twelve **real** tankers", "twelve real tankers")
+assert len(wl_["vessels"]) == 12
+
+# the one-point 30-day result of the Suez example, and the WTI scenario card's arithmetic
+pj = client.get("/api/v1/price/live").json()
+traj_ = s["sections"]["price"]["chart"]["trajectory"]
+results.append((len(traj_) == 1 and traj_[0]["day"] == 30, "(API)", "the price result is one point, day 30", str(traj_[0]["day"])))
+mv_ = round(5 / CFG.elasticity_abs, 2)
+claim("DEMO_SCRIPT.md", f"${pj['wti'] * (1 + mv_ / 100):,.2f}** (+{mv_:.1f}%)", "the WTI scenario card at the default 5% supply loss")
+claim("DEMO_SCRIPT.md", f"range ${pj['wti'] * (1 + (mv_ - CFG.price_band_pp) / 100):,.2f} to ${pj['wti'] * (1 + (mv_ + CFG.price_band_pp) / 100):,.2f}", "the WTI scenario range (plus or minus the 13.09 pp)")
+
+# the whole DEMO_SCRIPT: regenerate it from the template and the API now, and it must equal the file (the date it was generated on is taken from the file itself)
+import importlib.util  # noqa: E402
+spec_ = importlib.util.spec_from_file_location("make_demo_script", BACKEND / "tools" / "make_demo_script.py")
+mds = importlib.util.module_from_spec(spec_)
+spec_.loader.exec_module(mds)
+vals_ = mds.values(client)
+m_date = re.search(r"on (\d{4}-\d{2}-\d{2}) by `backend/tools/make_demo_script.py`", DOCS["DEMO_SCRIPT.md"])
+if m_date:
+    vals_["generated_on"] = m_date.group(1)
+fresh = (BACKEND / "tools" / "demo_script_template.md").read_text(encoding="utf-8")
+for k_, v_ in vals_.items():
+    fresh = fresh.replace(f"@@{k_}@@", v_)
+same = fresh.replace("\r\n", "\n").strip() == DOCS["DEMO_SCRIPT.md"].replace("\r\n", "\n").strip()
+results.append((same, "DEMO_SCRIPT.md", "the whole script equals what make_demo_script.py produces from the API now", "every number, every date"))
+
 # ---------------------------------------------------------------------------------------------------------------- report
 failed = [r for r in results if not r[0]]
 width = max(len(r[2]) for r in results)
