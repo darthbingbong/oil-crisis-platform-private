@@ -44,6 +44,15 @@ export interface FillTarget {
   count: number;
 }
 
+/** Per-vessel output for the 2D map (see VesselSim.fillGeo). */
+export interface GeoTarget {
+  lng: Float32Array;
+  lat: Float32Array;
+  bearing: Float32Array;      // degrees clockwise from north
+  state: Uint8Array;          // 0 normal, 1 rerouted, 2 halted
+}
+export const makeGeoTarget = (n: number): GeoTarget => ({ lng: new Float32Array(n), lat: new Float32Array(n), bearing: new Float32Array(n), state: new Uint8Array(n) });
+
 /** Which vessels to draw: those whose unit position has dot(p, cam) >= minDot (cam is the camera direction in the globe's local frame). null = all. */
 export interface View { cam: number[]; minDot: number }
 
@@ -252,6 +261,36 @@ export class VesselSim implements VesselSource {
       const s = this.state[i];
       if (this.dir[i] < 0) { t[0] = -t[0]; t[1] = -t[1]; t[2] = -t[2]; }
       writeInstance(out, i, p, t, radius, s === 1 ? size * 1.6 : size, s === 1 ? REROUTED : s === 2 ? HALTED : NORMAL, s === 2 ? 0 : trailRad, this.side[i], view);
+    }
+  }
+
+  /** The same vessels for the 2D map: longitude and latitude in degrees, bearing clockwise from north, state (0 normal, 1 rerouted, 2 halted).
+   *  Same motion as fill(), including the sideways lane band and the glide after a reroute, so both views show one simulation. */
+  fillGeo(out: GeoTarget): void {
+    const p = this.p, t = this.t;
+    for (let i = 0; i < this.count; i++) {
+      sampleLane(this.lanes[this.lane[i]], this.dist[i], p, t);
+      const b = this.blend[i];
+      if (b < 1) {
+        const e = b * b * (3 - 2 * b), fx = this.from[i * 3], fy = this.from[i * 3 + 1], fz = this.from[i * 3 + 2];
+        const x = fx + (p[0] - fx) * e, y = fy + (p[1] - fy) * e, z = fz + (p[2] - fz) * e, l = Math.sqrt(x * x + y * y + z * z) || 1;
+        p[0] = x / l; p[1] = y / l; p[2] = z / l;
+      }
+      if (this.dir[i] < 0) { t[0] = -t[0]; t[1] = -t[1]; t[2] = -t[2]; }
+      let q = p;
+      const offset = this.side[i];
+      if (offset) {                                   // sideways shift, as in writeInstance: right = up x forward (forward projected onto the surface)
+        const d = dot(t, p);
+        let fx = t[0] - d * p[0], fy = t[1] - d * p[1], fz = t[2] - d * p[2];
+        const fl = Math.sqrt(fx * fx + fy * fy + fz * fz) || 1;
+        fx /= fl; fy /= fl; fz /= fl;
+        const rx = p[1] * fz - p[2] * fy, ry = p[2] * fx - p[0] * fz, rz = p[0] * fy - p[1] * fx;
+        const ox = p[0] + rx * offset, oy = p[1] + ry * offset, oz = p[2] + rz * offset, ol = Math.sqrt(ox * ox + oy * oy + oz * oz) || 1;
+        SCRATCH[0] = ox / ol; SCRATCH[1] = oy / ol; SCRATCH[2] = oz / ol;
+        q = SCRATCH;
+      }
+      const ll = toLatLng(q);
+      out.lng[i] = ll.lng; out.lat[i] = ll.lat; out.bearing[i] = bearing(q, t); out.state[i] = this.state[i];
     }
   }
 

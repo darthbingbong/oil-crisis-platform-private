@@ -15,6 +15,7 @@ import type {
   RoutesResponse,
   SimulateRequest,
   SimulateResponse,
+  WatchlistResponse,
 } from "../types";
 
 const API_BASE = "/api/v1";
@@ -46,6 +47,11 @@ export function getRefineries(): Promise<RefineryHub[]> {
 
 export function getChokepointRisk(chokepoint: string): Promise<ChokepointRisk> {
   return fetchJson<ChokepointRisk>(`/refineries/at-risk/${encodeURIComponent(chokepoint)}`);
+}
+
+/** The saved watchlist of real tankers. Never fails on the server side (status NONE when there is no snapshot). */
+export function getWatchlist(): Promise<WatchlistResponse> {
+  return fetchJson<WatchlistResponse>("/vessels/watchlist");
 }
 
 export function getRoutes(): Promise<RoutesResponse> {

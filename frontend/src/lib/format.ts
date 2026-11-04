@@ -21,3 +21,14 @@ export function fmtUtc(iso: string | null | undefined): string {
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? iso : `${d.toISOString().slice(0, 16).replace("T", " ")} UTC`;
 }
+
+/** "3 min ago", "2 h 5 min ago", "1 d 4 h ago". Null (unknown) says so instead of guessing. */
+export function ageText(seconds: number | null | undefined): string {
+  if (seconds == null) return "unknown";
+  if (seconds < 90) return `${Math.max(0, Math.round(seconds))} s ago`;
+  const min = Math.round(seconds / 60);
+  if (min < 120) return `${min} min ago`;
+  const h = Math.floor(min / 60);
+  if (h < 48) return `${h} h ${min % 60} min ago`;
+  return `${Math.floor(h / 24)} d ${h % 24} h ago`;
+}

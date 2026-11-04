@@ -109,7 +109,7 @@ export function VesselControls({ mode, setMode, showingAis, phase, status, aisCo
   );
 }
 
-function Row({ k, v }: { k: string; v: string }) {
+export function Row({ k, v }: { k: string; v: string }) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "3px 0", borderBottom: "1px solid rgba(244,241,234,0.06)" }}>
       <span className="section-label" style={{ color: "var(--color-ash)" }}>{k}</span>

@@ -428,3 +428,53 @@ export interface PriceHistory {
   latest_date: string;
   age_days: number;
 }
+
+// ---- Saved watchlist of real tankers (GET /api/v1/vessels/watchlist). Always a snapshot unless a deliberate refresh just happened.
+export type VesselFreshness = "LIVE" | "DELAYED" | "STALE" | "SNAPSHOT";
+
+export interface WatchVessel {
+  mmsi: number;
+  imo: number | null;
+  name: string | null;
+  flag: string | null;
+  flag_source: string | null;
+  ship_type: number;
+  length_m: number | null;
+  draught_m: number | null;
+  destination: string | null;
+  sog_kn: number | null;
+  cog_deg: number | null;
+  heading_deg: number | null;
+  nav_status: string;
+  lat: number;
+  lng: number;
+  last_seen_utc: string | null;
+  last_seen_age_s_now: number | null;
+  record_fetched_utc: string | null;
+  position_confirmed_by: string | null;
+  area: string;
+  state: VesselFreshness;
+  typed_as_tanker_by: string | null;
+  cargo_note: string;
+}
+
+export interface WatchlistSample {
+  label: string;
+  area: string;
+  seed: { mmsi: number; name: string } | null;
+  fetched_utc: string;
+  radius_nm: number;
+  returned: number;
+  caveat: string;
+}
+
+export interface WatchlistResponse {
+  status: "SNAPSHOT" | "NONE";
+  provider: string;
+  key_expires_in_days: number;
+  captured_at_utc: string | null;
+  label: string | null;
+  note: string;
+  vessels: WatchVessel[];
+  samples: WatchlistSample[];
+}
