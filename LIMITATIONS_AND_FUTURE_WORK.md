@@ -1,6 +1,6 @@
 # Limitations and future work
 
-Final state at **v1.0** (30 Oct 2026). Everything here was observed or measured in this project, not assumed. Items marked **(to do)** are not built yet.
+Final state at **v2.0 release candidate** (written 4 Nov 2026; `v2.0` is tagged after the final AIS snapshot, planned for 2026-11-08 to 11-10). Everything here was observed or measured in this project, not assumed. Items marked **(to do)** are not built yet.
 
 ## 0. What is verified and what is not (one table)
 
@@ -11,10 +11,13 @@ Final state at **v1.0** (30 Oct 2026). Everything here was observed or measured 
 | EIA price path, `DAILY_CLOSE` | **Verified live** on 29 Oct 2026 with a real key |
 | EIA failure paths (`OFFLINE_FALLBACK`: rejected key, timeout, server error, rate limit) | **Mock only**: exercised against a mock server and mocked transports, not by breaking the real service |
 | GDELT route news | **Verified live** (slow, often rate-limited); quality filters tested on real headlines; fallbacks proven by simulated failures |
-| **Live AIS feed** | **UNVERIFIED**: no key was available; built from the provider's documentation and tested against a mock transport |
+| **ShipFinder AIS (the provider the app actually uses)** | **Verified against the real service** on 2026-11-02 to 11-03 with the owner's key (host, authentication, response shape, limits; `docs/ais_verification.md`), then **saved**: the app shows snapshots, never live data, and the key expires on 2026-11-13 |
+| **AISStream live feed (an older, optional adapter)** | **UNVERIFIED**: no key was available; built from the provider's documentation and tested against a mock transport |
+| ShipFinder terms for **public** display | **Unconfirmed**: the owner confirmed their own use; the terms text was never found (DECISIONS D10, D27) |
+| TradingView widget terms | Attribution required; commercial use is **not stated** on the pages read (D26) |
 | AISStream terms of service | **Unconfirmed**: the terms page could not be found |
 | Three USGS lithium cells (see section 8) | Read from the PDF's text layer and its footnotes on 30 Oct 2026; a person should still compare them with the rendered PDF |
-| Frame rates | **Software rendering only** (a lower bound); a real GPU was not measured |
+| Frame rates | **Software rendering only** (a lower bound); a real GPU was not measured. Map drag: 6.5 fps before M15, about 30 to 45 fps after |
 | Keyboard use | Routes yes (hidden list); individual simulated vessels no |
 
 ## 1. Route news (GDELT)
@@ -103,17 +106,17 @@ The literal readings are impossible (Argentina or Chile alone would exceed the w
 ## 10. Not built yet
 
 - **(to do)** A print-friendly or PDF version of the Results page.
-- **(to do)** Run the AIS adapter with a real key, check it against the provider's actual frames, confirm the provider's terms, then flip `VERIFIED_AGAINST_LIVE_FEED`.
+- **(to do)** Run the older AISStream adapter with a real key and flip `VERIFIED_AGAINST_LIVE_FEED` (the ShipFinder path is verified and saved; the AISStream one never ran live).
 - **(to do)** Measure frame rate on a real GPU.
-- **(to do)** Replace the older NewsAPI pipeline's live polling (or move to a paid plan) before any public deployment.
+- **(to do, milestone M16)** Hosting readiness: switch NewsAPI and the Anthropic classifier off in hosted mode, scheduled refreshes served from cache, the 390 px phone check, a footer, and a clean-export public repo (DECISIONS D25 to D32). Nothing in M16 is built yet.
 - **(to do)** Break the real EIA service on purpose (a rejected key against the real endpoint) to check the fallback end to end.
 
 ## 11. The 2D map (M11): measured limits
 
-- **Dragging the map is slow on software rendering.** With every layer on, the map holds about 71 fps (zoom 2) and 97 fps (zoom 5.5) while vessels move, but dragging it runs at about 6.5 fps with a worst frame near 0.7 s (`docs/m11_screenshots/map_fps.txt`). Every camera move redraws the country outlines; the static outlines sit on their own canvas so that moving vessels never redraw them, and the coarsest outline level is used while the camera moves. This was measured in Chromium with software WebGL (SwiftShader), which is a lower bound; a real GPU was not measured (still on the to-do list above).
+- **Dragging the map was slow on software rendering (fixed in M15, see below).** With every layer on, the map held about 71 fps (zoom 2) and 97 fps (zoom 5.5) while vessels move, but dragging it ran at about 6.5 fps with a worst frame near 0.7 s (`docs/m11_screenshots/map_fps.txt`). Every camera move redraws the country outlines; the static outlines sit on their own canvas so that moving vessels never redraw them, and the coarsest outline level is used while the camera moves. This was measured in Chromium with software WebGL (SwiftShader), which is a lower bound; a real GPU was not measured (still on the to-do list above).
 - **Country outlines are simplified** at three zoom levels (Douglas-Peucker, tolerances 0.2, 0.05 and 0.01 degrees) from the bundled Natural Earth 1:50m file. At the highest zoom the coastline is the 1:50m shape, not a survey.
 - **The real-tanker groups are two samples, not coverage**: eight tankers near Huelva (seen 2026-11-03 15:58 UTC) and four in the Strait of Malacca (seen 16:13 to 16:28 UTC). Three of the four Malacca positions come from the Vessels Nearby sample, not from Vessel Position. No tanker was found near Hormuz or Fujairah.
-- **The slow drag goes on the M15 polish list** (owner, 2026-11-04). M12 did not change it: with a vessel selected and its track drawn on the static canvas, frame rates with all layers on were 78 fps (zoom 2) and 114 fps (zoom 5.5).
+- **M15 drag fix.** The cost was the second canvas that draws the country outlines: every pointer move redrew it (about 140 ms a frame on software rendering). It now keeps its picture while the camera moves and is moved by a CSS transform (derived from the camera and checked against deck.gl's own projection to 0.01 px), then redrawn once when the interaction ends. Measured on the same setup: **about 27 to 45 fps while dragging** (zoom 2 and 5.5) against 6.3 to 7.4 before; the outlines are drawn 4 times per drag, all after release. **Trade-off:** during a drag a dark strip shows where new area is exposed, and the outlines snap into place on release (about 0.4 to 0.9 s of one slow frame on software rendering).
 
 ## 12. Real vessels (M12): limits
 

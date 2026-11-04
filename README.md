@@ -2,9 +2,9 @@
 
 A terminal-style web app for exploring what a maritime oil disruption would do. Pick a route (a chokepoint such as Suez or Hormuz, or a pipeline) on a 3D globe, blockade it or force a detour, and see the **price impact**, the **barrels displaced**, the **electric vehicles** that would be needed to offset them, the **extra lithium** that implies, and indicative **economy and market effects**. Every number is traceable to a source, a formula or a labelled assumption.
 
-**Version 1.0.** It is a student project for presenting to a professor: *credibility beats flash*. Nothing is labelled live that is not, simulated things are labelled simulated, and the places where the evidence is thin are written down (see [What is verified and what is not](#what-is-verified-and-what-is-not) and `LIMITATIONS_AND_FUTURE_WORK.md`).
+**Version 2.0 release candidate.** `v1.0` is tagged; `v2.0` is tagged only after the final AIS snapshot (planned for 2026-11-08 to 11-10, before the provider key expires on 2026-11-13). It is a student project for presenting to a professor: *credibility beats flash*. Nothing is labelled live that is not, simulated things are labelled simulated, and the places where the evidence is thin are written down (see [What is verified and what is not](#what-is-verified-and-what-is-not) and `LIMITATIONS_AND_FUTURE_WORK.md`).
 
-- Walkthrough for presenting: **`DEMO_SCRIPT.md`** (5 minutes, with the arithmetic and a demo-day fallback plan).
+- Walkthrough for presenting: **`DEMO_SCRIPT.md`** (7 minutes, with the arithmetic and a demo-day fallback plan).
 - Known limits: **`LIMITATIONS_AND_FUTURE_WORK.md`**.
 - Build instructions it was written to: `MASTER_PROMPT.md`. Phase 1 modelling decisions: `backend/PHASE1_SUMMARY.md`.
 
@@ -81,19 +81,22 @@ The 31 MB source workbook `backend/data/globalEnergyOwnership.xlsx` is **not in 
 ## Architecture
 
 ```
- Browser  (React 19, Vite, TypeScript, Tailwind 4, three.js globe via react-three-fiber, Recharts)
+ Browser  (React 19, Vite, TypeScript, Tailwind 4, three.js globe via react-three-fiber, deck.gl 2D map, Recharts)
    |  HTTP /api/v1/*                      WebSocket /ws/vessels
    v  (Vite dev server / preview proxies both to :8000)
  FastAPI backend (uvicorn, :8000)
    routers/    routes . report . price . vessels . health      (main.py: /simulate, /conflicts, /refineries, news stream)
    services/   calc_engine (pure functions) . config (every constant, with its source) . report . route_data
-               price_feed . news_feed . ais_feed . cache . news_classifier
+               price_feed . news_feed . ais_feed (AISStream, unverified) . shipfinder (the provider client: quota guard, breaker, call log)
+               ais_watchlist (saved real tankers, tracks, samples) . route_planning . cache . news_classifier
    data/       routes.json . importers.json . lithium_usgs.json . events.csv . oil_daily_prices.csv . refineries.csv ...
    news/       the older pipeline: NewsAPI -> classifier -> SIMULATED "model baseline" price (SQLite)
    |
    +-- EIA API v2 (key)            price ticker .............. fallback: local CSV, labelled OFFLINE_FALLBACK
    +-- GDELT DOC 2.0 (no key)      route headlines ........... fallback: disk cache -> labelled DEMO SNAPSHOT
-   +-- AISStream.io (key)          tanker positions .......... fallback: SIMULATED vessels (drawn in the browser)
+   +-- ShipFinder AIS (key, to 2026-11-13)  12 saved real tankers, tracks, search .... fallback: the saved snapshot, then SIMULATED vessels
+   +-- AISStream.io (key)          tanker positions (never run live) ... fallback: SIMULATED vessels (drawn in the browser)
+   +-- TradingView widget          Markets panel: loaded by the BROWSER from TradingView, no key, no server call ... fallback: "Widget unavailable"
    +-- NewsAPI, Anthropic (keys)   older classification pipeline, optional
 ```
 
@@ -106,6 +109,9 @@ All optional. Set them in `backend/.env` (copy `backend/.env.example`). Never pu
 | Variable | Default | What it does |
 |---|---|---|
 | `EIA_API_KEY` | none | EIA Open Data key for the WTI/Brent ticker. Without it: `OFFLINE_FALLBACK` |
+| `AIS_API_KEY` | none | ShipFinder Open Platform key (server-side only; never printed, logged or sent to the browser). Without it, or after it expires on 2026-11-13, the app shows the saved snapshot and makes no call |
+| `AIS_ENABLED` | `1` | `0` is the kill switch: no provider call is ever made |
+| `AIS_TODAY` | unset | **Testing only**: `YYYY-MM-DD` fakes today's date so the expired-key behaviour can be checked (for example `2026-11-13`) |
 | `AISSTREAM_API_KEY` | none | AISStream.io key for the tanker feed. Without it: simulated vessels. Adapter is **unverified against the live feed** |
 | `ANTHROPIC_API_KEY` | none | Lets the older news pipeline classify headlines with Claude; otherwise a rule-based classifier |
 | `NEWSAPI_API_KEY` | none | NewsAPI key for the older pipeline's polling (the free plan is dev/test only, see Limitations) |
@@ -142,7 +148,8 @@ All optional. Set them in `backend/.env` (copy `backend/.env.example`). Never pu
 | GET | `/api/v1/vessels/{mmsi}/track` | new (M12) | The saved past track (`past track, fetched at <time>`) or `no saved track`; the headline is the one that travelled furthest |
 | GET | `/api/v1/vessels/{mmsi}/near` | new (M12) | The saved Vessels Nearby sample that contains the vessel, with its seed and time. Never a live Nearby call |
 | POST | `/api/v1/dev/news-feed`, `/api/v1/news/test-inject` | DEV-ONLY | Simulate a feed failure or an empty feed; inject a test headline |
-| GET | `/api/v1/news/stream`, `/api/v1/alerts`, `/api/v1/price-state` (older pipeline) | unchanged | SSE alert stream, recent alerts, the SIMULATED model-baseline price |
+| GET | `/api/v1/news/stream`, `/api/v1/news/alerts`, `/api/v1/news/recent`, `/api/v1/news/price` (older pipeline) | unchanged | SSE alert stream, the alerts that moved the simulated price, the audit log of every classified article, the SIMULATED model-baseline price (never a quote) |
+| POST | `/api/v1/news/poll-now` | DEV-ONLY | Runs one poll cycle of the older NewsAPI pipeline (NewsAPI key needed; outside the plan's terms for public use) |
 
 **Route-collision decision: Option A.** `/api/v1/routes/{id}` returns a superset of what `/api/v1/routes/{chokepoint}` returned before. `backend/tests/test_routes_api.py` checks it against snapshots of the original responses (`backend/tests/snapshots/*_before.json`), key by key, for all four chokepoints and several URL spellings. Option B (`/route-data/{id}`) was not needed: no new field clashes with an old key.
 
@@ -162,6 +169,8 @@ Every data record in `routes.json` carries `source`, `source_url`, `data_year` a
 | ICCT, *EV supply chain* report (Feb 2024) | 0.10 kg lithium per kWh for NMC-811 cathodes | 2024 | <https://theicct.org/wp-content/uploads/2024/02/ID-85-%E2%80%93-EV-supply-chain-Report-Letter-70112-v3.pdf> |
 | IEA, *Global EV Outlook 2026* | EV sales above 20 million and about 22 million produced in 2025; average battery sizes (China below 60 kWh, EU close to 70, US 90) | 2025 | <https://www.iea.org/reports/global-ev-outlook-2026> |
 | IMF Managing Director K. Georgieva, speech of 9 Mar 2026; IMF Working Paper 17/196 | The only two macro coefficients with a verified primary source: +0.4 pp global inflation and -0.1 to -0.2% global output per +10% oil, if it lasts most of a year | 2026, 2017 | <https://www.imf.org/en/news/articles/2026/03/09/sp030926-coping-and-thriving-in-a-fluid-world> and <https://www.imf.org/en/publications/wp/issues/2017/09/05/oil-prices-and-inflation-dynamics-evidence-from-advanced-and-developing-economies-45180> |
+| ShipFinder Open Platform (Starter plan key `AIS-vessel-tracker`, valid to 2026-11-13) | Planned sea distances for the voyage days (M10, stored in `routes.json` and `data/ais_route_plans.json`); the 12 saved real tankers, their positions, three saved 7-day tracks and two Vessels Nearby samples (M12). Raw responses are kept out of git. The owner confirmed that the terms they accepted allow display and saving; **public display is unconfirmed** (DECISIONS D10, D27) | 2026-11 | <https://docs.shipfinder.com> |
+| Natural Earth 1:50m admin-0 countries (public domain) | The 2D map's country outlines (bundled, simplified at three zoom levels; no tile server) | 2026 | <https://www.naturalearthdata.com/> |
 | GDELT Project, DOC 2.0 API | Route headlines (headline, source, date, link only). Attribution link shown in the panel | live | <https://www.gdeltproject.org/> |
 | AISStream.io | Tanker positions (live mode, unverified) | live | <https://aisstream.io/documentation> |
 | TradingView free **Market Overview** widget (an iframe loaded from TradingView in the visitor's browser) | The Markets panel: indices, natural gas, gold, silver, copper, FX. We never receive these prices (no key, no server call). TradingView states stock data is delayed and forex is real time; the chip says "Via TradingView widget, delay set by TradingView" and no time is shown. Attribution stays visible. TradingView's pages do not say whether commercial use is allowed (DECISIONS D26) | live (their delay) | <https://www.tradingview.com/widget-docs/> |
@@ -246,6 +255,14 @@ Everything below is either borrowed, chosen, or estimated, and is flagged in the
 | Real-GPU frame rate | **Not measured.** All fps figures are from software rendering (a lower bound) |
 
 ## Changelog / corrected values
+
+### Changed in M11 to M15 (what you can see)
+
+- **M11, 2D map** beside the globe, with shared URL state (see the feature note above).
+- **M12, real vessels:** twelve saved real tankers (two sample areas: Huelva and the Strait of Malacca) on both views with one shared vessel panel, search (saved watchlist while typing, the provider only on a button press), three saved past tracks (MUHUT SILVER is the headline), two saved "vessels near this vessel" samples, the AIS budget endpoint and the expired-key behaviour (DECISIONS D21 to D24). Real vessels are never counted as traffic, and chokepoint traffic stays `SIMULATED`.
+- **M13, Markets panel** replaces the historical-events chart (removed from the dashboard): Indices, Commodities, FX; WTI and Brent are our own EIA cards with the WTI 30-day scenario toggle; the rest is TradingView's free widget with the chip "Via TradingView widget, delay set by TradingView" (DECISIONS D26).
+- **M14, 30-day outlook:** one price horizon. The headline was and is `supply loss / 0.15`; the hold-then-decay path over 180 days was removed, then the straight line that replaced it, leaving a single day-30 value with its error bar. `half_life_days` is gone from the report API; `horizon_days`, `validation_badge` and `price_horizon_days` were added. The barrels series now ends with the disruption length entered. `docs/outlook_validation.md`, `docs/m14_before_after.md`, DECISIONS D33 and D34.
+- **M15, polish:** map drag 6.5 to about 30 to 45 fps; nothing under 11 px; both lint warnings fixed (lint is clean); larger tap targets; a compact phone layout (taller map, compact ticker, folded snapshot note); documentation and tests brought up to the final state.
 
 ### Changed in M10 (numbers that moved)
 
@@ -334,6 +351,12 @@ Hover shows a tooltip, click flies the camera to the route and opens its panel (
 Route geometry is illustrative. Druzhba shows n/a. Routes with no sourced importer data say "not available" rather than showing an empty chart.
 Screenshots from a real browser run are in `docs/m3_screenshots/`; the scripts that produced them are in `frontend/e2e/`.
 
+### 2D map (M11)
+
+A `GLOBE | MAP` switch in the top bar. The map is deck.gl in Web Mercator with **bundled Natural Earth outlines** (public domain; no tile server, so it works offline), a graticule, sea and chokepoint labels, lanes (blue), pipelines (amber) and disrupted routes (crimson), pulsing rings on chokepoints scaled by conflict intensity, antimeridian-safe lines, hover tooltips, click for the same side panel as the globe, "Reset view", and a collapsible **Layers** panel (routes, chokepoints, hubs and cities, real tankers, simulated traffic, scenario overlay), each with a count and a status chip. **One state for both views, kept in the address**: `?view=map|globe&lat=&lon=&zoom=&layers=routes,chokepoints,...&selected=<route or place>&vessel=<MMSI>`; every parameter is validated and a bad one falls back to its default (`lib/viewState.ts`, 48 plain-node checks). Switching view keeps the selection.
+
+**Speed (software WebGL, 1440 x 900, all layers, 2,000 simulated vessels):** about 70 to 120 fps idle; **dragging was 6.5 fps until M15** because every pointer move redrew the country outlines on a second canvas. Since M15 that canvas keeps its picture during a drag or zoom and is moved by a CSS transform (derived from the camera and checked against deck.gl's own projection), then redrawn once when the interaction ends: about 30 to 45 fps while dragging, with a brief dark strip where new area is exposed. `frontend/e2e/m15_drag.mjs` asserts it.
+
 ### Route news
 
 `GET /api/v1/routes/{id}/news` returns recent headlines for one route: **headline, source, published time, link and a tag** (`attack`,
@@ -394,9 +417,8 @@ of Good Hope alternate lane are explained, not errored. "Back to map" returns to
 Page layout: header (route, baseline year, the user's detour days next to the route's derived default, the current-conditions note with the EIA links),
 a KPI strip (price impact, barrels per day displaced, EVs required, extra lithium, lithium deficit; the "outside the validated range" warning sits here when it
 applies), then six sections, each with a chart, a 2-4 sentence summary written by the backend from computed numbers, a one-line takeaway and a collapsible
-"Assumptions and sources" block. The price chart draws the part beyond the validated range dashed on a shaded zone, shows the reference event (the 2026 Iran war,
-labelled a soft figure, still unfolding), shows the Hormuz bypass sensitivity (4.7 vs 2.6 Mb/d), and replaces the plus or minus 13.09 pp band with
-"not validated at this magnitude" beyond 8% supply loss. The economy section shows an effect only where a coefficient has a cited primary source.
+"Assumptions and sources" block. The price section (M14) shows **one 30-day value** as a single marker with its plus or minus 13.09 pp error bar and the badge `VALIDATED 30 DAYS (≤ 8% supply loss)`; beyond 8% supply loss the marker turns red, the bar is replaced by "not validated at this magnitude" and the badge reads `OUTSIDE VALIDATED RANGE`. There is no path before day 30, and a note says the validated formula uses supply loss only, not duration. The chart also shows the reference event (the 2026 Iran war,
+labelled a soft figure, still unfolding) and the Hormuz bypass sensitivity (4.7 vs 2.6 Mb/d). The barrels chart ends with the disruption length you entered; the 1, 3 and 5 year EV horizons are labelled "if the displacement lasted this long (arithmetic, not a forecast)". The economy section shows an effect only where a coefficient has a cited primary source.
 
 **Tests.** `backend/tests/test_report_consistency.py` checks that every number quoted in a summary, takeaway or warning matches a value in the report payload
 (across nine scenarios, with a guard test proving it catches a wrong number) and that every summary is 2 to 4 sentences. Browser checks are in
