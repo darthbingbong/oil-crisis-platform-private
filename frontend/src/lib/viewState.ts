@@ -28,6 +28,8 @@ export interface ParsedView {
   /** null = not given or nothing valid in it: use the defaults */
   layers: LayerId[] | null;
   selected: string | null;
+  /** the selected real vessel (a 9-digit MMSI), shared by both views; null when not given or not valid */
+  vessel: number | null;
   problems: string[];
 }
 
@@ -69,10 +71,16 @@ export function parseViewParams(p: URLSearchParams): ParsedView {
     if (SELECTED_RE.test(rawSel)) selected = rawSel;
     else problems.push("selected");
   }
-  return { view, camera, cameraFromUrl, layers, selected, problems };
+  const rawVessel = p.get("vessel");
+  let vessel: number | null = null;
+  if (rawVessel !== null) {
+    if (/^\d{9}$/.test(rawVessel)) vessel = Number(rawVessel);
+    else problems.push("vessel");
+  }
+  return { view, camera, cameraFromUrl, layers, selected, vessel, problems };
 }
 
-export interface ViewWrite { view: ViewMode; camera?: MapCamera | null; layers?: LayerId[] | null; selected?: string | null }
+export interface ViewWrite { view: ViewMode; camera?: MapCamera | null; layers?: LayerId[] | null; selected?: string | null; vessel?: number | null }
 
 /** New query string with the view parameters set (others, such as the scenario ones, are kept). Camera values are rounded so the address stays short. */
 export function writeViewParams(current: URLSearchParams, w: ViewWrite): URLSearchParams {
@@ -91,5 +99,7 @@ export function writeViewParams(current: URLSearchParams, w: ViewWrite): URLSear
   }
   if (w.selected) next.set("selected", w.selected);
   else next.delete("selected");
+  if (w.vessel) next.set("vessel", String(w.vessel));
+  else next.delete("vessel");
   return next;
 }

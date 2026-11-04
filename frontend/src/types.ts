@@ -468,10 +468,83 @@ export interface WatchlistSample {
   caveat: string;
 }
 
+/** The AIS key's state and the plain sentence to show (the server decides; the browser never counts days itself). */
+export interface AisKeyInfo {
+  expires_on: string;
+  expires_in_days: number;
+  expired: boolean;
+  line: string;
+  saved_on: string | null;
+}
+
+/** A saved past track (Vessel History Track), served from disk. points: [lng, lat, unix seconds, speed over ground]. */
+export interface VesselTrack {
+  status: "SAVED" | "NONE";
+  mmsi: number;
+  name?: string | null;
+  label: string;
+  fetched_utc?: string | null;
+  first_point_utc?: string | null;
+  last_point_utc?: string | null;
+  points_provider?: number;
+  path_nm?: number | null;
+  start_to_end_nm?: number | null;
+  max_sog_kn?: number | null;
+  stationary?: boolean;
+  motion_note?: string | null;
+  headline?: boolean;
+  points: [number, number, number, number | null][];
+  note?: string;
+  key?: AisKeyInfo;
+}
+
+export interface NearVessel { mmsi: number; name: string | null; ship_type: number | null; tanker: boolean; nav_status: string | null; sog_kn: number | null; distance_nm: number }
+
+/** The saved Vessels Nearby sample that contains a vessel. Never live, never an area count. */
+export interface VesselNear {
+  status: "SAVED SAMPLE" | "NOT_IN_SAMPLE" | "NONE";
+  mmsi: number;
+  label?: string;
+  seed?: { mmsi: number; name: string };
+  fetched_utc?: string;
+  radius_nm?: number;
+  returned?: number;
+  caveat?: string;
+  note: string;
+  message?: string;
+  distances_note?: string;
+  listed?: number;
+  vessels: NearVessel[];
+  key?: AisKeyInfo;
+}
+
+export interface SavedSearchHit { mmsi: number; name: string | null; flag: string | null; area: string; ship_type: number | null; nav_status: string | null }
+export interface SavedSearch {
+  query: string;
+  source: string;
+  results: SavedSearchHit[];
+  message: string | null;
+  provider_search: { available: boolean; min_chars: number; note: string };
+}
+export interface ProviderHit { mmsi: number; imo: number | null; name: string | null; call_sign: string | null; flag: string | null; last_report_utc: string | null; in_watchlist: boolean }
+export interface ProviderSearch {
+  status: "OK" | "NO_MATCH" | "TOO_SHORT" | "KEY_EXPIRED" | "UNAVAILABLE";
+  query: string;
+  message: string | null;
+  note?: string;
+  kind?: string;
+  retry_after_s?: number | null;
+  results: ProviderHit[];
+  key: AisKeyInfo;
+}
+
 export interface WatchlistResponse {
   status: "SNAPSHOT" | "NONE";
   provider: string;
   key_expires_in_days: number;
+  key: AisKeyInfo;
+  key_expired: boolean;
+  key_line: string;
   captured_at_utc: string | null;
   label: string | null;
   note: string;

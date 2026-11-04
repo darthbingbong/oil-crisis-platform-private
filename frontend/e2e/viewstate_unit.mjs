@@ -131,4 +131,15 @@ t("detail level follows the zoom in three steps", () => {
   assert.deepEqual([1, 3.4, 3.5, 5.4, 5.5, 9].map(detailIndex), [0, 0, 1, 1, 2, 2]);
 });
 
+// ---- the selected real vessel
+t("vessel=<9-digit MMSI> is read, anything else is ignored with a problem noted, and it is written back only when set", () => {
+  assert.equal(P("vessel=538006502").vessel, 538006502);
+  for (const bad of ["abc", "12345", "1234567890", "5380065<script>", ""]) { const v = P(`vessel=${bad}`); assert.equal(v.vessel, null); assert.ok(v.problems.includes("vessel")); }
+  assert.equal(P("").vessel, null);
+  const cur = new URLSearchParams("view=map&vessel=538006502&selected=suez");
+  assert.equal(writeViewParams(cur, { view: "map", vessel: 538006502, selected: null }).get("vessel"), "538006502");
+  assert.equal(writeViewParams(cur, { view: "map", vessel: null, selected: null }).get("vessel"), null);
+  assert.equal(writeViewParams(new URLSearchParams("view=globe"), { view: "globe", vessel: 224543980 }).get("vessel"), "224543980");
+});
+
 console.log(`\n${n} checks passed`);

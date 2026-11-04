@@ -16,6 +16,10 @@ import type {
   SimulateRequest,
   SimulateResponse,
   WatchlistResponse,
+  VesselTrack,
+  VesselNear,
+  SavedSearch,
+  ProviderSearch,
 } from "../types";
 
 const API_BASE = "/api/v1";
@@ -52,6 +56,24 @@ export function getChokepointRisk(chokepoint: string): Promise<ChokepointRisk> {
 /** The saved watchlist of real tankers. Never fails on the server side (status NONE when there is no snapshot). */
 export function getWatchlist(): Promise<WatchlistResponse> {
   return fetchJson<WatchlistResponse>("/vessels/watchlist");
+}
+
+export function getVesselTrack(mmsi: number): Promise<VesselTrack> {
+  return fetchJson<VesselTrack>(`/vessels/${mmsi}/track`);
+}
+
+export function getVesselNear(mmsi: number): Promise<VesselNear> {
+  return fetchJson<VesselNear>(`/vessels/${mmsi}/near`);
+}
+
+/** The saved watchlist only: this never reaches the provider. */
+export function searchSaved(q: string): Promise<SavedSearch> {
+  return fetchJson<SavedSearch>(`/ais/search?q=${encodeURIComponent(q)}`);
+}
+
+/** ONE provider search. Only ever called from an explicit button press, never from typing. */
+export function searchProvider(q: string): Promise<ProviderSearch> {
+  return fetchJson<ProviderSearch>("/ais/search/provider", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ q }) });
 }
 
 export function getRoutes(): Promise<RoutesResponse> {
