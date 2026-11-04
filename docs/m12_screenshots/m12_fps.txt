@@ -1,4 +1,4 @@
 2D map, all layers on, 2,000 simulated vessels moving, a real vessel selected with its panel and saved track, 1440x900, Chromium with software WebGL (SwiftShader). A lower bound.
 M11 reference: zoom 2 71 fps, zoom 5.5 97 fps.
-zoom 2: 91.1 fps, worst frame 35 ms
-zoom 5.5: 121.5 fps, worst frame 21 ms
+zoom 2: 88.9 fps, worst frame 35 ms
+zoom 5.5: 121.0 fps, worst frame 21 ms

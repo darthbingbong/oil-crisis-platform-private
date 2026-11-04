@@ -3,7 +3,7 @@
 [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
 [warning] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
 [log] THREE.WebGLRenderer: Context Lost.
-[warning] [.WebGL-0x25ec01db7600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)
+[warning] [.WebGL-0x58dc001cf800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)
 [debug] [vite] connecting...
 [debug] [vite] connected.
 [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
