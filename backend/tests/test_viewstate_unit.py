@@ -17,6 +17,7 @@ def _supports_strip_types() -> bool:
 
 
 @pytest.mark.skipif(not _supports_strip_types(), reason="needs node 22.6+ (--experimental-strip-types)")
+@pytest.mark.skipif(not (FRONTEND / "node_modules" / "@math.gl" / "web-mercator").exists(), reason="needs `npm ci` in frontend/ (the map transform check compares with deck.gl's own projection)")
 def test_view_state_and_map_geometry_checks_pass():
     r = subprocess.run([NODE, "--experimental-strip-types", "e2e/viewstate_unit.mjs"], cwd=FRONTEND, capture_output=True, text=True, encoding="utf-8", timeout=120)
     assert r.returncode == 0, r.stdout[-2000:] + r.stderr[-2000:]

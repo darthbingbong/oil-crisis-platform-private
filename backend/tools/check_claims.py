@@ -143,13 +143,18 @@ for line in (BACKEND / ".env.example").read_text(encoding="utf-8").splitlines():
 
 wl_ = client.get("/api/v1/vessels/watchlist").json()
 trk_ = client.get("/api/v1/vessels/538006502/track").json()
-cap_ = wl_["captured_at_utc"].replace("T", " ")[:16] + " UTC"
-claim("DEMO_SCRIPT.md", f"SNAPSHOT {cap_} · {len(wl_['vessels'])} REAL TANKERS", "the real-tanker badge text (watchlist endpoint)")
-claim("DEMO_SCRIPT.md", wl_["key_line"], "the AIS key line (watchlist endpoint)")
-claim("DEMO_SCRIPT.md", trk_["label"], "the saved track label (track endpoint)")
-claim("DEMO_SCRIPT.md", f"{trk_['path_nm']:g} nm sailed, {trk_['start_to_end_nm']:g} nm start to end", "the headline track distances (track endpoint)")
-claim("README.md", "Twelve **real** tankers", "twelve real tankers")
-assert len(wl_["vessels"]) == 12
+# The saved AIS snapshot lives in git-ignored folders (DECISIONS D9), so a clean export has none: the vessel claims and the whole-script comparison need it and are
+# skipped there (printed at the end), exactly as the AIS tests skip when the raw folder is absent.
+have_ais = wl_.get("status") == "SNAPSHOT" and bool(wl_.get("captured_at_utc")) and trk_.get("status") == "SAVED"
+cap_ = wl_["captured_at_utc"].replace("T", " ")[:16] + " UTC" if have_ais else ""
+if have_ais:
+  claim("DEMO_SCRIPT.md", f"SNAPSHOT {cap_} · {len(wl_['vessels'])} REAL TANKERS", "the real-tanker badge text (watchlist endpoint)")
+if have_ais:
+  claim("DEMO_SCRIPT.md", wl_["key_line"], "the AIS key line (watchlist endpoint)")
+  claim("DEMO_SCRIPT.md", trk_["label"], "the saved track label (track endpoint)")
+  claim("DEMO_SCRIPT.md", f"{trk_['path_nm']:g} nm sailed, {trk_['start_to_end_nm']:g} nm start to end", "the headline track distances (track endpoint)")
+  claim("README.md", "Twelve **real** tankers", "twelve real tankers")
+  assert len(wl_["vessels"]) == 12
 
 # the one-point 30-day result of the Suez example, and the WTI scenario card's arithmetic
 pj = client.get("/api/v1/price/live").json()
@@ -160,19 +165,20 @@ claim("DEMO_SCRIPT.md", f"${pj['wti'] * (1 + mv_ / 100):,.2f}** (+{mv_:.1f}%)", 
 claim("DEMO_SCRIPT.md", f"range ${pj['wti'] * (1 + (mv_ - CFG.price_band_pp) / 100):,.2f} to ${pj['wti'] * (1 + (mv_ + CFG.price_band_pp) / 100):,.2f}", "the WTI scenario range (plus or minus the 13.09 pp)")
 
 # the whole DEMO_SCRIPT: regenerate it from the template and the API now, and it must equal the file (the date it was generated on is taken from the file itself)
-import importlib.util  # noqa: E402
-spec_ = importlib.util.spec_from_file_location("make_demo_script", BACKEND / "tools" / "make_demo_script.py")
-mds = importlib.util.module_from_spec(spec_)
-spec_.loader.exec_module(mds)
-vals_ = mds.values(client)
-m_date = re.search(r"on (\d{4}-\d{2}-\d{2}) by `backend/tools/make_demo_script.py`", DOCS["DEMO_SCRIPT.md"])
-if m_date:
-    vals_["generated_on"] = m_date.group(1)
-fresh = (BACKEND / "tools" / "demo_script_template.md").read_text(encoding="utf-8")
-for k_, v_ in vals_.items():
-    fresh = fresh.replace(f"@@{k_}@@", v_)
-same = fresh.replace("\r\n", "\n").strip() == DOCS["DEMO_SCRIPT.md"].replace("\r\n", "\n").strip()
-results.append((same, "DEMO_SCRIPT.md", "the whole script equals what make_demo_script.py produces from the API now", "every number, every date"))
+if have_ais:
+  import importlib.util  # noqa: E402
+  spec_ = importlib.util.spec_from_file_location("make_demo_script", BACKEND / "tools" / "make_demo_script.py")
+  mds = importlib.util.module_from_spec(spec_)
+  spec_.loader.exec_module(mds)
+  vals_ = mds.values(client)
+  m_date = re.search(r"on (\d{4}-\d{2}-\d{2}) by `backend/tools/make_demo_script.py`", DOCS["DEMO_SCRIPT.md"])
+  if m_date:
+      vals_["generated_on"] = m_date.group(1)
+  fresh = (BACKEND / "tools" / "demo_script_template.md").read_text(encoding="utf-8")
+  for k_, v_ in vals_.items():
+      fresh = fresh.replace(f"@@{k_}@@", v_)
+  same = fresh.replace("\r\n", "\n").strip() == DOCS["DEMO_SCRIPT.md"].replace("\r\n", "\n").strip()
+  results.append((same, "DEMO_SCRIPT.md", "the whole script equals what make_demo_script.py produces from the API now", "every number, every date"))
 
 # ---------------------------------------------------------------------------------------------------------------- report
 failed = [r for r in results if not r[0]]
@@ -180,6 +186,8 @@ width = max(len(r[2]) for r in results)
 for ok, doc, label, expected in results:
     print(f"{'PASS' if ok else 'FAIL'}  {label:<{width}}  {doc:<32} {expected[:70]!r}")
 print(f"\n{len(results) - len(failed)} of {len(results)} claims match the running app and the data files.")
+if not have_ais:
+    print("SKIPPED: no saved AIS snapshot in this checkout (git-ignored), so the vessel, track and whole-DEMO_SCRIPT claims were not checked.")
 print("NOT CHECKED HERE (historical measurements, cannot be recomputed): EIA latency, observed data lag, fps numbers, page load times, "
       "the GDELT timings, the Phase 1 experiment rows other than 13.09 and 13.80, and everything about the live AIS feed.")
 sys.exit(1 if failed else 0)
