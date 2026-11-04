@@ -12,11 +12,12 @@ import type { ConflictEvent, CurrentConditions, Location, RouteScenarioPrefill, 
 import LocationDetail from "../globe/LocationDetail";
 import RoutePanel from "../RoutePanel";
 import { VesselPanel } from "../VesselUi";
+import SnapshotBadge from "../SnapshotBadge";
 import LayersPanel from "./LayersPanel";
 import RealVesselPanel from "../RealVesselPanel";
 import type { VesselExtras } from "../../hooks/useVesselExtras";
 import { buildBaseLayers, buildLayers, type CountryLevel, makeSimVessels, packSimVessels, routePieces, watchGroupLabels } from "./mapLayers";
-import { SEA_LABELS } from "../../lib/mapGeometry";
+import { cameraTransform, SEA_LABELS } from "../../lib/mapGeometry";
 import { DETAIL_LEVELS, detailIndex, simplifyCountries } from "../../lib/mapSimplify";
 
 interface Props {
@@ -191,23 +192,47 @@ export default function MapView(props: Props) {
   // zoom comes back 220 ms after the camera stops.
   const [camMoving, setCamMoving] = useState(false);
   const camTimer = useRef<number | undefined>(undefined);
+  // While the camera moves the outlines are NOT redrawn: the canvas keeps the picture it had when the move began and is moved with a CSS transform that
+  // lib/mapGeometry.ts `cameraTransform` derives from the camera (checked against deck.gl's own projection in e2e/viewstate_unit.mjs). Redrawing them on every
+  // pointer move cost about 140 ms a frame on software rendering (6.5 fps); they are redrawn once, 220 ms after the camera stops.
+  const latestVs = useRef<MapViewState>(viewState);
+  latestVs.current = viewState;
+  const [frozen, setFrozen] = useState<MapViewState | null>(null);
+  // "The camera has stopped" is decided by deck.gl's own interaction state (a drag, a wheel zoom or a flight is going on), not by a quiet gap between events: on
+  // software rendering a frame takes several hundred ms, so a gap-only timer fired in the middle of a drag and redrew the outlines at full detail each time.
+  const interacting = useRef(false);
+  const settle = useCallback(() => {
+    window.clearTimeout(camTimer.current);
+    camTimer.current = window.setTimeout(() => { setCamMoving(false); setFrozen(null); }, 220);
+  }, []);
   const noteCameraMoved = useCallback(() => {
     setCamMoving(true);
-    window.clearTimeout(camTimer.current);
-    camTimer.current = window.setTimeout(() => setCamMoving(false), 220);
-  }, []);
+    setFrozen((f) => f ?? latestVs.current);
+    if (!interacting.current) settle();
+  }, [settle]);
+  const onInteractionStateChange = useCallback((st: { isDragging?: boolean; isPanning?: boolean; isZooming?: boolean; isRotating?: boolean; inTransition?: boolean }) => {
+    const active = !!(st.isDragging || st.isPanning || st.isZooming || st.isRotating || st.inTransition);
+    interacting.current = active;
+    if (active) window.clearTimeout(camTimer.current); else settle();
+  }, [settle]);
+  const baseVs = frozen ?? viewState;
+  const baseStyle = useMemo(() => {
+    if (!frozen) return BASE_STYLE;
+    const { tx, ty, k } = cameraTransform(frozen, viewState);
+    return { ...BASE_STYLE, transformOrigin: "50% 50%", transform: `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px) scale(${k.toFixed(5)})` };
+  }, [frozen, viewState]);
   useEffect(() => () => window.clearTimeout(camTimer.current), []);
   const wanted = detailIndex(viewState.zoom);
-  const activeDetail = camMoving ? 0 : wanted;
+  const activeDetail = frozen ? detailIndex(frozen.zoom) : wanted;
   const loadedLevels = useRef<{ src: object | null; have: Map<number, object> }>({ src: null, have: new Map() });
   if (countries && loadedLevels.current.src !== countries) loadedLevels.current = { src: countries, have: new Map() };
   if (countries) for (const i of camMoving ? [0] : [0, wanted]) if (!loadedLevels.current.have.has(i)) loadedLevels.current.have.set(i, simplifyCountries(countries, DETAIL_LEVELS[i].tolerance));
   const levelCount = loadedLevels.current.have.size;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const countryLevels = useMemo<CountryLevel[]>(() => [...loadedLevels.current.have.entries()].sort((a, b) => a[0] - b[0]).map(([index, data]) => ({ index, data })), [countries, levelCount]);
-  const seaLabelCount = SEA_LABELS.filter((s) => viewState.zoom >= s.minZoom).length;     // the labels shown are fully decided by how many pass the zoom test
+  const seaLabelCount = SEA_LABELS.filter((s) => baseVs.zoom >= s.minZoom).length;     // the labels shown are fully decided by how many pass the zoom test
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const baseLayers = useMemo(() => buildBaseLayers(countryLevels, activeDetail, viewState.zoom, trackLine), [countryLevels, activeDetail, seaLabelCount, trackLine]);
+  const baseLayers = useMemo(() => buildBaseLayers(countryLevels, activeDetail, baseVs.zoom, trackLine), [countryLevels, activeDetail, seaLabelCount, trackLine]);
   const layers = buildLayers({
     pieces, routes, locations, on, hoveredRouteId, selectedRouteId: selectedRoute?.id ?? null, disrupted, conflictIntensity: props.conflictIntensity,
     time: reducedMotion ? 0.7 * 2.4 : timeRef.current, zoom: viewState.zoom, sim: sim && on.has("simulated") ? simPack : null,
@@ -270,10 +295,10 @@ export default function MapView(props: Props) {
       <DeckGL
         id="deck-base"
         views={MAP_VIEW}
-        viewState={viewState}
+        viewState={baseVs}
         controller={false}
         layers={baseLayers}
-        style={BASE_STYLE}
+        style={baseStyle}
       />
       <DeckGL
         ref={deckRef}
@@ -288,6 +313,7 @@ export default function MapView(props: Props) {
           noteCameraMoved();
         }}
         controller={CONTROLLER}
+        onInteractionStateChange={onInteractionStateChange}
         layers={layers}
         pickingRadius={6}
         onHover={(i) => pick(i, "hover")}
@@ -299,19 +325,17 @@ export default function MapView(props: Props) {
       <LayersPanel on={on} onToggle={toggle} counts={counts} />
 
       <div style={{ position: "absolute", left: 12, bottom: 12, zIndex: 5, display: "flex", flexDirection: "column", gap: 2, pointerEvents: "none" }} data-testid="route-legend" className="text-[11px]">
-        <span style={{ color: "var(--color-ash)" }}><span style={{ color: "var(--color-lane)" }}>━ ━</span> sea lane / chokepoint (flow)</span>
-        <span style={{ color: "var(--color-ash)" }}><span style={{ color: "var(--color-crude)" }}>━━</span> pipeline (nameplate capacity)</span>
-        <span style={{ color: "var(--color-ash)" }}><span style={{ color: "var(--color-alarm)" }}>━ ━</span> disrupted route</span>
+        <span className="hidden sm:inline" style={{ color: "var(--color-ash)" }}><span style={{ color: "var(--color-lane)" }}>━ ━</span> sea lane / chokepoint (flow)</span>
+        <span className="hidden sm:inline" style={{ color: "var(--color-ash)" }}><span style={{ color: "var(--color-crude)" }}>━━</span> pipeline (nameplate capacity)</span>
+        <span className="hidden sm:inline" style={{ color: "var(--color-ash)" }}><span style={{ color: "var(--color-alarm)" }}>━ ━</span> disrupted route</span>
+        <span className="sm:hidden" style={{ color: "var(--color-ash)" }}><span style={{ color: "var(--color-lane)" }}>━</span> lane <span style={{ color: "var(--color-crude)" }}>━</span> pipeline <span style={{ color: "var(--color-alarm)" }}>━</span> disrupted</span>
         <span style={{ color: "var(--color-ash)" }}>Route geometry is illustrative, not surveyed. Map: Natural Earth (public domain).</span>
       </div>
 
-      <div style={{ position: "absolute", right: 12, bottom: 12, zIndex: 5, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, pointerEvents: "none", maxWidth: "min(360px, 60%)" }}>
+      <div style={{ position: "absolute", right: 12, bottom: 12, zIndex: 5, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, pointerEvents: "none", maxWidth: "min(360px, 60%)" }} className="max-sm:!left-3 max-sm:!max-w-none max-sm:!bottom-14">
         {on.has("watchlist") && haveSnapshot && (
-          <div data-testid="watch-badge" className="data-readout" style={{ fontSize: 11, color: "var(--color-ion)", background: "rgba(3,3,3,0.9)", border: "1px solid rgba(89,224,201,0.4)", borderRadius: 4, padding: "5px 9px", textAlign: "right" }}>
-            SNAPSHOT {fmtUtc(wl!.captured_at_utc)} · {wl!.vessels.length} REAL TANKERS
-            <span style={{ display: "block", color: "var(--color-ash)" }}>{wl!.label}</span>
-            <span data-testid="ais-key-line" style={{ display: "block", color: wl!.key_expired ? "var(--color-alarm)" : "var(--color-ash)" }}>{wl!.key_line}</span>
-          </div>
+          <SnapshotBadge testId="watch-badge" title={`SNAPSHOT ${fmtUtc(wl!.captured_at_utc)} · ${wl!.vessels.length} REAL TANKERS`} label={wl!.label ?? ""} keyLine={wl!.key_line} expired={wl!.key_expired}
+            style={{ fontSize: 11, color: "var(--color-ion)", background: "rgba(3,3,3,0.9)", border: "1px solid rgba(89,224,201,0.4)", borderRadius: 4, padding: "5px 9px", textAlign: "right" }} />
         )}
         {trackLine && props.extras.track && (
           <div data-testid="track-badge" className="data-readout" style={{ fontSize: 11, color: "var(--color-ion)", background: "rgba(3,3,3,0.9)", border: "1px solid rgba(89,224,201,0.4)", borderRadius: 4, padding: "5px 9px", textAlign: "right" }}>
@@ -330,7 +354,7 @@ export default function MapView(props: Props) {
       <div style={{ position: "absolute", left: 12, bottom: 116, zIndex: 5, display: "flex", flexDirection: "column", gap: 4 }}>
         {[["+", "Zoom in", 1], ["−", "Zoom out", -1]].map(([sym, label, d]) => (
           <button key={label as string} type="button" aria-label={label as string} data-testid={`map-zoom-${(d as number) > 0 ? "in" : "out"}`} onClick={() => zoomBy(d as number)}
-            style={{ width: 30, height: 30, background: "rgba(3,3,3,0.9)", border: "1px solid rgba(244,241,234,0.2)", borderRadius: 4, color: "var(--color-bone)", cursor: "pointer", fontSize: 16 }}>{sym}</button>
+            style={{ width: 36, height: 36, background: "rgba(3,3,3,0.9)", border: "1px solid rgba(244,241,234,0.2)", borderRadius: 4, color: "var(--color-bone)", cursor: "pointer", fontSize: 16 }}>{sym}</button>
         ))}
         <button type="button" data-testid="map-reset-view" onClick={resetView} className="text-xs" style={{ marginTop: 2, padding: "5px 8px", background: "rgba(3,3,3,0.9)", border: "1px solid rgba(244,241,234,0.2)", borderRadius: 4, color: "var(--color-bone)", cursor: "pointer" }}>Reset view</button>
       </div>
@@ -350,7 +374,7 @@ export default function MapView(props: Props) {
           {hoveredRouteData && (
             <>
               <div style={{ fontSize: 12, fontWeight: 600, color: "var(--color-bone)" }}>{hoveredRouteData.name}</div>
-              <div className="data-readout" style={{ fontSize: 10, color: "var(--color-ash)", marginTop: 2 }}>{ROUTE_TYPE_LABEL[hoveredRouteData.type]}</div>
+              <div className="data-readout" style={{ fontSize: 11, color: "var(--color-ash)", marginTop: 2 }}>{ROUTE_TYPE_LABEL[hoveredRouteData.type]}</div>
               <div className="data-readout" style={{ fontSize: 11, color: hoveredRouteData.type === "pipeline" ? "var(--color-crude)" : "var(--color-lane)", marginTop: 2 }}>
                 {hoveredRouteData.excluded_from_calculations ? "n/a (no sourced figure)" : hoveredRouteData.type === "pipeline" ? `nameplate capacity ${formatMbpd(hoveredRouteData.capacity_bpd)}` : `flow ${formatMbpd(hoveredRouteData.annual_flow_bpd)} (${hoveredRouteData.baseline_year ?? hoveredRouteData.data_year})`}
               </div>
@@ -359,7 +383,7 @@ export default function MapView(props: Props) {
           {hoveredLocation && (
             <>
               <div style={{ fontSize: 12, fontWeight: 600, color: "var(--color-bone)" }}>{hoveredLocation.name}</div>
-              <div className="data-readout" style={{ fontSize: 10, color: "var(--color-ash)", marginTop: 2 }}>{hoveredLocation.type === "chokepoint" ? "Chokepoint" : hoveredLocation.type === "hub" ? "Refinery / export hub" : "City (illustrative)"}</div>
+              <div className="data-readout" style={{ fontSize: 11, color: "var(--color-ash)", marginTop: 2 }}>{hoveredLocation.type === "chokepoint" ? "Chokepoint" : hoveredLocation.type === "hub" ? "Refinery / export hub" : "City (illustrative)"}</div>
               {hoveredLocation.metrics[0] && <div className="data-readout" style={{ fontSize: 11, color: "var(--color-crude)", marginTop: 2 }}>{hoveredLocation.metrics[0].label}: {hoveredLocation.metrics[0].value} {hoveredLocation.metrics[0].unit ?? ""}</div>}
             </>
           )}
@@ -373,7 +397,7 @@ export default function MapView(props: Props) {
             <>
               <div className="section-label" style={{ color: "var(--color-ion)" }}>SNAPSHOT · REAL VESSEL</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: "var(--color-bone)", marginTop: 2 }}>{hoveredWatch.name ?? `MMSI ${hoveredWatch.mmsi}`}</div>
-              <div className="data-readout" style={{ fontSize: 10, color: "var(--color-ash)", marginTop: 2 }}>{hoveredWatch.nav_status} · {hoveredWatch.area}</div>
+              <div className="data-readout" style={{ fontSize: 11, color: "var(--color-ash)", marginTop: 2 }}>{hoveredWatch.nav_status} · {hoveredWatch.area}</div>
             </>
           )}
         </div>

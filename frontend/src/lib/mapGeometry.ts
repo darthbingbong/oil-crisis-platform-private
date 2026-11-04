@@ -56,3 +56,18 @@ export function graticule(step = 30): LngLat[][] {
   for (let lat = -60; lat <= 60; lat += step) lines.push([[-180, lat], [180, lat]]);
   return lines;
 }
+
+/** Web Mercator world coordinates of a point: x from the west edge and y from the north edge, both 0..1. */
+const mercX = (lng: number) => (lng + 180) / 360;
+const mercY = (lat: number) => 0.5 - Math.log(Math.tan(Math.PI / 4 + (Math.max(-85, Math.min(85, lat)) * Math.PI) / 360)) / (2 * Math.PI);
+
+/**
+ * CSS transform that makes a picture drawn for camera `from` look like camera `to` (same screen size). Used to move the country-outline canvas while the camera
+ * is moving instead of redrawing it on every pointer move (software rendering takes about 140 ms per redraw): translate then scale about the screen centre.
+ * deck.gl's MapView draws a world of 512 x 2^zoom pixels.
+ */
+export function cameraTransform(from: { longitude: number; latitude: number; zoom: number }, to: { longitude: number; latitude: number; zoom: number }): { tx: number; ty: number; k: number } {
+  const k = Math.pow(2, to.zoom - from.zoom);
+  const s0 = 512 * Math.pow(2, from.zoom);
+  return { k, tx: k * s0 * (mercX(from.longitude) - mercX(to.longitude)), ty: k * s0 * (mercY(from.latitude) - mercY(to.latitude)) };
+}

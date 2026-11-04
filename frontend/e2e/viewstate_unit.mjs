@@ -3,7 +3,8 @@
 import assert from "node:assert/strict";
 import { DEFAULT_CAMERA, LAYER_IDS, defaultLayers, parseViewParams, writeViewParams } from "../src/lib/viewState.ts";
 import { DETAIL_LEVELS, detailIndex, simplifyCountries, simplifyLine } from "../src/lib/mapSimplify.ts";
-import { AFFECTED_ZONE_KM, graticule, pulsePhase, ringRadiusKm, splitAtAntimeridian, toLngLat } from "../src/lib/mapGeometry.ts";
+import { WebMercatorViewport } from "@math.gl/web-mercator";
+import { AFFECTED_ZONE_KM, cameraTransform, graticule, pulsePhase, ringRadiusKm, splitAtAntimeridian, toLngLat } from "../src/lib/mapGeometry.ts";
 
 let n = 0;
 const t = (name, fn) => { fn(); n++; console.log("PASS ", name); };
@@ -141,5 +142,24 @@ t("vessel=<9-digit MMSI> is read, anything else is ignored with a problem noted,
   assert.equal(writeViewParams(cur, { view: "map", vessel: null, selected: null }).get("vessel"), null);
   assert.equal(writeViewParams(new URLSearchParams("view=globe"), { view: "globe", vessel: 224543980 }).get("vessel"), "224543980");
 });
+
+// ---- the transform used to move the country outlines while the camera moves: checked against deck.gl's own projection
+const vp = (c) => new WebMercatorViewport({ width: 1440, height: 900, longitude: c.longitude, latitude: c.latitude, zoom: c.zoom, pitch: 0, bearing: 0 });
+for (const [name, from, to] of [
+  ["no move", { longitude: 56, latitude: 26, zoom: 2 }, { longitude: 56, latitude: 26, zoom: 2 }],
+  ["a pan east and south at one zoom", { longitude: 56, latitude: 26, zoom: 2 }, { longitude: 38.5, latitude: 17.2, zoom: 2 }],
+  ["a long pan at high zoom", { longitude: 56.25, latitude: 26.57, zoom: 5.5 }, { longitude: 55.1, latitude: 27.3, zoom: 5.5 }],
+  ["a zoom in with a pan", { longitude: 56, latitude: 26, zoom: 2 }, { longitude: 60, latitude: 30, zoom: 3.4 }],
+  ["a zoom out with a pan", { longitude: 10, latitude: 40, zoom: 6 }, { longitude: 4, latitude: 36, zoom: 4.25 }],
+]) {
+  t(`outline transform matches deck.gl's projection: ${name}`, () => {
+    const { tx, ty, k } = cameraTransform(from, to);
+    for (const [lng, lat] of [[from.longitude, from.latitude], [from.longitude + 3, from.latitude - 2], [to.longitude, to.latitude]]) {
+      const [x0, y0] = vp(from).project([lng, lat]), [x1, y1] = vp(to).project([lng, lat]);
+      const px = 720 + k * (x0 - 720) + tx, py = 450 + k * (y0 - 450) + ty;     // translate(tx, ty) scale(k) about the centre of a 1440 x 900 screen
+      assert.ok(Math.abs(px - x1) < 0.01 && Math.abs(py - y1) < 0.01, `(${px.toFixed(3)}, ${py.toFixed(3)}) vs (${x1.toFixed(3)}, ${y1.toFixed(3)})`);
+    }
+  });
+}
 
 console.log(`\n${n} checks passed`);
