@@ -1,3 +1,4 @@
+import SnapshotBadge from "../SnapshotBadge";
 import { OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
@@ -589,7 +590,7 @@ export default function EarthGlobe({
           <div style={{ fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600, color: "var(--color-bone)" }}>
             {hoveredRouteData.name}
           </div>
-          <div className="data-readout" style={{ fontSize: 10, color: "var(--color-ash)", marginTop: 2 }}>
+          <div className="data-readout" style={{ fontSize: 11, color: "var(--color-ash)", marginTop: 2 }}>
             {ROUTE_TYPE_LABEL[hoveredRouteData.type]}
           </div>
           <div
@@ -606,11 +607,8 @@ export default function EarthGlobe({
       )}
 
       {watchBadge && (
-        <div data-testid="globe-watch-badge" className="data-readout" style={{ position: "absolute", right: 12, bottom: 12, zIndex: 4, maxWidth: "min(340px, 60%)", fontSize: 11, color: "var(--color-ion)", background: "rgba(3,3,3,0.9)", border: "1px solid rgba(89,224,201,0.4)", borderRadius: 4, padding: "5px 9px", textAlign: "right", pointerEvents: "none" }}>
-          {watchBadge.title}
-          <span style={{ display: "block", color: "var(--color-ash)" }}>{watchBadge.label}</span>
-          <span data-testid="ais-key-line" style={{ display: "block", color: watchBadge.expired ? "var(--color-alarm)" : "var(--color-ash)" }}>{watchBadge.keyLine}</span>
-        </div>
+        <SnapshotBadge testId="globe-watch-badge" title={watchBadge.title} label={watchBadge.label} keyLine={watchBadge.keyLine} expired={watchBadge.expired}
+          style={{ position: "absolute", right: 12, bottom: 12, zIndex: 4, maxWidth: "min(340px, 60%)", fontSize: 11, color: "var(--color-ion)", background: "rgba(3,3,3,0.9)", border: "1px solid rgba(89,224,201,0.4)", borderRadius: 4, padding: "5px 9px", textAlign: "right", pointerEvents: "none" }} />
       )}
 
       {phase === "detail" && activeVessel && extras && (

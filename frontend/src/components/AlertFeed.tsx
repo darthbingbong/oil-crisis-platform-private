@@ -90,7 +90,7 @@ export default function AlertFeed({ alerts, status }: Props) {
                 >
                   {a.summary.replace(/^\[heuristic match: '[^']*'\]\s*/, "")}
                 </a>
-                <span className="section-label" style={{ fontSize: 10, color: "var(--color-ash)" }}>
+                <span className="section-label" style={{ fontSize: 11, color: "var(--color-ash)" }}>
                   {EVENT_TYPE_LABEL[a.event_type] ?? a.event_type}
                 </span>
                 <div className="hairline mt-2" />

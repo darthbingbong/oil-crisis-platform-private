@@ -23,7 +23,7 @@ function Help({ text, label }: { text: string; label: string }) {
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
         className="section-label"
-        style={{ width: 20, height: 20, borderRadius: 10, border: "1px solid rgba(244,241,234,0.3)", background: "transparent", cursor: "help", padding: 0, lineHeight: "18px" }}
+        style={{ width: 28, height: 28, borderRadius: 14, border: "1px solid rgba(244,241,234,0.3)", background: "transparent", cursor: "help", padding: 0, lineHeight: "26px" }}
       >
         ?
       </button>

@@ -178,3 +178,9 @@ input[type="range"].terminal-slider::-moz-range-thumb:active {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Phones: the price ticker keeps both quotes on one row and drops the sparkline, so the map starts higher up the screen. */
+@media (max-width: 639px) {
+  .price-bar { padding: 4px 12px !important; gap: 2px 14px !important; min-height: 0 !important; }
+  .price-bar [data-testid="sparkline"], .price-bar [data-testid="sparkline-missing"] { display: none; }
+}

@@ -51,7 +51,7 @@ for (const [name, q, key, width, height] of [["suez", SUEZ, "suez", 1440, 1000],
   const dots = await chart.locator(".recharts-line-dots circle, .recharts-dot").count();
   check(`${tag}: price chart has ONE x position, "30 days", and ONE marker (ticks: ${ticks.join(",")}; dots: ${dots})`, ticks.length === 1 && ticks[0] === "30 days" && dots === 1);
   const eb = await chart.locator(".recharts-errorBars").count();
-  const priceSectionTxt = await txt(p, '[data-testid="section-price"]');
+  
   check(`${tag}: no points or lines before day 30 (no line path in the price chart)`, (await chart.locator(".recharts-line-curve").count()) === 0);
   check(`${tag}: price section has no half-life, decay, 90 / 180-day, one-year or 'peak' wording`, !BANNED.test(priceSection), BANNED.test(priceSection) ? `(${priceSection.match(BANNED)})` : "");
   check(`${tag}: price section says 30 days is the only horizon, duration is not used, and the chart is one value`, /only horizon/.test(priceSection) && /supply loss only, not duration/.test(priceSection) && /one 30-day value, not a path/.test(priceSection) && !/illustrative/.test(priceSection));

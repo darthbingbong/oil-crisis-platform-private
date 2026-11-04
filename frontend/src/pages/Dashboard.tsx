@@ -151,7 +151,7 @@ export default function Dashboard() {
       )}
       <main className="flex-1 flex flex-col overflow-y-auto lg:grid lg:grid-cols-[1fr_400px] lg:overflow-hidden gap-0">
         <div className="flex flex-col lg:min-h-0">
-          <div className="min-h-[320px] h-[320px] md:h-[480px] lg:h-auto lg:flex-1 relative">
+          <div className="min-h-[340px] h-[58vh] md:h-[480px] lg:h-auto lg:flex-1 relative">
             {view === "globe" ? (
               <EarthGlobe
                 locations={locations}
@@ -232,9 +232,10 @@ function RouteLayerStatus({ state, legend }: { state: ReturnType<typeof useRoute
       {state.status === "error" && <span style={{ color: "var(--color-alarm)" }}>Route layer unavailable: backend not reachable.</span>}
       {state.status === "ready" && legend && (
         <>
-          <span><span style={{ color: "var(--color-lane)" }}>━ ━</span> sea lane / chokepoint (flow)</span>
-          <span><span style={{ color: "var(--color-crude)" }}>━━</span> pipeline (nameplate capacity)</span>
-          <span><span style={{ color: "var(--color-alarm)" }}>━ ━</span> disrupted route</span>
+          <span className="hidden sm:inline"><span style={{ color: "var(--color-lane)" }}>━ ━</span> sea lane / chokepoint (flow)</span>
+          <span className="hidden sm:inline"><span style={{ color: "var(--color-crude)" }}>━━</span> pipeline (nameplate capacity)</span>
+          <span className="hidden sm:inline"><span style={{ color: "var(--color-alarm)" }}>━ ━</span> disrupted route</span>
+          <span className="sm:hidden"><span style={{ color: "var(--color-lane)" }}>━</span> lane <span style={{ color: "var(--color-crude)" }}>━</span> pipeline <span style={{ color: "var(--color-alarm)" }}>━</span> disrupted</span>
           <span>Route geometry is illustrative, not surveyed.</span>
         </>
       )}

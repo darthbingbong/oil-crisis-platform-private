@@ -69,7 +69,7 @@ function StatusBadge({ live }: { live: PriceLive }) {
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
         className="section-label"
-        style={{ padding: "2px 8px", border: `1px solid ${color}`, color, borderRadius: 4, background: "transparent", cursor: "help" }}
+        style={{ padding: "2px 8px", minHeight: 32, border: `1px solid ${color}`, color, borderRadius: 4, background: "transparent", cursor: "help" }}
       >
         {live.status} ⓘ
       </button>
@@ -122,7 +122,7 @@ export default function PriceTicker() {
   const shown = state.kind === "ready" ? { live: state.live, history: state.history } : state.last;
 
   return (
-    <div role="region" aria-label="Oil prices" data-testid="price-ticker" data-state={state.kind} style={bar}>
+    <div role="region" aria-label="Oil prices" data-testid="price-ticker" data-state={state.kind} style={bar} className="price-bar">
       {shown ? (
         <>
           <Quote label="WTI" value={shown.live.wti} change={shown.live.change} pct={shown.live.change_pct} testId="quote-wti" />

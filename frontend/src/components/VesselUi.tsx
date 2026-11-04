@@ -134,7 +134,7 @@ export function VesselPanel({ info, onClose }: { info: VesselInfo; onClose: () =
           </div>
           <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-bone)" }}>{info.name}</div>
         </div>
-        <button type="button" data-testid="vessel-panel-close" aria-label="Close vessel details" onClick={onClose} style={{ color: "var(--color-ash)", fontSize: 16, lineHeight: 1, cursor: "pointer" }}>
+        <button type="button" data-testid="vessel-panel-close" aria-label="Close vessel details" onClick={onClose} style={{ color: "var(--color-ash)", fontSize: 16, lineHeight: 1, cursor: "pointer", minWidth: 32, minHeight: 32 }}>
           {"×"}
         </button>
       </div>

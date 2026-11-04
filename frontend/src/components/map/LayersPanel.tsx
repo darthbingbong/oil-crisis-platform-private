@@ -63,7 +63,7 @@ export default function LayersPanel({ on, onToggle, counts }: { on: Set<LayerId>
   return (
     <div data-testid="layers-panel" style={{ position: "absolute", left: 12, top: 12, zIndex: 6, width: 270, maxWidth: "calc(100% - 24px)", background: "rgba(3,3,3,0.9)", border: "1px solid rgba(244,241,234,0.16)", borderRadius: 6 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px" }}>
-        <button type="button" data-testid="layers-collapse" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="section-label" style={{ color: "var(--color-bone)", cursor: "pointer", display: "flex", gap: 6, alignItems: "center" }}>
+        <button type="button" data-testid="layers-collapse" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="section-label" style={{ color: "var(--color-bone)", cursor: "pointer", display: "flex", gap: 6, alignItems: "center", minHeight: 32, minWidth: 32 }}>
           <span aria-hidden>{open ? "▾" : "▸"}</span> LAYERS
         </button>
         <span
@@ -76,13 +76,13 @@ export default function LayersPanel({ on, onToggle, counts }: { on: Set<LayerId>
         <div style={{ padding: "0 10px 10px", maxHeight: "min(60vh, 520px)", overflowY: "auto" }}>
           {rows(counts).map((g) => (
             <div key={g.group} style={{ marginTop: 6 }}>
-              <div className="section-label" style={{ color: "var(--color-ash)", fontSize: 10, marginBottom: 3 }}>{g.group}</div>
+              <div className="section-label" style={{ color: "var(--color-ash)", fontSize: 11, marginBottom: 3 }}>{g.group}</div>
               {g.items.map((r) => (
                 <label key={r.id} title={r.hint} style={{ display: "grid", gridTemplateColumns: "16px 1fr auto", columnGap: 8, alignItems: "start", padding: "4px 0", opacity: r.disabled ? 0.55 : 1, cursor: r.disabled ? "not-allowed" : "pointer" }}>
                   <input type="checkbox" data-testid={`layer-toggle-${r.id}`} checked={on.has(r.id) && !r.disabled} disabled={r.disabled} onChange={() => onToggle(r.id)} style={{ marginTop: 2 }} />
                   <span>
                     <span className="text-xs" style={{ color: "var(--color-bone)" }}>{r.label}</span>
-                    <span data-testid={`layer-chip-${r.id}`} className="data-readout" style={{ display: "block", fontSize: 10, color: r.chipColor, marginTop: 1 }}>{r.chip}</span>
+                    <span data-testid={`layer-chip-${r.id}`} className="data-readout" style={{ display: "block", fontSize: 11, color: r.chipColor, marginTop: 1 }}>{r.chip}</span>
                   </span>
                   <span data-testid={`layer-count-${r.id}`} className="data-readout" style={{ fontSize: 11, color: "var(--color-ash)" }}>{r.count}</span>
                 </label>

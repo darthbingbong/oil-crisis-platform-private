@@ -14,11 +14,11 @@ export default function ChokepointPanel({ selected, onSelect, refineries }: Prop
   const [risk, setRisk] = useState<ChokepointRisk | null>(null);
   const [offline, setOffline] = useState(false);
 
+  // nothing selected: forget the last result during render (React's pattern for state that follows a value), not inside an effect
+  if (!selected && risk !== null) setRisk(null);
+
   useEffect(() => {
-    if (!selected) {
-      setRisk(null);
-      return;
-    }
+    if (!selected) return;
     let cancelled = false;
     getChokepointRisk(selected)
       .then((result) => {

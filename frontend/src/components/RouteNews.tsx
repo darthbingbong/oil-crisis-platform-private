@@ -88,7 +88,7 @@ export default function RouteNews({ routeId }: { routeId: string }) {
                 stale
               </span>
             )}
-            <span data-testid="news-updated" className="data-readout text-[10px]" style={{ color: "var(--color-ash)" }}>
+            <span data-testid="news-updated" className="data-readout text-[11px]" style={{ color: "var(--color-ash)" }}>
               {state.news.snapshot ? "fetched" : "updated"} {fmtUtc(state.news.last_updated)}
             </span>
           </div>
@@ -100,7 +100,7 @@ export default function RouteNews({ routeId }: { routeId: string }) {
           {[0.9, 0.7, 0.8].map((w, i) => (
             <div key={i} style={{ height: 12, width: `${w * 100}%`, borderRadius: 3, background: "rgba(244,241,234,0.08)" }} />
           ))}
-          <p className="text-[10px]" style={{ color: "var(--color-ash)", margin: 0 }}>
+          <p className="text-[11px]" style={{ color: "var(--color-ash)", margin: 0 }}>
             The free GDELT feed can take 10 to 20 seconds to answer. Results are then cached for 20 minutes.
           </p>
         </div>
@@ -143,7 +143,7 @@ export default function RouteNews({ routeId }: { routeId: string }) {
                     >
                       {item.title}
                     </a>
-                    <div className="data-readout text-[10px]" style={{ color: "var(--color-ash)", marginTop: 2 }}>
+                    <div className="data-readout text-[11px]" style={{ color: "var(--color-ash)", marginTop: 2 }}>
                       {item.source} · {fmtUtc(item.published_at)}
                     </div>
                   </div>
@@ -151,7 +151,7 @@ export default function RouteNews({ routeId }: { routeId: string }) {
               </li>
             ))}
           </ul>
-          <p data-testid="news-attribution" className="text-[10px]" style={{ color: "var(--color-ash)", margin: "8px 0 0" }}>
+          <p data-testid="news-attribution" className="text-[11px]" style={{ color: "var(--color-ash)", margin: "8px 0 0" }}>
             <Linkified text={state.news.attribution} />
           </p>
         </>

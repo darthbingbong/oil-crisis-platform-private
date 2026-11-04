@@ -197,7 +197,7 @@ export default function Markers({
                   {teaser && (
                     <div
                       className="data-readout"
-                      style={{ fontSize: 10, color: teaserColor, marginTop: 2 }}
+                      style={{ fontSize: 11, color: teaserColor, marginTop: 2 }}
                     >
                       {teaser.label}: {teaser.value}
                     </div>

@@ -92,7 +92,7 @@ export default function RoutePanel({ route, visible, onClose, onSimulate }: Prop
         onClick={onClose}
         tabIndex={visible ? 0 : -1}
         className="section-label"
-        style={{ alignSelf: "flex-start", background: "none", border: "none", padding: 0, cursor: "pointer" }}
+        style={{ alignSelf: "flex-start", background: "none", border: "none", padding: 0, cursor: "pointer", minHeight: 32 }}
       >
         ← Back to overview
       </button>
@@ -150,7 +150,7 @@ export default function RoutePanel({ route, visible, onClose, onSimulate }: Prop
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={importers} layout="vertical" margin={{ top: 0, right: 28, left: 0, bottom: 0 }}>
                         <XAxis type="number" domain={[0, 100]} hide />
-                        <YAxis type="category" dataKey="country" width={150} tick={{ fill: TOKENS.bone, fontSize: 10 }} axisLine={false} tickLine={false} />
+                        <YAxis type="category" dataKey="country" width={150} tick={{ fill: TOKENS.bone, fontSize: 11 }} axisLine={false} tickLine={false} />
                         <Tooltip
                           cursor={{ fill: "rgba(255,255,255,0.04)" }}
                           contentStyle={{ background: "var(--color-surface)", border: "1px solid rgba(244,241,234,0.14)", fontSize: 11 }}
@@ -159,7 +159,7 @@ export default function RoutePanel({ route, visible, onClose, onSimulate }: Prop
                         <Bar
                           dataKey="share_of_route_flow_pct"
                           radius={2}
-                          label={{ position: "right", fill: TOKENS.bone, fontSize: 10 }}
+                          label={{ position: "right", fill: TOKENS.bone, fontSize: 11 }}
                           isAnimationActive={false}
                         >
                           {importers.map((i) => (

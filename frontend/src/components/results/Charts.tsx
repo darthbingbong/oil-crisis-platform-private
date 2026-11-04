@@ -220,7 +220,7 @@ export function LithiumChart({ report }: { report: ReportResponse }) {
       <Frame height={320} testId="chart-lithium">
         <BarChart data={data} margin={{ top: 16, right: 16, left: 4, bottom: 8 }}>
           <CartesianGrid stroke={GRID} vertical={false} />
-          <XAxis dataKey="name" tick={{ ...AXIS, fontSize: 10 }} interval={0} />
+          <XAxis dataKey="name" tick={{ ...AXIS, fontSize: 11 }} interval={0} />
           <YAxis tick={AXIS} domain={liDomain} ticks={liTicks} tickFormatter={(v) => fmtCompact(v, 1)} width={56} allowDataOverflow />
           <Tooltip {...TOOLTIP} formatter={(v) => [`${fmtInt(Number(v))} t LCE`, "required"]} />
           <Bar dataKey="v" radius={[3, 3, 0, 0]} isAnimationActive={false}>
