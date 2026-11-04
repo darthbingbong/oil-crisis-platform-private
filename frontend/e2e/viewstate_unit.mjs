@@ -2,6 +2,7 @@
 //   node --experimental-strip-types e2e/viewstate_unit.mjs
 import assert from "node:assert/strict";
 import { DEFAULT_CAMERA, LAYER_IDS, defaultLayers, parseViewParams, writeViewParams } from "../src/lib/viewState.ts";
+import { DETAIL_LEVELS, detailIndex, simplifyCountries, simplifyLine } from "../src/lib/mapSimplify.ts";
 import { AFFECTED_ZONE_KM, graticule, pulsePhase, ringRadiusKm, splitAtAntimeridian, toLngLat } from "../src/lib/mapGeometry.ts";
 
 let n = 0;
@@ -93,5 +94,41 @@ t("the pulse repeats and the ring grows with conflict intensity but stays bounde
   assert.ok(AFFECTED_ZONE_KM > 0);
 });
 t("the graticule covers every 30 degrees", () => assert.equal(graticule(30).length, 13 + 5));
+
+// ---- a bad layers value is removed from the address, not kept
+t("layers=null (the defaults) removes a stale or invalid layers parameter; undefined leaves it alone", () => {
+  const cur = new URLSearchParams("view=map&layers=bogus,evil&lat=1");
+  assert.equal(writeViewParams(cur, { view: "map", layers: null }).get("layers"), null);
+  assert.equal(writeViewParams(cur, { view: "map" }).get("layers"), "bogus,evil");
+  assert.equal(writeViewParams(cur, { view: "map", layers: ["routes", "chokepoints"] }).get("layers"), "routes,chokepoints");
+});
+
+// ---- country outline detail levels
+t("simplifyLine keeps the ends and every bump bigger than the tolerance, drops the rest", () => {
+  const line = [[0, 0], [1, 0.001], [2, 0], [3, 1], [4, 0]];
+  const out = simplifyLine(line, 0.01);
+  assert.deepEqual(out[0], [0, 0]); assert.deepEqual(out[out.length - 1], [4, 0]);
+  assert.ok(out.some((p) => p[0] === 3 && p[1] === 1), "the real corner stays");
+  assert.ok(!out.some((p) => p[0] === 1), "the 0.001 wiggle goes");
+  assert.deepEqual(simplifyLine(line, 0), line);
+});
+t("simplifyCountries drops specks, keeps big countries valid (closed rings of 4+ points), and a coarser level has fewer vertices", () => {
+  const ring = (x, y, s, k = 40) => { const r = []; for (let i = 0; i < k; i++) r.push([x + s * Math.cos((i / k) * 6.2832), y + s * Math.sin((i / k) * 6.2832)]); r.push(r[0]); return r; };
+  const fc = { type: "FeatureCollection", features: [
+    { type: "Feature", properties: { n: "big" }, geometry: { type: "Polygon", coordinates: [ring(0, 0, 10)] } },
+    { type: "Feature", properties: { n: "speck" }, geometry: { type: "Polygon", coordinates: [ring(50, 50, 0.01, 8)] } },
+    { type: "Feature", properties: { n: "archipelago" }, geometry: { type: "MultiPolygon", coordinates: [[ring(80, 0, 5)], [ring(95, 0, 0.01, 8)]] } },
+  ] };
+  const coarse = simplifyCountries(fc, 0.5), fine = simplifyCountries(fc, 0.01);
+  assert.deepEqual(coarse.features.map((f) => f.properties.n), ["big", "archipelago"]);
+  assert.equal(coarse.features[1].geometry.coordinates.length, 1, "the speck island of the archipelago goes");
+  const count = (c) => JSON.stringify(c.features.map((f) => f.geometry.coordinates)).split("],[").length;
+  assert.ok(count(coarse) < count(fine));
+  for (const f of coarse.features) for (const p of f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates) { assert.ok(p[0].length >= 4); assert.deepEqual(p[0][0], p[0][p[0].length - 1]); }
+});
+t("detail level follows the zoom in three steps", () => {
+  assert.equal(DETAIL_LEVELS.length, 3);
+  assert.deepEqual([1, 3.4, 3.5, 5.4, 5.5, 9].map(detailIndex), [0, 0, 1, 1, 2, 2]);
+});
 
 console.log(`\n${n} checks passed`);

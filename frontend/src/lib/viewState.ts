@@ -10,7 +10,8 @@ export type LayerId = (typeof LAYER_IDS)[number];
 
 export interface MapCamera { lat: number; lon: number; zoom: number }
 
-export const DEFAULT_CAMERA: MapCamera = { lat: 24, lon: 52, zoom: 2.4 };
+// Chosen so all six routes, the Cape lane and the Huelva tankers are in view and clear of the layers panel on a laptop screen.
+export const DEFAULT_CAMERA: MapCamera = { lat: 22, lon: 22, zoom: 2 };
 export const ZOOM_MIN = 1;
 export const ZOOM_MAX = 9;
 export const LAT_LIMIT = 80;          // Web Mercator is unusable towards the poles
@@ -84,7 +85,10 @@ export function writeViewParams(current: URLSearchParams, w: ViewWrite): URLSear
   } else if (w.view === "globe") {
     for (const k of ["lat", "lon", "zoom", "layers"]) next.delete(k);
   }
-  if (w.view === "map" && w.layers) next.set("layers", w.layers.join(","));
+  if (w.view === "map" && w.layers !== undefined) {              // null = the defaults: no parameter, so a bad value in the address is removed rather than kept
+    if (w.layers) next.set("layers", w.layers.join(","));
+    else next.delete("layers");
+  }
   if (w.selected) next.set("selected", w.selected);
   else next.delete("selected");
   return next;
