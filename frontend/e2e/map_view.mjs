@@ -246,9 +246,13 @@ for (const z of [2, 5.5]) {
     // panning redraws the static base (country outlines) as well, so it is the costly case: drag the map across 3 seconds and count frames
     const fb = await f.locator('[data-testid="map-view"]').boundingBox();
     await f.evaluate(() => { window.__panFrames = { n: 0, worst: 0, last: performance.now(), t0: performance.now(), on: true }; const tick = (now) => { const s = window.__panFrames; if (!s.on) return; s.n++; s.worst = Math.max(s.worst, now - s.last); s.last = now; requestAnimationFrame(tick); }; requestAnimationFrame(tick); });
+    const panBefore = await f.evaluate(() => window.__map.project(26.57, 56.25));
     await f.mouse.move(fb.x + 700, fb.y + 400); await f.mouse.down();
     for (let k = 1; k <= 30; k++) { await f.mouse.move(fb.x + 700 - k * 12, fb.y + 400 + k * 3); await f.waitForTimeout(100); }
     await f.mouse.up();
+    await f.waitForTimeout(600);
+    const panAfter = await f.evaluate(() => window.__map.project(26.57, 56.25));
+    check("dragging the map actually moves it (Hormuz shifts by about the drag, -360 px across)", Math.abs(panAfter.x - panBefore.x - -360) < 40, `(moved ${Math.round(panAfter.x - panBefore.x)} px)`);
     const pr = await f.evaluate(() => { const s = window.__panFrames; s.on = false; return { fps: s.n / ((performance.now() - s.t0) / 1000), worst: s.worst }; });
     fpsLines.push(`zoom 5.5 while dragging the map: ${pr.fps.toFixed(1)} fps, worst frame ${Math.round(pr.worst)} ms (the static base is redrawn as the camera moves)`);
     check("2D map, all layers, dragging at zoom 5.5: measured (no threshold; the base is redrawn on every camera move)", pr.fps > 0, `(${fpsLines[fpsLines.length - 1]})`);

@@ -1,5 +1,5 @@
 2D map, all layers on (routes, chokepoints, hubs, real tankers, 2,000 simulated vessels moving, scenario overlay switched on but no scenario active), 1440x900, Chromium with software WebGL (SwiftShader).
 A lower bound: a real GPU is faster.
-zoom 2: 70.9 fps, worst frame 42 ms
-zoom 5.5: 96.8 fps, worst frame 42 ms
-zoom 5.5 while dragging the map: 3.7 fps, worst frame 985 ms (the static base is redrawn as the camera moves)
+zoom 2: 80.3 fps, worst frame 35 ms
+zoom 5.5: 114.5 fps, worst frame 21 ms
+zoom 5.5 while dragging the map: 6.5 fps, worst frame 735 ms (the static base is redrawn as the camera moves)
