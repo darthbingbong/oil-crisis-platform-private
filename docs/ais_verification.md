@@ -82,6 +82,46 @@ Call totals in the log at this point: 120 provider calls (Port Information 22, V
 
 **The watchlist is geographically one place.** A Nearby sample is every vessel within 10 nm of one seed, so all 8 chosen tankers are in the Huelva anchorage area (Gulf of Cadiz): 8 different flags and several size classes, but 7 of 8 stopped (moored or at anchor). It is a real-vessel sample, not coverage of any chokepoint.
 
-## 8. Open questions for the user
+## 8. Saved past tracks (Vessel History Track, fetched 2026-11-03, 3 of 10 loads used)
+
+Fetched now rather than on demand because the key expires on 2026-11-13. Each raw response is in `backend/data/ais_raw/tracks/` (git-ignored, backed up). The thinned fixture the vessel panel serves is `backend/data/ais_raw/snapshots/tracks.json`; the panel labels it "past track, fetched at <time>" and serves it from disk with no key or provider call, so after the key expires it still shows the saved track with its date and never an error. The window was 7 days ending at the fetch time. I did not re-check the documented maximum window in this session.
+
+| Vessel | MMSI | Flag | Fetched (UTC) | Provider points | Stored (thinned) | First to last point (UTC) | Path | Start to end | Max speed | Moving share |
+|---|---|---|---|---|---|---|---|---|---|---|
+| OIZMENDI | 224543980 | Spain | 2026-11-03 16:10:33 | 5,349 | 493 | 10-27 16:10 to 11-03 16:09 | 76.0 nm | 6.1 nm | 7.9 kn | 34% |
+| MUHUT SILVER | 538006502 | Marshall Islands | 2026-11-03 16:11:15 | 7,291 | 500 | 10-27 16:12 to 11-03 16:08 | 846.5 nm | 658.9 nm | 13.8 kn | 67% |
+| CAPE ANN | 563202900 | Singapore | 2026-11-03 16:11:03 | 3,213 | 500 | 10-27 16:11 to 11-03 16:04 | 18.8 nm | 0.1 nm | 0.7 kn | 0% |
+
+**Correction of the owner's premise and of my pick.** The owner's instruction called OIZMENDI "the one underway". Its saved track covers only 76 nm of path and 6.1 nm from start to end, so it spent most of the week stopped. **MUHUT SILVER is the vessel with real movement** (about 659 nm in a straight line). **CAPE ANN did not move at all** (0.1 nm net, 0% moving), so it was a poor choice for "most movement"; it is a valid saved track but the panel must not suggest a voyage. The vessel names in commit 80703c8 (OIZMENDI, MUHUT SILVER, CAPE ANN) are correct; nothing in that commit needs correcting. Seven History Track loads remain in reserve (3 of 10 used). Track lines join reported AIS positions and are not surveyed routes.
+
+## 9. Location-variety attempt (one attempt, 2026-11-03, within the hard limits)
+
+Goal: put at least one real tanker near Hormuz/Fujairah, Singapore or Malacca so the watchlist is not only Huelva.
+
+| Step | Calls | What happened |
+|---|---|---|
+| Vessel Search (unmetered) for `ADNOC` and `EAGLE` | 2 | saved to `vessel_search_location_20261103.json` |
+| Vessel Position, 3 candidates (from the reserve, not the 16 ceiling) | 3 | **ADNOC 810** (MMSI 470562000): provider type 90, 25.119 N 53.605 E, not a tanker. **ADNOC A15** (471991000): type 90, 24.288 N 54.434 E (Abu Dhabi area), not a tanker. **SINGAPORE ENERGY** (538007985): type 80, 278 m, 2.335 N 101.955 E, at anchor (nav status 1) at the Kuala Linggi anchorage, **Strait of Malacca**. |
+| Vessels Nearby around SINGAPORE ENERGY (one call, 2026-11-03 16:28:13 UTC) | 1 | status 0, **46 vessels, `total` 46**, **10 typed as tankers by the provider** (80 to 89), 641 ms |
+
+Result: the two Gulf candidates were not tankers and not near Hormuz/Fujairah, so only the Malacca candidate qualified. Four tankers were added to the watchlist, taking it from 8 to 12: **SINGAPORE ENERGY** (the seed), **TEMBEK** (461000259), **ZARGA** (538003346) and **ETYFA PROMETHEAS** (210060000). Their positions come from the Nearby sample itself and are labelled "Vessels Nearby sample only" (no extra Vessel Position calls). Nearly all are anchored or moored at the Kuala Linggi anchorage. Still no tanker at Hormuz or Fujairah. The watchlist label now reads "A sample of real tankers near Huelva, Spain, and a few in the Strait of Malacca, each group seen at the time shown on it. Not chokepoint traffic and not coverage of any area." The Nearby hold was put back after the call; the raw response is saved and backed up.
+
+## 10. Call totals from `logs/ais_calls.jsonl` (129 calls, last entry 2026-11-03 16:28:13 UTC)
+
+| Service | Calls | Successful | Metered limit for the key |
+|---|---|---|---|
+| Vessel Position | 11 | 11 | 11 of 50 (8 watchlist, 3 location search) |
+| Vessel History Track | 3 | 3 | 3 of 10 |
+| Port-to-Port | 5 | 5 | 5 of 10 |
+| Point-to-Point | 2 | 2 | 2 of 10 |
+| Fleet Position | 0 | 0 | 0 of 50 |
+| Vessels Nearby (unmetered) | 41 | 12 (29 refused with status 38 on 2026-11-01) | none |
+| Vessel Search (unmetered) | 37 | 34 (3 answered status 31, no match) | none |
+| Vessel Flag (unmetered) | 8 | 8 | none |
+| Port Information (unmetered) | 22 | 22 | none |
+
+Vessel Position headroom: ceiling 16 (5 left), absolute limit 19 (8 left). That is not enough to refresh 12 tankers; see DECISIONS D17.
+
+## 11. Open questions for the user
 
 None blocking. Final snapshot due 2026-11-10; the key expires 2026-11-13.
