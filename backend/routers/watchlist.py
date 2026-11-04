@@ -50,7 +50,10 @@ def _vessel(v: dict, now: float) -> dict:
 @router.get("/vessels/watchlist")
 def watchlist() -> dict:
     snap = wl.load_watchlist(wl.WATCHLIST_FILE)
-    base = {"provider": "ShipFinder", "key_expires_in_days": sf.days_until_expiry()}
+    from routers.ais import key_info          # imported here: routers.ais imports this module
+    snap_for_key = wl.load_watchlist(wl.WATCHLIST_FILE)
+    key = key_info((snap_for_key or {}).get("captured_at_utc"))
+    base = {"provider": "ShipFinder", "key_expires_in_days": sf.days_until_expiry(), "key": key, "key_expired": key["expired"], "key_line": key["line"]}
     if not snap or not isinstance(snap.get("watchlist"), list):
         return {**base, "status": "NONE", "captured_at_utc": None, "label": None, "note": NONE_NOTE, "vessels": [], "samples": []}
     now = time.time()

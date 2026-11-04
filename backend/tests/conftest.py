@@ -13,3 +13,13 @@ sys.path.insert(0, str(BACKEND))
 from news import db as _news_db  # noqa: E402
 
 _news_db.init_db()
+
+
+import pytest  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _fixed_ais_date(monkeypatch):
+    """The AIS key expires on 2026-11-13 and the client then refuses every call. Tests that exercise the client must not depend on the real date, so it is pinned
+    before the expiry unless a test sets AIS_TODAY itself (tests/test_ais_expiry.py does)."""
+    monkeypatch.setenv("AIS_TODAY", "2026-11-04")

@@ -71,4 +71,5 @@ async def health() -> dict:
     feeds = {"price": await _price(), "news": _news(), "ais": _ais()}
     states = {f["state"] for f in feeds.values()}
     overall = "ok" if states == {"ok"} else "fallback" if "fallback" in states else "degraded"
-    return {"overall": overall, "feeds": feeds}
+    from routers.ais import key_info
+    return {"overall": overall, "feeds": feeds, "ais_key": key_info(), "ais_key_line": key_info()["line"]}

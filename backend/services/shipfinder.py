@@ -50,7 +50,7 @@ if KEY_ENV not in price_feed.SECRET_ENV_NAMES:
 
 
 class AISError(Exception):
-    """kind: disabled | no_key | on_hold | breaker_open | too_soon | rate_limited | quota_cap | quota_exhausted | provider_status | http_error | timeout | bad_response"""
+    """kind: disabled | key_expired | no_key | on_hold | breaker_open | too_soon | rate_limited | quota_cap | quota_exhausted | provider_status | http_error | timeout | bad_response"""
 
     def __init__(self, kind: str, message: str, status: int | None = None, retry_after_s: float | None = None):
         super().__init__(message)
@@ -98,8 +98,24 @@ def get_key() -> str:
     return os.environ.get(KEY_ENV, "").strip()
 
 
-def days_until_expiry(today: date | None = None) -> int:
-    return (KEY_EXPIRES - (today or datetime.now(timezone.utc).date())).days
+def today() -> date:
+    """Today (UTC). AIS_TODAY=YYYY-MM-DD fakes it, for tests and for checking the expired-key behaviour without waiting for 2026-11-13. Never set it in normal use."""
+    fake = os.environ.get("AIS_TODAY", "").strip()
+    if fake:
+        try:
+            return date.fromisoformat(fake)
+        except ValueError:
+            pass
+    return datetime.now(timezone.utc).date()
+
+
+def days_until_expiry(today_: date | None = None) -> int:
+    return (KEY_EXPIRES - (today_ or today())).days
+
+
+def key_expired(today_: date | None = None) -> bool:
+    """From the expiry date itself the app makes no AIS call at all (owner decision, 2026-11-04): everything is shown from saved snapshots."""
+    return days_until_expiry(today_) <= 0
 
 
 class ShipFinderClient:
@@ -160,6 +176,8 @@ class ShipFinderClient:
             raise NotSupported(service)
         if not enabled():
             raise AISError("disabled", "AIS_ENABLED=0")
+        if key_expired():
+            raise AISError("key_expired", f"the AIS key expired on {KEY_EXPIRES.isoformat()}; no call was made")
         if not self._key:
             raise AISError("no_key", "no AIS key configured")
         now = self._clock()
