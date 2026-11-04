@@ -1,0 +1,113 @@
+{
+  "suez_20_day_detour": {
+    "loss_pct": 4.3134,
+    "kpi_price_impact_pct": 28.7557,
+    "kpi_price_band_pp": 13.09,
+    "outside_validated_range": false,
+    "price_numbers_keys": [
+      "band_pp",
+      "band_validated",
+      "half_life_days",
+      "outside_validated_range",
+      "peak_pct",
+      "validated_supply_loss_max_pct"
+    ],
+    "price_chart_keys": [
+      "band_validated",
+      "half_life_days",
+      "trajectory",
+      "validated_price_ceiling_pct",
+      "validated_reference"
+    ],
+    "trajectory_points": 181,
+    "trajectory_last_day": 180,
+    "trajectory_day_0_pct": 28.7557,
+    "trajectory_day_30_pct": 28.7557,
+    "trajectory_last_pct": 1.7972,
+    "half_life_days": 30.0,
+    "price_summary": "For a 4.31% supply loss the linear formula implies about a +28.8% price move (supply loss divided by 0.15), held for 60 days and then decaying toward baseline with a 30-day half-life. The shaded band is plus or minus 13.09 percentage points, the formula's average error across 21 historical events.",
+    "price_takeaway": "The linear formula implies a peak of +28.8%, with a ±13.09 pp band.",
+    "price_assumptions": [
+      "%dP = %dS / |Ed|, Ed = -0.15 (borrowed textbook short-run value). Phase 1 tested a trained model on 21 events and it did not beat this formula.",
+      "Band of ±13.09 pp = leave-one-out mean absolute error of the formula on 21 daily-resolution events, all with supply loss up to 8% (small sample). It does not apply beyond that.",
+      "Exponential decay after the disruption with a 30-day half-life (default: half the duration, clamped to 7 to 60 days).",
+      "Price is assumed to move linearly with supply loss; this is unverified for very large shocks and no nonlinear model or cap is applied."
+    ],
+    "barrels_series_points": 181,
+    "barrels_cumulative_bbl": 443341772.15189815
+  },
+  "hormuz_blockade": {
+    "loss_pct": 15.4889,
+    "kpi_price_impact_pct": 103.2591,
+    "kpi_price_band_pp": null,
+    "outside_validated_range": true,
+    "price_numbers_keys": [
+      "band_pp",
+      "band_validated",
+      "half_life_days",
+      "outside_validated_range",
+      "peak_pct",
+      "validated_supply_loss_max_pct"
+    ],
+    "price_chart_keys": [
+      "band_validated",
+      "half_life_days",
+      "trajectory",
+      "validated_price_ceiling_pct",
+      "validated_reference"
+    ],
+    "trajectory_points": 181,
+    "trajectory_last_day": 180,
+    "trajectory_day_0_pct": 103.2591,
+    "trajectory_day_30_pct": 103.2591,
+    "trajectory_last_pct": 0.1008,
+    "half_life_days": 15.0,
+    "price_summary": "For a 15.49% supply loss the linear formula implies about a +103.3% price move (supply loss divided by 0.15), held for 30 days and then decaying toward baseline with a 15-day half-life. This is outside the validated range: the largest validated event, 2026 US-Israel War on Iran (Hormuz Blockade), had a supply loss of 8% and an actual price move of +57.8%, and the plus or minus 13.09 percentage point error band, measured only on events up to 8% supply loss, is not validated at this magnitude and is not shown. The blockade result depends on the bypass assumption: with the headline 4.7 million barrels per day of pipeline bypass the price impact is +103.3%, with the lower 2.6 million case it is +116.8%.",
+    "price_takeaway": "The linear formula implies a peak of +103.3%, outside the validated range (largest validated event: +57.8% at 8% supply loss).",
+    "price_assumptions": [
+      "%dP = %dS / |Ed|, Ed = -0.15 (borrowed textbook short-run value). Phase 1 tested a trained model on 21 events and it did not beat this formula.",
+      "Band of ±13.09 pp = leave-one-out mean absolute error of the formula on 21 daily-resolution events, all with supply loss up to 8% (small sample). It does not apply beyond that.",
+      "Exponential decay after the disruption with a 15-day half-life (default: half the duration, clamped to 7 to 60 days).",
+      "Price is assumed to move linearly with supply loss; this is unverified for very large shocks and no nonlinear model or cap is applied."
+    ],
+    "barrels_series_points": 181,
+    "barrels_cumulative_bbl": 480000000.0
+  },
+  "suez_20_day_detour_lasting_10_days": {
+    "loss_pct": 4.3134,
+    "kpi_price_impact_pct": 28.7557,
+    "kpi_price_band_pp": 13.09,
+    "outside_validated_range": false,
+    "price_numbers_keys": [
+      "band_pp",
+      "band_validated",
+      "half_life_days",
+      "outside_validated_range",
+      "peak_pct",
+      "validated_supply_loss_max_pct"
+    ],
+    "price_chart_keys": [
+      "band_validated",
+      "half_life_days",
+      "trajectory",
+      "validated_price_ceiling_pct",
+      "validated_reference"
+    ],
+    "trajectory_points": 181,
+    "trajectory_last_day": 180,
+    "trajectory_day_0_pct": 28.7557,
+    "trajectory_day_30_pct": 3.9686,
+    "trajectory_last_pct": 0.0,
+    "half_life_days": 7.0,
+    "price_summary": "For a 4.31% supply loss the linear formula implies about a +28.8% price move (supply loss divided by 0.15), held for 10 days and then decaying toward baseline with a 7-day half-life. The shaded band is plus or minus 13.09 percentage points, the formula's average error across 21 historical events.",
+    "price_takeaway": "The linear formula implies a peak of +28.8%, with a ±13.09 pp band.",
+    "price_assumptions": [
+      "%dP = %dS / |Ed|, Ed = -0.15 (borrowed textbook short-run value). Phase 1 tested a trained model on 21 events and it did not beat this formula.",
+      "Band of ±13.09 pp = leave-one-out mean absolute error of the formula on 21 daily-resolution events, all with supply loss up to 8% (small sample). It does not apply beyond that.",
+      "Exponential decay after the disruption with a 7-day half-life (default: half the duration, clamped to 7 to 60 days).",
+      "Price is assumed to move linearly with supply loss; this is unverified for very large shocks and no nonlinear model or cap is applied."
+    ],
+    "barrels_series_points": 181,
+    "barrels_cumulative_bbl": 220556962.02531636
+  }
+}

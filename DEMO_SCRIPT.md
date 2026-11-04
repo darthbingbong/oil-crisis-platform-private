@@ -32,7 +32,7 @@
 - **Do:** choose **Detour**, press **Simulate disruption on this route**, set **20 days** and a **60-day** duration, then **Run full simulation**. (Or open the prepared tab.)
 - **Say:** "Ships avoid the canal and go round the Cape. With a fixed tanker fleet, a longer trip means fewer deliveries."
 - **If you notice the URL says `conf=6`:** the dashboard's conflict-intensity slider defaults to 6 and the prepared link uses 5. It changes **no number** here, because the price formula uses supply loss only. Say that if asked.
-- **KPIs on screen:** price impact **28.8%**, barrels displaced **4,455,696**, EVs required **63.4 million**, extra lithium **2.03 Mt**, deficit **1.25 Mt**.
+- **KPIs on screen:** 30-day price impact **+28.8%** with the badge **VALIDATED 30 DAYS (≤ 8% supply loss)**, barrels displaced **4,455,696**, EVs required **63.4 million**, extra lithium **2.03 Mt**, deficit **1.25 Mt**.
 
 ### 2:30 to 3:30. The arithmetic, by hand (this is the credibility moment)
 

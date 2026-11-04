@@ -1,0 +1,122 @@
+{
+  "suez_20_day_detour": {
+    "loss_pct": 4.3134,
+    "kpi_price_impact_pct": 28.7557,
+    "kpi_price_band_pp": 13.09,
+    "outside_validated_range": false,
+    "price_numbers_keys": [
+      "band_pp",
+      "band_validated",
+      "horizon_days",
+      "move_30d_pct",
+      "outside_validated_range",
+      "peak_pct",
+      "validated_supply_loss_max_pct",
+      "validation_badge"
+    ],
+    "price_chart_keys": [
+      "band_validated",
+      "horizon_days",
+      "trajectory",
+      "validated_price_ceiling_pct",
+      "validated_reference"
+    ],
+    "trajectory_points": 31,
+    "trajectory_last_day": 30,
+    "trajectory_day_0_pct": 0.0,
+    "trajectory_day_30_pct": 28.7557,
+    "trajectory_last_pct": 28.7557,
+    "half_life_days": null,
+    "price_summary": "For a 4.31% supply loss the linear formula implies about a +28.8% price move over 30 days (supply loss divided by 0.15). 30 days is the only horizon the formula was validated on, and the 60-day length of the disruption does not change this figure. The line on the chart is an illustrative path up to the 30-day value, not a forecast of the days in between. The bar at day 30 is plus or minus 13.09 percentage points, the formula's average error across 21 historical events.",
+    "price_takeaway": "The linear formula implies a 30-day price move of +28.8%, with a ±13.09 pp band.",
+    "price_assumptions": [
+      "%dP = %dS / |Ed|, Ed = -0.15 (borrowed textbook short-run value). Phase 1 tested a trained model on 21 events and it did not beat this formula.",
+      "Band of ±13.09 pp = leave-one-out mean absolute error of the formula on 21 daily-resolution events, all with supply loss up to 8% (small sample). It does not apply beyond that.",
+      "Horizon: 30 days only. The formula was tested on the price change over 30 days; no other horizon (a week, 90 days, a year) is estimated, and how long the disruption lasts does not change this figure.",
+      "The straight line from the starting price to the 30-day value is an illustrative path, not a model: the formula gives one 30-day number and nothing about the days in between.",
+      "Price is assumed to move linearly with supply loss; this is unverified for very large shocks and no nonlinear model or cap is applied."
+    ],
+    "barrels_series_points": 181,
+    "barrels_cumulative_bbl": 443341772.15189815
+  },
+  "hormuz_blockade": {
+    "loss_pct": 15.4889,
+    "kpi_price_impact_pct": 103.2591,
+    "kpi_price_band_pp": null,
+    "outside_validated_range": true,
+    "price_numbers_keys": [
+      "band_pp",
+      "band_validated",
+      "horizon_days",
+      "move_30d_pct",
+      "outside_validated_range",
+      "peak_pct",
+      "validated_supply_loss_max_pct",
+      "validation_badge"
+    ],
+    "price_chart_keys": [
+      "band_validated",
+      "horizon_days",
+      "trajectory",
+      "validated_price_ceiling_pct",
+      "validated_reference"
+    ],
+    "trajectory_points": 31,
+    "trajectory_last_day": 30,
+    "trajectory_day_0_pct": 0.0,
+    "trajectory_day_30_pct": 103.2591,
+    "trajectory_last_pct": 103.2591,
+    "half_life_days": null,
+    "price_summary": "For a 15.49% supply loss the linear formula implies about a +103.3% price move over 30 days (supply loss divided by 0.15). 30 days is the only horizon the formula was validated on, and the 30-day length of the disruption does not change this figure. The line on the chart is an illustrative path up to the 30-day value, not a forecast of the days in between. This is outside the validated range: the largest validated event, 2026 US-Israel War on Iran (Hormuz Blockade), had a supply loss of 8% and an actual price move of +57.8%, and the plus or minus 13.09 percentage point error band, measured only on events up to 8% supply loss, is not validated at this magnitude and is not shown. The blockade result depends on the bypass assumption: with the headline 4.7 million barrels per day of pipeline bypass the price impact is +103.3%, with the lower 2.6 million case it is +116.8%.",
+    "price_takeaway": "The linear formula implies a 30-day price move of +103.3%, outside the validated range (largest validated event: +57.8% at 8% supply loss).",
+    "price_assumptions": [
+      "%dP = %dS / |Ed|, Ed = -0.15 (borrowed textbook short-run value). Phase 1 tested a trained model on 21 events and it did not beat this formula.",
+      "Band of ±13.09 pp = leave-one-out mean absolute error of the formula on 21 daily-resolution events, all with supply loss up to 8% (small sample). It does not apply beyond that.",
+      "Horizon: 30 days only. The formula was tested on the price change over 30 days; no other horizon (a week, 90 days, a year) is estimated, and how long the disruption lasts does not change this figure.",
+      "The straight line from the starting price to the 30-day value is an illustrative path, not a model: the formula gives one 30-day number and nothing about the days in between.",
+      "Price is assumed to move linearly with supply loss; this is unverified for very large shocks and no nonlinear model or cap is applied."
+    ],
+    "barrels_series_points": 181,
+    "barrels_cumulative_bbl": 480000000.0
+  },
+  "suez_20_day_detour_lasting_10_days": {
+    "loss_pct": 4.3134,
+    "kpi_price_impact_pct": 28.7557,
+    "kpi_price_band_pp": 13.09,
+    "outside_validated_range": false,
+    "price_numbers_keys": [
+      "band_pp",
+      "band_validated",
+      "horizon_days",
+      "move_30d_pct",
+      "outside_validated_range",
+      "peak_pct",
+      "validated_supply_loss_max_pct",
+      "validation_badge"
+    ],
+    "price_chart_keys": [
+      "band_validated",
+      "horizon_days",
+      "trajectory",
+      "validated_price_ceiling_pct",
+      "validated_reference"
+    ],
+    "trajectory_points": 31,
+    "trajectory_last_day": 30,
+    "trajectory_day_0_pct": 0.0,
+    "trajectory_day_30_pct": 28.7557,
+    "trajectory_last_pct": 28.7557,
+    "half_life_days": null,
+    "price_summary": "For a 4.31% supply loss the linear formula implies about a +28.8% price move over 30 days (supply loss divided by 0.15). 30 days is the only horizon the formula was validated on, and the 10-day length of the disruption does not change this figure. The line on the chart is an illustrative path up to the 30-day value, not a forecast of the days in between. The bar at day 30 is plus or minus 13.09 percentage points, the formula's average error across 21 historical events.",
+    "price_takeaway": "The linear formula implies a 30-day price move of +28.8%, with a ±13.09 pp band.",
+    "price_assumptions": [
+      "%dP = %dS / |Ed|, Ed = -0.15 (borrowed textbook short-run value). Phase 1 tested a trained model on 21 events and it did not beat this formula.",
+      "Band of ±13.09 pp = leave-one-out mean absolute error of the formula on 21 daily-resolution events, all with supply loss up to 8% (small sample). It does not apply beyond that.",
+      "Horizon: 30 days only. The formula was tested on the price change over 30 days; no other horizon (a week, 90 days, a year) is estimated, and how long the disruption lasts does not change this figure.",
+      "The straight line from the starting price to the 30-day value is an illustrative path, not a model: the formula gives one 30-day number and nothing about the days in between.",
+      "Price is assumed to move linearly with supply loss; this is unverified for very large shocks and no nonlinear model or cap is applied."
+    ],
+    "barrels_series_points": 181,
+    "barrels_cumulative_bbl": 220556962.02531636
+  }
+}
