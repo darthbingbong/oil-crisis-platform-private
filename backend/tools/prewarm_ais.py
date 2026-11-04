@@ -161,7 +161,7 @@ def main() -> int:
         print(f"final snapshot saved: {out.relative_to(BACKEND)} ({n} of {len(mmsis)} vessels refreshed)")
         backup()
         status(client)
-        print("REMINDER: copy the newest folder in %USERPROFILE%\oil-crisis-backups to a USB drive or a cloud folder; the key expires on 2026-11-13.")
+        print("REMINDER: copy the newest ais_* folder inside the oil-crisis-backups folder in your user profile to a USB drive or a cloud folder; the key expires on 2026-11-13.")
         return 0 if n == len(mmsis) else 3
 
     if args.step == "tracks-snapshot":
