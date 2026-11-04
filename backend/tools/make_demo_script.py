@@ -47,7 +47,17 @@ def values(client: TestClient) -> dict[str, str]:
     else:
         say = (f"On this machine EIA could not be used when this script was generated, so it showed the last row of a local file, dated {price['as_of']} "
                f"({price['age_days']} days old). Say that plainly.")
+    # M15: the vessel and Markets lines come from the same endpoints the app reads, so the snapshot time, the key line and the track figures are never typed
+    wl = client.get("/api/v1/vessels/watchlist").json()
+    trk = client.get("/api/v1/vessels/538006502/track").json()
+    captured = wl["captured_at_utc"].replace("T", " ")[:16] + " UTC"
+    move_default = round(5 / CFG.elasticity_abs, 2)                      # the dashboard's default scenario: 5% supply loss
+    wti = price["wti"]
     return {
+        "snap_badge": f"SNAPSHOT {captured} · {len(wl['vessels']) if isinstance(wl['vessels'], list) else wl['vessels']} REAL TANKERS", "snap_date": wl["captured_at_utc"][:10],
+        "key_line": wl["key_line"], "trk_label": trk["label"], "trk_path_nm": f"{trk['path_nm']:g}", "trk_net_nm": f"{trk['start_to_end_nm']:g}",
+        "wti_scn": f"{wti * (1 + move_default / 100):,.2f}", "wti_scn_move": f"{move_default:.1f}",
+        "wti_scn_lo": f"{wti * (1 + (move_default - CFG.price_band_pp) / 100):,.2f}", "wti_scn_hi": f"{wti * (1 + (move_default + CFG.price_band_pp) / 100):,.2f}",
         "generated_on": date.today().isoformat(), "suez_url": SUEZ_URL, "hormuz_url": HORMUZ_URL,
         "ticker_status": price["status"], "ticker_say": say,
         "suez_flow_mbd": f"{s['baseline']['flow_bpd'] / 1e6:g}", "s_flow": n(s["baseline"]["flow_bpd"]),
