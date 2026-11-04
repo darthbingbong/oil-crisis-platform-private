@@ -1,0 +1,140 @@
+{
+ "budget": {
+  "source": "logs/ais_calls.jsonl (our own log: the provider console does not record unmetered calls)",
+  "key": {
+   "expires_on": "2026-11-13",
+   "expires_in_days": 9,
+   "expired": false,
+   "line": "AIS key expires in 9 days (2026-11-13)",
+   "saved_on": null
+  },
+  "total_calls": 129,
+  "services": {
+   "vessel_search": {
+    "used": 37,
+    "ok": 37,
+    "failed": 0,
+    "quota": null,
+    "left": null,
+    "metered": false,
+    "last_call_utc": "2026-11-03T16:12:36Z",
+    "last_status": 0,
+    "hold": null,
+    "breaker": "closed",
+    "retry_in_s": 0
+   },
+   "vessel_flag": {
+    "used": 8,
+    "ok": 8,
+    "failed": 0,
+    "quota": null,
+    "left": null,
+    "metered": false,
+    "last_call_utc": "2026-11-03T15:58:55Z",
+    "last_status": 0,
+    "hold": null,
+    "breaker": "closed",
+    "retry_in_s": 0
+   },
+   "port_info": {
+    "used": 22,
+    "ok": 22,
+    "failed": 0,
+    "quota": null,
+    "left": null,
+    "metered": false,
+    "last_call_utc": "2026-11-02T13:34:03Z",
+    "last_status": 0,
+    "hold": null,
+    "breaker": "closed",
+    "retry_in_s": 0
+   },
+   "vessels_nearby": {
+    "used": 41,
+    "ok": 12,
+    "failed": 29,
+    "quota": null,
+    "left": null,
+    "metered": false,
+    "last_call_utc": "2026-11-03T16:28:13Z",
+    "last_status": 0,
+    "hold": "the one Nearby call authorised on 2026-11-03 has been used; ask the owner before any other",
+    "breaker": "closed",
+    "retry_in_s": 0
+   },
+   "vessel_position": {
+    "used": 11,
+    "ok": 11,
+    "failed": 0,
+    "quota": 50,
+    "left": 39,
+    "metered": true,
+    "last_call_utc": "2026-11-03T16:13:11Z",
+    "last_status": 0,
+    "hold": null,
+    "breaker": "closed",
+    "retry_in_s": 0
+   },
+   "fleet_position": {
+    "used": 0,
+    "ok": 0,
+    "failed": 0,
+    "quota": 50,
+    "left": 50,
+    "metered": true,
+    "last_call_utc": null,
+    "last_status": null,
+    "hold": null,
+    "breaker": "closed",
+    "retry_in_s": 0
+   },
+   "vessel_track": {
+    "used": 3,
+    "ok": 3,
+    "failed": 0,
+    "quota": 10,
+    "left": 7,
+    "metered": true,
+    "last_call_utc": "2026-11-03T16:11:15Z",
+    "last_status": 0,
+    "hold": null,
+    "breaker": "closed",
+    "retry_in_s": 0
+   },
+   "route_point": {
+    "used": 2,
+    "ok": 2,
+    "failed": 0,
+    "quota": 10,
+    "left": 8,
+    "metered": true,
+    "last_call_utc": "2026-11-02T13:47:22Z",
+    "last_status": 0,
+    "hold": null,
+    "breaker": "closed",
+    "retry_in_s": 0
+   },
+   "route_port": {
+    "used": 5,
+    "ok": 5,
+    "failed": 0,
+    "quota": 10,
+    "left": 5,
+    "metered": true,
+    "last_call_utc": "2026-11-02T13:46:59Z",
+    "last_status": 0,
+    "hold": null,
+    "breaker": "closed",
+    "retry_in_s": 0
+   }
+  }
+ },
+ "health_ais_key": {
+  "expires_on": "2026-11-13",
+  "expires_in_days": 9,
+  "expired": false,
+  "line": "AIS key expires in 9 days (2026-11-13)",
+  "saved_on": null
+ },
+ "health_line": "AIS key expires in 9 days (2026-11-13)"
+}
