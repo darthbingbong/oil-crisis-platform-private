@@ -351,6 +351,36 @@ def build_snapshot(sample_body: dict, seed_mmsi: int, sample_fetched_at: float, 
     }
 
 
+FINAL_SNAPSHOT_WINDOW = ("2026-11-08", "2026-11-10")      # owner decision (D12/D20): the key expires on 2026-11-13
+
+
+def in_final_snapshot_window(now: float) -> bool:
+    day = utc_iso(now)[:10]
+    return FINAL_SNAPSHOT_WINDOW[0] <= day <= FINAL_SNAPSHOT_WINDOW[1]
+
+
+def refresh_snapshot(snapshot: dict, positions: dict[int, dict], fetched_at: float, budget: dict, notes: list[str] | None = None) -> tuple[dict, int]:
+    """Final snapshot: every watchlist vessel whose Vessel Position call succeeded gets its new position and time; its flag, area and labels are kept. A vessel whose call
+    did not happen or failed keeps its older record and its older time (nothing is faked). The Nearby samples are never touched. Returns (snapshot, vessels refreshed)."""
+    refreshed = 0
+    for i, old in enumerate(snapshot["watchlist"]):
+        pos = positions.get(old["mmsi"])
+        if not pos:
+            continue
+        v = clean_vessel(pos, fetched_at)
+        v.update({k: old.get(k) for k in ("flag_registry", "flag_from_mmsi_prefix", "typed_as_tanker_by", "cargo_note", "area")})
+        v.update(position_confirmed_by="Vessel Position", record_fetched_utc=utc_iso(fetched_at), state_when_captured="SNAPSHOT")
+        snapshot["watchlist"][i] = v
+        refreshed += 1
+    if refreshed:
+        snapshot["captured_at_utc"] = utc_iso(fetched_at)
+        snapshot["final_snapshot"] = {"taken_utc": utc_iso(fetched_at), "vessels_refreshed": refreshed, "vessels_total": len(snapshot["watchlist"])}
+    snapshot["provider_calls"] = budget
+    if notes:
+        snapshot["notes"] = list(snapshot.get("notes") or []) + notes
+    return snapshot, refreshed
+
+
 def save_snapshot(snapshot: dict, path: Path = WATCHLIST_FILE) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(snapshot, indent=1, ensure_ascii=False), encoding="utf-8")

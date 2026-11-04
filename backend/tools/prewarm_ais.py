@@ -5,6 +5,7 @@ r"""Refresh the ShipFinder snapshots within the budget. Run from backend/.
     python tools\prewarm_ais.py watchlist
     python tools\prewarm_ais.py manifest
     python tools\prewarm_ais.py tracks MMSI [MMSI ...]
+    python tools\prewarm_ais.py final-snapshot
 
 sample     EXACTLY ONE Vessels Nearby call around the seed vessel (default FRONT ALTAIR, MMSI 538007007). Refused unless --allow-one-nearby-call is given,
            because Nearby is on hold (it refused calls with status 38 on 2026-11-01). The raw response is saved at once to backend/data/ais_raw/nearby/ and
@@ -12,6 +13,9 @@ sample     EXACTLY ONE Vessels Nearby call around the seed vessel (default FRONT
 watchlist  Takes up to 8 tankers the provider itself typed as tankers from the latest saved sample (chosen for variety in flag, size and motion), confirms their
            positions with Vessel Position (hard ceiling: 16 calls for the key's whole life, 19 with the one-off location search, stops at the first error) and their flags with Vessel Flag Information
            (unmetered), then writes backend/data/ais_raw/snapshots/watchlist.json and backs up.
+
+final-snapshot  Refreshes every watchlist vessel (12) with ONE Vessel Position call each (hard limit 23 for the key, DECISIONS D20; stops at the first error), keeps
+           flags and labels, never calls Vessels Nearby (hold stays), writes watchlist.json and backs up. Refuses outside 2026-11-08 to 2026-11-10 (UTC).
 
 manifest   No provider call. Lists everything captured so far (samples, positions, flags, route plans, port lookups, search lists, tracks) with counts and the
            latest capture time, in backend/data/ais_raw/snapshots/manifest.json, and backs up. This is the "first full snapshot" record.
@@ -64,7 +68,7 @@ def latest_sample() -> tuple[Path, dict]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("step", choices=["status", "sample", "watchlist", "manifest", "tracks", "tracks-snapshot", "location-sample"])
+    ap.add_argument("step", choices=["status", "sample", "watchlist", "manifest", "tracks", "tracks-snapshot", "location-sample", "final-snapshot"])
     ap.add_argument("--seed", type=int, default=DEFAULT_SEED)
     ap.add_argument("--allow-one-nearby-call", action="store_true")
     ap.add_argument("--area", default="Strait of Malacca")
@@ -134,6 +138,31 @@ def main() -> int:
         backup()
         status(client)
         return 0
+
+    if args.step == "final-snapshot":
+        now = time.time()
+        if not wl.in_final_snapshot_window(now):
+            print(f"refused: the final snapshot is taken between {wl.FINAL_SNAPSHOT_WINDOW[0]} and {wl.FINAL_SNAPSHOT_WINDOW[1]} (UTC); now is {wl.utc_iso(now)}")
+            return 2
+        snap = wl.load_watchlist()
+        if not snap:
+            print("no watchlist snapshot to refresh")
+            return 2
+        mmsis = [v["mmsi"] for v in snap["watchlist"]]
+        left = wl.POSITION_ABSOLUTE_LIMIT - client.service_state("vessel_position")["used"]
+        print(f"refreshing {len(mmsis)} vessels; Vessel Position calls left under the limit of {wl.POSITION_ABSOLUTE_LIMIT}: {left}")
+        positions, why = wl.fetch_positions(client, mmsis)
+        fetched_at = time.time()
+        notes = [f"final snapshot positions: {why}"] if why else []
+        if why:
+            print("positions:", why)
+        snap, n = wl.refresh_snapshot(snap, positions, fetched_at, client.budget(), notes)
+        out = wl.save_snapshot(snap)
+        print(f"final snapshot saved: {out.relative_to(BACKEND)} ({n} of {len(mmsis)} vessels refreshed)")
+        backup()
+        status(client)
+        print("REMINDER: copy the newest folder in %USERPROFILE%\oil-crisis-backups to a USB drive or a cloud folder; the key expires on 2026-11-13.")
+        return 0 if n == len(mmsis) else 3
 
     if args.step == "tracks-snapshot":
         watch = wl.load_watchlist() or {"watchlist": []}

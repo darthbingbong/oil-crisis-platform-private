@@ -306,3 +306,24 @@ def test_nearby_calls_are_spaced_by_thirty_minutes():
     assert wl.nearby_spacing_wait_s(None, NOW) == 0
     assert wl.nearby_spacing_wait_s(NOW - 600, NOW) == 1200
     assert wl.nearby_spacing_wait_s(NOW - 1800, NOW) == 0 and wl.nearby_spacing_wait_s(NOW - 5000, NOW) == 0
+
+
+# ------------------------------------------------------------------ final snapshot (12 vessels, D20)
+def test_final_snapshot_window_is_nov_8_to_10_utc():
+    from datetime import datetime, timezone
+    ts = lambda d: datetime.fromisoformat(d).replace(tzinfo=timezone.utc).timestamp()
+    assert not wl.in_final_snapshot_window(ts("2026-11-07T23:59:59")) and wl.in_final_snapshot_window(ts("2026-11-08T00:00:00"))
+    assert wl.in_final_snapshot_window(ts("2026-11-10T23:59:59")) and not wl.in_final_snapshot_window(ts("2026-11-11T00:00:00"))
+
+
+def test_refresh_keeps_labels_updates_positions_and_leaves_failed_vessels_alone():
+    old = [{**wl.clean_vessel(row(m, last_age=9000), NOW - 100), "flag_registry": f"F{m}", "flag_from_mmsi_prefix": None, "typed_as_tanker_by": "provider (ship type 80)",
+            "cargo_note": "n", "area": "Strait of Malacca", "position_confirmed_by": "Vessels Nearby sample only", "record_fetched_utc": "old"} for m in (1, 2, 3)]
+    snap = {"watchlist": old, "captured_at_utc": "old", "notes": [], "extra_samples": [{"x": 1}]}
+    pos = {1: row(1, last_age=30), 3: row(3, last_age=40)}                      # vessel 2's call failed
+    snap, n = wl.refresh_snapshot(snap, pos, NOW + 5000, {"vessel_position": {"used": 23}}, ["positions: stopped"])
+    assert n == 2 and snap["final_snapshot"]["vessels_refreshed"] == 2 and snap["extra_samples"] == [{"x": 1}]
+    v1, v2, v3 = snap["watchlist"]
+    assert v1["position_confirmed_by"] == "Vessel Position" and v1["flag_registry"] == "F1" and v1["area"] == "Strait of Malacca" and v1["record_fetched_utc"] == wl.utc_iso(NOW + 5000)
+    assert v2["record_fetched_utc"] == "old" and v2["position_confirmed_by"] == "Vessels Nearby sample only"
+    assert v3["position_age_s"] == 5040 and snap["captured_at_utc"] == wl.utc_iso(NOW + 5000) and snap["notes"] == ["positions: stopped"]
