@@ -33,7 +33,11 @@ def _key_value(env_path: Path) -> str:
 
 def backup(dest_root: Path, sources=SOURCES, env_path: Path = BACKEND / ".env") -> tuple[Path, int, int]:
     """Returns (backup folder, file count, bytes). Raises RuntimeError (and removes the copy) if the key value is found in it."""
-    dest = dest_root / f"ais_{time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())}"
+    stamp = time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())
+    dest, n = dest_root / f"ais_{stamp}", 1
+    while dest.exists():                       # two backups in the same second (a capture step followed straight by another) must not collide
+        n += 1
+        dest = dest_root / f"ais_{stamp}_{n}"
     files = 0
     for src, name in sources:
         if not src.exists():

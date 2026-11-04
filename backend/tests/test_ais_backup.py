@@ -39,3 +39,13 @@ def test_backup_is_deleted_if_it_contains_the_key(tmp_path):
 def test_backup_with_nothing_recorded_is_not_an_error(tmp_path):
     folder, files, size = backup_ais_data.backup(tmp_path / "out", [(tmp_path / "missing", "ais_raw")], tmp_path / ".env")
     assert files == 0 and size == 0
+
+
+def test_two_backups_in_the_same_second_do_not_collide(tmp_path, monkeypatch):
+    sources, env = _tree(tmp_path)
+    monkeypatch.setattr(backup_ais_data.time, "gmtime", lambda *a: __import__("time").struct_time((2026, 11, 3, 16, 28, 13, 0, 0, 0)))
+    first, n1, _ = backup_ais_data.backup(tmp_path / "out", sources, env)
+    second, n2, _ = backup_ais_data.backup(tmp_path / "out", sources, env)
+    assert first != second and n1 == n2 == 3 and second.name.endswith("_2")
+    third, _, _ = backup_ais_data.backup(tmp_path / "out", sources, env)
+    assert third.name.endswith("_3") and (first / "ais_raw" / "ports.json").exists()
