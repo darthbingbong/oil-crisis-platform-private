@@ -47,10 +47,15 @@ for (const [name, q, key, width, height] of [["suez", SUEZ, "suez", 1440, 1000],
   const priceSection = await txt(p, '[data-testid="section-price"]');
   const chart = p.locator('[data-testid="chart-price"]');
   await chart.locator(".recharts-xAxis-tick-labels text").first().waitFor({ state: "attached", timeout: 15000 });
-  const ticks = (await chart.locator(".recharts-xAxis-tick-labels text").allTextContents()).map(Number);
-  check(`${tag}: price chart x axis runs 0 to 30 only (ticks ${ticks.join(",")})`, Math.min(...ticks) === 0 && Math.max(...ticks) === 30);
+  const ticks = await chart.locator(".recharts-xAxis-tick-labels text").allTextContents();
+  const dots = await chart.locator(".recharts-line-dots circle, .recharts-dot").count();
+  check(`${tag}: price chart has ONE x position, "30 days", and ONE marker (ticks: ${ticks.join(",")}; dots: ${dots})`, ticks.length === 1 && ticks[0] === "30 days" && dots === 1);
+  const eb = await chart.locator(".recharts-errorBars").count();
+  const priceSectionTxt = await txt(p, '[data-testid="section-price"]');
+  check(`${tag}: no points or lines before day 30 (no line path in the price chart)`, (await chart.locator(".recharts-line-curve").count()) === 0);
   check(`${tag}: price section has no half-life, decay, 90 / 180-day, one-year or 'peak' wording`, !BANNED.test(priceSection), BANNED.test(priceSection) ? `(${priceSection.match(BANNED)})` : "");
-  check(`${tag}: price section says 30 days is the only horizon and the line is an illustrative path`, /only horizon/.test(priceSection) && /illustrative path/.test(priceSection));
+  check(`${tag}: price section says 30 days is the only horizon, duration is not used, and the chart is one value`, /only horizon/.test(priceSection) && /supply loss only, not duration/.test(priceSection) && /one 30-day value, not a path/.test(priceSection) && !/illustrative/.test(priceSection));
+  check(`${tag}: duration note next to the price: "uses supply loss only, not duration"`, /uses supply loss only, not duration/.test(await txt(p, '[data-testid="duration-note"]')) && /same/.test(await txt(p, '[data-testid="duration-note"]')));
   const kpi = await txt(p, '[data-testid="kpi-price"]');
   const want = `${j.kpis.price_impact_pct >= 0 ? "+" : ""}${j.kpis.price_impact_pct.toFixed(1)}%`;
   check(`${tag}: headline KPI is the API's plain formula value ${want} and is labelled 30-day`, kpi.includes(want) && /30-day price impact/i.test(kpi), `(${kpi})`);
@@ -58,11 +63,17 @@ for (const [name, q, key, width, height] of [["suez", SUEZ, "suez", 1440, 1000],
   const chartBadge = await txt(p, '[data-testid="price-validation-badge"]');
   check(`${tag}: validation badge is the API's: ${j.kpis.validation_badge}`, badge.toUpperCase() === j.kpis.validation_badge.toUpperCase() && chartBadge.toUpperCase() === j.kpis.validation_badge.toUpperCase(), `(${badge})`);
   if (j.kpis.outside_validated_range) {
-    check(`${tag}: outside the range: OUTSIDE VALIDATED RANGE, band not drawn, warning next to the number`, badge.toUpperCase() === "OUTSIDE VALIDATED RANGE" && (await p.locator('[data-testid="band-not-validated"]').count()) === 1 && (await p.locator('[data-testid="kpi-outside-warning"]').count()) === 1 && /not validated at this magnitude/.test(kpi));
+    check(`${tag}: outside the range: OUTSIDE VALIDATED RANGE, band not drawn, warning next to the number`, badge.toUpperCase() === "OUTSIDE VALIDATED RANGE" && eb === 0 && (await p.locator('[data-testid="band-not-validated"]').count()) === 1 && (await p.locator('[data-testid="kpi-outside-warning"]').count()) === 1 && /not validated at this magnitude/.test(kpi));
   } else {
-    check(`${tag}: inside the range: the plus or minus 13.09 pp is shown with the number and in the legend`, /± 13\.09 pp/.test(kpi) && /13\.09 pp measured error of the 30-day figure/.test(await txt(p, '[data-testid="section-price"]')));
+    check(`${tag}: inside the range: the plus or minus 13.09 pp is shown with the number and in the legend`, /± 13\.09 pp/.test(kpi) && /13\.09 pp: the formula's measured average error at 30 days/.test(await txt(p, '[data-testid="section-price"]')) && eb === 1);
+    check(`${tag}: inside the range: the error bar is drawn on the marker`, eb === 1);
     check(`${tag}: inside the range: no 'not validated' text`, (await p.locator('[data-testid="band-not-validated"]').count()) === 0);
   }
+  const bt = (await p.locator('[data-testid="chart-barrels"] .recharts-xAxis-tick-labels text').allTextContents()).map(Number);
+  const dur = key === "suez" ? 60 : 30;
+  check(`${tag}: barrels chart ends with the ${dur}-day disruption entered, not 180 days (x axis ${bt.join(",")})`, Math.max(...bt) === dur || (Math.max(...bt) <= dur && Math.max(...bt) >= dur - 10), "");
+  check(`${tag}: EV chart says the horizons are arithmetic, not a forecast`, /if the displacement lasted this long.*arithmetic, not a forecast/.test(await txt(p, '[data-testid="section-evs"]')));
+  check(`${tag}: economy section is labelled SOURCED ESTIMATE with its source`, /SOURCED ESTIMATE/i.test(await txt(p, '[data-testid="section-economy"]')) && /IMF/.test(await txt(p, '[data-testid="section-economy"]')));
   check(`${tag}: no horizontal page scroll`, await p.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
   await p.locator('[data-testid="section-price"]').screenshot({ path: path.join(OUT, `results_price_${name}_${width}.png`) });
   console.log("      saved", `results_price_${name}_${width}`);
@@ -75,7 +86,7 @@ const p10 = await newPage(1440, 1000);
 await results(p10, SHORT);
 const j10 = await api({ ...BODY.suez, duration_days: 10 });
 const j60 = await api(BODY.suez);
-check("10-day and 60-day disruptions give the same 30-day KPI and the same trajectory", j10.kpis.price_impact_pct === j60.kpis.price_impact_pct && JSON.stringify(j10.sections.price.chart.trajectory) === JSON.stringify(j60.sections.price.chart.trajectory));
+check("10-day and 60-day disruptions give the same 30-day KPI and the same one-point price result", j10.kpis.price_impact_pct === j60.kpis.price_impact_pct && JSON.stringify(j10.sections.price.chart.trajectory) === JSON.stringify(j60.sections.price.chart.trajectory));
 check("the 10-day page shows the same headline as the 60-day API value", (await txt(p10, '[data-testid="kpi-price"]')).includes(`+${j60.kpis.price_impact_pct.toFixed(1)}%`));
 await p10.close();
 
@@ -88,7 +99,8 @@ await dash.close();
 
 console.log("\n--- API fields");
 check("API: no half_life_days anywhere in the price section; horizon_days is 30", !JSON.stringify(j60.sections.price).includes("half_life") && j60.sections.price.numbers.horizon_days === 30 && j60.sections.price.chart.horizon_days === 30);
-check("API: the price trajectory has 31 points (days 0 to 30)", j60.sections.price.chart.trajectory.length === 31);
+check("API: the price result is ONE point, day 30", j60.sections.price.chart.trajectory.length === 1 && j60.sections.price.chart.trajectory[0].day === 30);
+check("API: barrels series has days 0 to the entered duration (60) and no more", j60.sections.barrels.chart.series.length === 61 && j10.sections.barrels.chart.series.length === 11);
 check("API: old keys kept: kpis.price_impact_pct, numbers.peak_pct, chart.trajectory with pct/low/high/beyond_validated", "price_impact_pct" in j60.kpis && "peak_pct" in j60.sections.price.numbers && ["pct", "low", "high", "beyond_validated"].every((k) => k in j60.sections.price.chart.trajectory[0]));
 
 fs.writeFileSync(path.join(OUT, "m14_console.txt"), logs.join(String.fromCharCode(10)));

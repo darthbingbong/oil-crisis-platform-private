@@ -198,7 +198,7 @@ All of it is in `backend/services/calc_engine.py` as pure functions, driven by `
 | 4 | Barrels displaced per day | `flow x (1 - delivery factor)` (blockade: `max(0, flow x blocked share - bypass)`) | 4,455,696 bpd |
 | 5 | Supply loss | `displaced / 103.3 Mb/d` | 4.313% of world supply |
 | 6 | Price impact (the validated formula) | `supply loss / 0.15` | **+28.8%** (±13.09 pp) |
-| 7 | Price path (M14: 30 days only) | an illustrative straight line from 0 to the step-6 value at day 30; no decay, and the length of the disruption does not change it | 31 points, day 30 = +28.8% |
+| 7 | The 30-day outlook (M14: one value) | the step-6 value at day 30, drawn as one marker with its error bar; no path, no decay, and the length of the disruption does not change it | 1 point, day 30 = +28.8% |
 | 8 | EVs needed to offset the lost fuel | `displaced x 19.5 gal gasoline/bbl x 365 / 500 gal per vehicle-year x EV share` | 63,426,835 EVs |
 | 9 | Lithium per EV (sourced case) | `0.10 kg Li/kWh x 60 kWh x 5.323 (LCE per Li) / 1000` | 0.0319 t LCE (the project's own 0.008 is shown for comparison) |
 | 10 | Lithium required | `EVs x t LCE per EV` | 2,025,726 t LCE (2.03 to 3.04 Mt across 60/70/90 kWh packs) |
@@ -215,7 +215,7 @@ Everything below is either borrowed, chosen, or estimated, and is flagged in the
 1. **Elasticity Ed = -0.15** is a borrowed textbook short-run value, not estimated from this project's data.
 2. **The ±13.09 pp band** is the leave-one-out MAE of 21 events and is applied as a constant width; it is not a statistical confidence interval.
 3. **The formula is linear** and validated only up to 8% supply loss (see Methodology).
-4. **Price path shape** is only an illustration: since M14 the app shows one price horizon, 30 days, and the line drawn from 0 to the 30-day value is a straight line, not a model (the earlier hold-then-decay path over 180 days was removed because nothing validated it; DECISIONS D33).
+4. **There is no price path.** Since M14 the app shows one price horizon, 30 days, as a single value with its error bar (the earlier hold-then-decay path over 180 days, and a straight line that briefly replaced it, were removed because nothing validated them; DECISIONS D33, D34).
 5. **Tanker fleet is fixed** for a detour (worst case): delivery scales by `T/(T+detour)`. `fleet=0` on the Results page lets the fleet expand (zero displaced).
 6. **Voyage days** are a planned sea distance from ShipFinder route planning (5 Port-to-Port calls, retrieved 2026-11-02, 2 Point-to-Point cross-checks within 0.6%) divided by 14 knots. The distance is sourced; the 14-knot speed is the project's assumption. The default Suez detour (14 days) is the Cape plan minus the Suez plan, 11,239.4 and 6,540.2 nm. The globe lines are still illustrative.
 7. **Baseline flows** are the last normal year (2023 for Suez, Bab el-Mandeb and the Cape, 2024 elsewhere). Real conditions in 2026 differ (Hormuz effectively closed); results are a what-if from a normal baseline.

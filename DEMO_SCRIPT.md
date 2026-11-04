@@ -72,6 +72,8 @@
 
 ## Questions you may be asked, and honest answers
 
+**"Does the price change if the disruption lasts longer?"** Not in this model, and I say so on the page. The validated formula uses **supply loss only, not duration**: it was tested on the price 30 days after each event, against that event's supply loss. A 10-day and a 60-day Suez detour with the same supply loss both give **+28.76%**. Duration does change the barrels lost, the totals and the economy scaling, but not the price figure. That is a limitation of the evidence (21 events, not split by duration), not a claim that duration is irrelevant in the real world.
+
 **"Twenty-one events is a tiny sample. Why believe the formula?"** I do not claim it is accurate; I claim it is **transparent and not beaten**. I tested a trained model with leave-one-out validation against it: formula error 13.09 pp, model 13.80 pp. With 21 events and four features there is not enough signal to justify replacing theory. The ±13.09 pp band on the chart is that error, so the chart shows how wrong it has been, not a guess.
 
 **"Where does -0.15 come from?"** It is a **borrowed textbook short-run demand elasticity**, not estimated from my data. It is the biggest single assumption in the price number: if the true value were -0.10 the price effects would be 1.5 times larger, and at -0.30 half as large.
