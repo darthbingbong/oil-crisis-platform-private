@@ -1,5 +1,6 @@
 import {
   Area,
+  ErrorBar,
   Bar,
   BarChart,
   CartesianGrid,
@@ -34,8 +35,6 @@ function niceAxis(lo: number, hi: number, targetTicks = 6): { domain: [number, n
   return { domain: [min, max], ticks };
 }
 
-const DAY_TICKS = [0, 30, 60, 90, 120, 150, 180]; // the barrels chart (arithmetic over the disruption) keeps its axis
-const PRICE_DAY_TICKS = [0, 5, 10, 15, 20, 25, 30]; // the price outlook is 30 days and nothing else
 
 function Frame({ height = 300, children, testId }: { height?: number; children: React.ReactElement; testId: string }) {
   return (
@@ -66,18 +65,18 @@ function Legend({ items }: { items: { color: string; label: string; dashed?: boo
 export function BarrelsChart({ report }: { report: ReportResponse }) {
   const data = report.sections.barrels.chart.series.map((p) => ({ day: p.day, daily: p.daily_bbl / 1e6, cumulative: p.cumulative_bbl / 1e6 }));
   const dur = report.scenario.duration_days;
+  const last = data[data.length - 1].day;
   return (
     <>
       <Frame testId="chart-barrels">
         <ComposedChart data={data} margin={{ top: 8, right: 16, left: 4, bottom: 20 }}>
           <CartesianGrid stroke={GRID} vertical={false} />
-          <XAxis dataKey="day" type="number" domain={[0, 180]} ticks={DAY_TICKS} tick={AXIS} label={{ value: "days since the disruption starts", position: "insideBottom", offset: -10, fill: TOKENS.ash, fontSize: 11 }} />
+          <XAxis dataKey="day" type="number" domain={[0, last]} ticks={niceAxis(0, last, 6).ticks.filter((t) => t <= last)} tick={AXIS} label={{ value: `days of the ${dur}-day disruption you entered`, position: "insideBottom", offset: -10, fill: TOKENS.ash, fontSize: 11 }} />
           <YAxis yAxisId="cum" tick={AXIS} tickFormatter={(v) => `${v}M`} width={52} label={{ value: "cumulative barrels", angle: -90, position: "insideLeft", fill: TOKENS.ash, fontSize: 11 }} />
           <YAxis yAxisId="day" orientation="right" tick={AXIS} tickFormatter={(v) => `${v}M`} width={44} />
           <Tooltip {...TOOLTIP} formatter={(v, name) => [`${Number(v).toFixed(1)} million barrels`, name === "cumulative" ? "cumulative" : "per day"]} labelFormatter={(d) => `day ${d}`} />
           <Area yAxisId="cum" type="monotone" dataKey="cumulative" stroke={LANE} fill={LANE} fillOpacity={0.18} strokeWidth={2} dot={false} isAnimationActive={false} />
           <Line yAxisId="day" type="stepAfter" dataKey="daily" stroke={TOKENS.crude} strokeWidth={2} dot={false} isAnimationActive={false} />
-          <ReferenceLine yAxisId="cum" x={dur} stroke={TOKENS.ash} strokeDasharray="4 4" label={{ value: `disruption ends (day ${dur})`, position: "insideTopLeft", fill: TOKENS.ash, fontSize: 11 }} />
         </ComposedChart>
       </Frame>
       <Legend items={[{ color: LANE, label: "cumulative barrels lost (left axis)", swatch: "box" }, { color: TOKENS.crude, label: "barrels displaced per day (right axis)" }]} />
@@ -95,20 +94,12 @@ export function PriceChart({ report }: { report: ReportResponse }) {
   const horizon = sec.chart.horizon_days;
   const end = traj[traj.length - 1];
 
-  // Split the line into a solid part (inside the validated range) and a dashed part (beyond it); neighbours at the boundary are
-  // included in both so the two pieces join without a gap.
-  const data = traj.map((p, i) => {
-    const prev = traj[i - 1]?.beyond_validated, next = traj[i + 1]?.beyond_validated;
-    const touchesValid = !p.beyond_validated || prev === false || next === false;
-    const touchesBeyond = p.beyond_validated || prev === true || next === true;
-    return {
-      day: p.day,
-      valid: touchesValid ? p.pct : null,
-      beyond: touchesBeyond ? p.pct : null,
-    };
-  });
-  const anyBeyond = traj.some((p) => p.beyond_validated);
-  const peak = Math.max(...traj.map((p) => p.pct));
+  // ONE value: the formula's 30-day move. Nothing is drawn for any earlier day (the formula gives no path). Outside the validated range the marker is
+  // red and there is no error bar.
+  const label = `${horizon} days`;
+  const data = [{ label, pct: end.pct, err: bandShown ? [report.kpis.price_band_pp ?? 0, report.kpis.price_band_pp ?? 0] : undefined }];
+  const anyBeyond = end.beyond_validated;
+  const peak = end.pct;
   const sens = sec.sensitivity;
   const sensPeaks = sens.map((s) => s.price_impact_pct);
   const hiRaw = Math.max(peak, ceiling, ref.actual_price_move_pct, ...sensPeaks, ...(bandShown ? traj.map((p) => p.high ?? 0) : [0])) * 1.08;
@@ -128,41 +119,39 @@ export function PriceChart({ report }: { report: ReportResponse }) {
       <Frame height={340} testId="chart-price">
         <ComposedChart data={data} margin={{ top: 14, right: 16, left: 4, bottom: 20 }}>
           <CartesianGrid stroke={GRID} vertical={false} />
-          <XAxis dataKey="day" type="number" domain={[0, horizon]} ticks={PRICE_DAY_TICKS} tick={AXIS} label={{ value: `days (${horizon}-day outlook; the line between is illustrative)`, position: "insideBottom", offset: -10, fill: TOKENS.ash, fontSize: 11 }} />
+          <XAxis dataKey="label" type="category" tick={AXIS} label={{ value: `price change ${horizon} days after the disruption starts (one value, no path)`, position: "insideBottom", offset: -10, fill: TOKENS.ash, fontSize: 11 }} />
           <YAxis tick={AXIS} domain={yDomain} ticks={yTicks} tickFormatter={(v) => `${Math.round(v)}%`} width={52} allowDataOverflow />
           <Tooltip
             {...TOOLTIP}
-            labelFormatter={(d) => `day ${d}`}
-            formatter={(v, name) => [`${fmtSigned(Number(v))}%`, name === "beyond" ? "beyond the validated range" : "within the validated range"]}
+            labelFormatter={(d) => `${d} after the disruption starts`}
+            formatter={(v) => [`${fmtSigned(Number(v))}%`, anyBeyond ? "linear formula, beyond the validated range" : "linear formula, within the validated range"]}
           />
 
           {/* shaded zone: the price the linear formula gives above the edge of the validated range */}
           {anyBeyond && <ReferenceArea y1={ceiling} y2={hi} fill={TOKENS.alarm} fillOpacity={0.07} ifOverflow="hidden" />}
           {/* the bypass assumption (Hormuz): the same blockade under two published capacities */}
           {sens.length > 1 && (
-            <ReferenceArea x1={0} x2={horizon} y1={Math.min(...sensPeaks)} y2={Math.max(...sensPeaks)} fill={TOKENS.crude} fillOpacity={0.22} ifOverflow="visible"
+            <ReferenceArea y1={Math.min(...sensPeaks)} y2={Math.max(...sensPeaks)} fill={TOKENS.crude} fillOpacity={0.22} ifOverflow="visible"
               label={{ value: `bypass sensitivity: ${Number((sens[0].bypass_bpd / 1e6).toFixed(2))} vs ${fmtMbd(sens[1].bypass_bpd)}`, position: "insideTopLeft", dy: -2, fill: TOKENS.crude, fontSize: 11 }} />
           )}
-          {/* the +/- 13.09 pp is a measured error of the 30-day figure, so it is drawn at day 30 only */}
-          {bandShown && end.low !== null && end.high !== null && (
-            <ReferenceLine segment={[{ x: horizon, y: end.low }, { x: horizon, y: end.high }]} stroke={LANE} strokeWidth={10} strokeOpacity={0.4} ifOverflow="visible" />
-          )}
-
           <ReferenceLine y={ceiling} stroke={TOKENS.ash} strokeDasharray="2 4"
             label={{ value: `formula at ${report.validated_supply_loss_max_pct}% supply loss: ${fmtSigned(ceiling)}%`, position: "insideBottomRight", dy: 17, fill: TOKENS.ash, fontSize: 11 }} />
           <ReferenceLine y={ref.actual_price_move_pct} stroke={TOKENS.ion} strokeDasharray="6 3"
             label={{ value: `2026 war: ${fmtSigned(ref.actual_price_move_pct)}% actual, ${ref.supply_loss_pct}% supply loss (soft)`, position: "insideTopRight", dy: -22, fill: TOKENS.ion, fontSize: 11 }} />
 
-          <Line type="monotone" dataKey="valid" stroke={LANE} strokeWidth={2.5} dot={false} connectNulls={false} isAnimationActive={false} />
-          <Line type="monotone" dataKey="beyond" stroke={TOKENS.alarm} strokeWidth={2.5} strokeDasharray="7 5" dot={false} connectNulls={false} isAnimationActive={false} />
+          <Line dataKey="pct" stroke="none" isAnimationActive={false}
+            dot={{ r: 8, fill: anyBeyond ? TOKENS.alarm : LANE, stroke: TOKENS.bone, strokeWidth: 1.5 }} activeDot={{ r: 9, fill: anyBeyond ? TOKENS.alarm : LANE }}>
+            {bandShown && <ErrorBar dataKey="err" direction="y" stroke={LANE} strokeWidth={3} width={14} />}
+          </Line>
         </ComposedChart>
       </Frame>
 
       <Legend
         items={[
-          { color: LANE, label: `linear formula, ${horizon}-day value within the validated range (the line before day ${horizon} is an illustrative path)` },
-          ...(anyBeyond ? [{ color: TOKENS.alarm, label: "linear formula, beyond the validated range (extrapolation)", dashed: true }] : []),
-          ...(bandShown ? [{ color: LANE, label: `± ${report.kpis.price_band_pp} pp measured error of the ${horizon}-day figure (drawn at day ${horizon})`, swatch: "box" as const }] : []),
+          ...(anyBeyond
+            ? [{ color: TOKENS.alarm, label: `linear formula, ${horizon}-day value beyond the validated range (extrapolation, no error bar)`, swatch: "box" as const, solid: true }]
+            : [{ color: LANE, label: `linear formula, ${horizon}-day value within the validated range`, swatch: "box" as const, solid: true }]),
+          ...(bandShown ? [{ color: LANE, label: `± ${report.kpis.price_band_pp} pp: the formula's measured average error at ${horizon} days (the bar through the marker)` }] : []),
           { color: TOKENS.ion, label: `largest validated event (reference): ${ref.name.replace(/\s*\(.*\)/, "")}, soft figure, still unfolding`, dashed: true },
           ...(sens.length > 1 ? [{ color: TOKENS.crude, label: `bypass-capacity sensitivity range (${Number((sens[0].bypass_bpd / 1e6).toFixed(2))} vs ${fmtMbd(sens[1].bypass_bpd)})`, swatch: "box" as const }] : []),
         ]}
@@ -211,7 +200,7 @@ export function EvChart({ report }: { report: ReportResponse }) {
             label={{ value: `${c.current_data_year} global EV production: ${fmtCompact(c.current_global_production, 1)} (IEA)`, position: "insideTopRight", fill: TOKENS.crude, fontSize: 11 }} />
         </BarChart>
       </Frame>
-      <Legend items={[{ color: TOKENS.ion, label: "extra EVs per year if delivered over 1, 3 or 5 years (label = multiple of production; brighter bar = the headline horizon)", swatch: "box" }, { color: TOKENS.crude, label: `${c.current_data_year} global production (IEA Global EV Outlook 2026); sales that year exceeded ${fmtCompact(c.current_global_sales, 0)}` }]} />
+      <Legend items={[{ color: TOKENS.ion, label: "extra EVs per year if the displacement lasted this long, 1, 3 or 5 years (arithmetic, not a forecast; label = multiple of production; brighter bar = the headline horizon)", swatch: "box" }, { color: TOKENS.crude, label: `${c.current_data_year} global production (IEA Global EV Outlook 2026); sales that year exceeded ${fmtCompact(c.current_global_sales, 0)}` }]} />
     </>
   );
 }

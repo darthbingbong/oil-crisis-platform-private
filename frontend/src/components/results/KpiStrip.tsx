@@ -47,6 +47,10 @@ export default function KpiStrip({ report }: { report: ReportResponse }) {
         />
       </div>
 
+      <p data-testid="duration-note" className="text-xs" style={{ margin: "0 0 10px", color: "var(--color-ash)", maxWidth: 760 }}>
+        The validated formula uses supply loss only, not duration: the {report.scenario.duration_days}-day length of the disruption you entered does not change this price figure
+        (a shorter or longer disruption with the same supply loss gives the same {fmtSigned(k.price_impact_pct)}%).
+      </p>
       <div
         data-testid="kpi-validation-badge"
         className="section-label"

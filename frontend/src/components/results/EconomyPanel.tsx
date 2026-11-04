@@ -12,7 +12,7 @@ export default function EconomyPanel({ report }: { report: ReportResponse }) {
   return (
     <div data-testid="economy-panel" style={{ display: "flex", flexDirection: "column", gap: 22 }}>
       <div>
-        <div className="section-label" style={{ marginBottom: 8 }}>Macro effects from a cited rule of thumb (indicative, not a forecast)</div>
+        <div className="section-label" style={{ marginBottom: 8 }}>Macro effects from a cited rule of thumb: SOURCED ESTIMATE (indicative, not a forecast; the 30-day move is scaled to the days you entered, which is an assumption)</div>
         <div style={{ overflowX: "auto" }}>
           <table data-testid="economy-coefficients" className="text-sm" style={{ borderCollapse: "collapse", color: TOKENS.bone, minWidth: 560 }}>
             <thead><tr><th style={th}>Effect</th><th style={th}>This scenario</th><th style={th}>Per +10% oil price</th><th style={{ ...th, paddingRight: 0 }}>Source</th></tr></thead>

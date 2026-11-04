@@ -77,7 +77,7 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
     loss = ce.supply_loss_pct(displaced, cfg)
     price = ce.price_impact_pct(loss, cfg)
     dur = req["duration_days"]
-    traj = ce.price_outlook_path(price, cfg)
+    traj = [ce.price_outlook_point(price, cfg)]
     dseries = ce.displaced_series(displaced, dur, gap, cfg)
 
     # --- validated range (Phase 1): the +/-13 pp band was measured only on events up to vmax supply loss ---
@@ -166,16 +166,16 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
     }
 
     core = (f"For a {loss:.2f}% supply loss the linear formula implies about a {price:+.1f}% price move over {horizon} days (supply loss divided by {cfg.elasticity_abs}). "
-            f"{horizon} days is the only horizon the formula was validated on, and the {format(dur, 'g')}-day length of the disruption does not change this figure. "
-            f"The line on the chart is an illustrative path up to the {horizon}-day value, not a forecast of the days in between.")
+            f"{horizon} days is the only horizon the formula was validated on, and the validated formula uses supply loss only, not duration: "
+            f"the {format(dur, 'g')}-day length of the disruption does not change this figure. The chart shows that one {horizon}-day value, not a path.")
     if outside:
         second = (f"This is outside the validated range: the largest validated event, {ref['name']}, had a supply loss of {ref['supply_loss_pct']:g}% and an actual "
                   f"price move of {ref['actual_price_move_pct']:+.1f}%, and the plus or minus {cfg.price_band_pp:g} percentage point error band, measured only on events "
                   f"up to {vmax:g}% supply loss, is not validated at this magnitude and is not shown.")
     else:
-        second = f"The bar at day {horizon} is plus or minus {cfg.price_band_pp:g} percentage points, the formula's average error across {ref['n_events']} historical events."
+        second = f"The error bar is plus or minus {cfg.price_band_pp:g} percentage points, the formula's average error across {ref['n_events']} historical events."
     s_price = {
-        "title": "Oil price trajectory",
+        "title": "30-day oil price outlook",
         "summary": core + " " + second,
         "takeaway": (f"The linear formula implies a {horizon}-day price move of {price:+.1f}%, outside the validated range (largest validated event: {ref['actual_price_move_pct']:+.1f}% at {ref['supply_loss_pct']:g}% supply loss)."
                      if outside else f"The linear formula implies a {horizon}-day price move of {price:+.1f}%, with a ±{cfg.price_band_pp:g} pp band."),
@@ -191,7 +191,6 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
                "phase1_analysis.py output: 13.09 pp"),
             _a(f"Horizon: {horizon} days only. The formula was tested on the price change over {horizon} days; no other horizon (a week, 90 days, a year) is estimated, and how long the disruption lasts does not change this figure.",
                "backend/PHASE1_SUMMARY.md; docs/outlook_validation.md"),
-            _a(f"The straight line from the starting price to the {horizon}-day value is an illustrative path, not a model: the formula gives one {horizon}-day number and nothing about the days in between.", is_estimate=True),
             _a("Price is assumed to move linearly with supply loss; this is unverified for very large shocks and no nonlinear model or cap is applied.", is_estimate=True),
         ],
     }
@@ -212,7 +211,7 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
         "title": "EVs required",
         "summary": (
             f"Offsetting {_n(displaced)} barrels per day of lost crude would take about {_mb(evs)} electric cars replacing gasoline cars "
-            f"(at a {req['ev_substitution_rate_pct']:g}% substitution rate). Delivered over 1, 3 or 5 years that is "
+            f"(at a {req['ev_substitution_rate_pct']:g}% substitution rate). If the displacement lasted 1, 3 or 5 years (arithmetic, not a forecast) that would mean "
             f"{_mb(horizons[0]['evs_per_year'])}, {_mb(horizons[1]['evs_per_year'])} or {_mb(horizons[2]['evs_per_year'])} extra EVs per year, "
             f"or {prod_x[0]:.1f}, {prod_x[1]:.1f} and {prod_x[2]:.1f} times the roughly {_mb(cfg.current_global_ev_production_per_year)} electric cars "
             f"produced worldwide in {cfg.current_ev_data_year} (IEA Global EV Outlook 2026)."),
@@ -291,9 +290,9 @@ def build_report(route: dict, req: dict, cfg: CalcConfig = DEFAULT_CONFIG) -> di
         hard_numbers.append({"label": "Tanker tonne-miles (longer voyages)", "value": tonne_mile, "unit": "% more"})
         hard_numbers.append({"label": "One-time transit gap", "value": gap, "unit": "barrels"})
     s_eco = {
-        "title": "Economy and markets (indicative)",
+        "title": "Economy and markets (indicative, sourced estimate)",
         "summary": (
-            f"The linear formula implies a {price:+.1f}% oil price move lasting {format(dur, 'g')} days. Scaling the IMF rule of thumb "
+            f"Taking the {horizon}-day move of {price:+.1f}% as if it were sustained for {format(dur, 'g')} days (an assumption: the price is not estimated beyond {horizon} days), scaling the IMF rule of thumb "
             f"(per +10% oil: about {inf['per_10pct_high']:+.1f} pp of global headline inflation and a {abs(out['per_10pct_high']):.1f} to "
             f"{abs(out['per_10pct_low']):.1f}% fall in global output, if the rise lasts most of a year) to this scenario implies about "
             f"{inf['low']:+.2f} pp of global inflation and {out['low']:+.2f}% to {out['high']:+.2f}% for global output. "

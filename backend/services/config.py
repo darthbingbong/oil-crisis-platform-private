@@ -63,8 +63,6 @@ class CalcConfig:
     price_band_pp: float = 13.09
     # M14: the price formula was validated on the price change over 30 days and on nothing else. No other price horizon is computed or shown.
     price_horizon_days: int = 30
-    # Days drawn by the barrels-displaced series. Arithmetic over the disruption's duration, NOT a price estimate.
-    trajectory_days: int = 180
 
     # --- fleet and detour -------------------------------------------------
     # Project tanker speed (brief section 4.5).

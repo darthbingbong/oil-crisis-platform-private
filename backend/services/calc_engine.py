@@ -5,7 +5,7 @@ Chain:  route flow -> barrels displaced/day -> supply loss % -> price impact % (
 """
 
 from dataclasses import replace  # noqa: F401  (re-exported for tests that override config)
-from math import floor, log10
+from math import ceil, floor, log10
 
 from .config import DEFAULT_CONFIG, CalcConfig
 
@@ -54,27 +54,19 @@ def price_impact_pct(supply_loss: float, cfg: CalcConfig = DEFAULT_CONFIG) -> fl
     return supply_loss / cfg.elasticity_abs
 
 
-def price_outlook_path(price_pct: float, cfg: CalcConfig = DEFAULT_CONFIG) -> list[dict]:
-    """The 30-day price outlook as a daily list, day 0..price_horizon_days (30).
-
-    The ONLY validated number is the last point: the plain formula value `price_pct` (= supply loss / 0.15) at day 30, with the +/- price_band_pp
-    (Phase 1 leave-one-out MAE) attached to that day alone. The days in between are an ILLUSTRATIVE straight line from 0 to that figure: the formula gives
-    one 30-day number and says nothing about the path, so the line claims nothing more. There is no decay and no dependence on how long the disruption lasts.
-    """
-    horizon = cfg.price_horizon_days
-    out = []
-    for day in range(horizon + 1):
-        pct = price_pct * day / horizon
-        end = day == horizon
-        out.append({"day": day, "pct": pct, "low": pct - cfg.price_band_pp if end else None, "high": pct + cfg.price_band_pp if end else None})
-    return out
+def price_outlook_point(price_pct: float, cfg: CalcConfig = DEFAULT_CONFIG) -> dict:
+    """The 30-day price outlook: ONE value, the plain formula `price_pct` (= supply loss / 0.15) at day 30, with the +/- price_band_pp (Phase 1
+    leave-one-out MAE) attached to it. The formula gives no path, so no other day is returned: no decay, no ramp, and no dependence on how long the
+    disruption lasts."""
+    return {"day": cfg.price_horizon_days, "pct": price_pct, "low": price_pct - cfg.price_band_pp, "high": price_pct + cfg.price_band_pp}
 
 
 def displaced_series(displaced_bpd: float, duration_days: float, transit_gap: float = 0.0,
                      cfg: CalcConfig = DEFAULT_CONFIG) -> list[dict]:
-    """Daily and cumulative barrels displaced, day 0..trajectory_days (supply restored after the duration)."""
+    """Daily and cumulative barrels displaced, day 0 to the last day of the disruption the user entered (arithmetic, not a price estimate)."""
+    last = max(1, ceil(duration_days))
     out, cum = [], transit_gap
-    for day in range(cfg.trajectory_days + 1):
+    for day in range(last + 1):
         daily = displaced_bpd if 0 < day <= duration_days else 0.0
         cum += daily
         out.append({"day": day, "daily_bbl": daily, "cumulative_bbl": cum})

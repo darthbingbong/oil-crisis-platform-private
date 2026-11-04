@@ -36,8 +36,8 @@ def test_zero_detour_displaces_nothing():
 def test_negative_supply_oversupply_gives_price_fall_and_no_evs():
     assert ce.price_impact_pct(-3.0, GOLD) == pytest.approx(-20.0)
     assert ce.vehicles_offset(-1_000_000, 100, GOLD) == 0.0
-    traj = ce.price_outlook_path(-20.0, cfg=GOLD)
-    assert traj[0]["pct"] == 0.0 and traj[-1]["pct"] == -20.0  # a straight line down to the 30-day value
+    pt = ce.price_outlook_point(-20.0, cfg=GOLD)
+    assert pt["day"] == 30 and pt["pct"] == -20.0  # one 30-day value, and it is the plain formula
 
 
 def test_blocked_share_below_bypass_displaces_nothing():
@@ -78,25 +78,22 @@ def test_fleet_not_constrained_removes_displacement_but_keeps_transit_gap():
 
 
 # ---- other behaviour ------------------------------------------------------
-def test_price_outlook_path_is_30_days_and_ends_on_the_plain_formula():
-    t = ce.price_outlook_path(33.3, cfg=DEFAULT_CONFIG)
-    assert len(t) == 31 and [p["day"] for p in t] == list(range(31))     # days 0..30 and nothing beyond
-    assert t[0]["pct"] == 0.0 and t[30]["pct"] == 33.3                   # the validated number is day 30
-    assert t[15]["pct"] == pytest.approx(33.3 / 2)                       # illustrative straight line, no decay
-    assert all(t[i]["pct"] <= t[i + 1]["pct"] for i in range(30))        # never falls back
-    assert t[30]["high"] - t[30]["pct"] == pytest.approx(13.09) and t[30]["pct"] - t[30]["low"] == pytest.approx(13.09)
-    assert all(p["low"] is None and p["high"] is None for p in t[:30])    # the +/-13.09 pp is a statement about day 30 only
+def test_price_outlook_is_one_day_30_value_with_the_band():
+    pt = ce.price_outlook_point(33.3, cfg=DEFAULT_CONFIG)
+    assert pt["day"] == 30 and pt["pct"] == 33.3                          # the validated number, and nothing before day 30
+    assert pt["high"] - pt["pct"] == pytest.approx(13.09) and pt["pct"] - pt["low"] == pytest.approx(13.09)
 
 
 def test_no_decay_or_half_life_machinery_is_left():
-    assert not hasattr(ce, "default_half_life_days") and not hasattr(ce, "price_trajectory")
+    assert not hasattr(ce, "default_half_life_days") and not hasattr(ce, "price_trajectory") and not hasattr(ce, "price_outlook_path")
     assert not hasattr(DEFAULT_CONFIG, "half_life_min_days") and DEFAULT_CONFIG.price_horizon_days == 30
 
 
 def test_displaced_series_cumulative_stops_after_duration():
     s = ce.displaced_series(1_000_000, 10, transit_gap=500, cfg=DEFAULT_CONFIG)
-    assert s[10]["cumulative_bbl"] == 500 + 10_000_000
-    assert s[180]["cumulative_bbl"] == s[10]["cumulative_bbl"]
+    assert [p["day"] for p in s] == list(range(11))                       # M14: the series ends with the disruption the user entered, not at 180 days
+    assert s[10]["cumulative_bbl"] == 500 + 10_000_000 and s[0]["cumulative_bbl"] == 500
+    assert [p["day"] for p in ce.displaced_series(1_000_000, 7.5, cfg=DEFAULT_CONFIG)][-1] == 8
 
 
 def test_ev_horizons_per_year_and_ratio():
