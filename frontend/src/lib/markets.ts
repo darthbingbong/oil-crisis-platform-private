@@ -45,7 +45,10 @@ export const TAB_SYMBOLS: Record<MarketTab, MarketSymbol[]> = {
 };
 
 /** Said under the Indices tab: what is missing and why. */
-export const INDICES_NOTE = "Not shown: Nasdaq Composite and Nifty 50 (TradingView's free widget returns no data for them; the Nasdaq 100 and the Sensex stand in). Rows marked CFD are broker quotes that track the index closely, not the official index level.";
+export const INDICES_NOTE = "Not shown: Nasdaq Composite and Nifty 50 (TradingView's free widget returns no data for them; the Nasdaq 100 and the Sensex stand in).";
+
+/** Said under every tab, at every screen width: what "CFD" in a row name means. */
+export const CFD_NOTE = "Rows marked CFD are broker quotes that track the index or commodity closely, not the official level or an exchange price.";
 
 export const TV_SCRIPT_URL = "https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js";
 export const TV_HOME = "https://www.tradingview.com/";

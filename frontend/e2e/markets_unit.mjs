@@ -1,7 +1,7 @@
 // Unit checks for the Markets panel's pure parts (symbol lists, widget settings, the WTI scenario number). Plain node, no browser:
 //   node --experimental-strip-types e2e/markets_unit.mjs
 import assert from "node:assert/strict";
-import { FORMULA_BAND_PP, INDICES_NOTE, TABS, TAB_SYMBOLS, TV_SCRIPT_URL, VALIDATED_SUPPLY_LOSS_MAX_PCT, WIDGET_CHIP, WIDGET_HELP, widgetConfig, widgetHeight, wtiScenario } from "../src/lib/markets.ts";
+import { CFD_NOTE, FORMULA_BAND_PP, INDICES_NOTE, TABS, TAB_SYMBOLS, TV_SCRIPT_URL, VALIDATED_SUPPLY_LOSS_MAX_PCT, WIDGET_CHIP, WIDGET_HELP, widgetConfig, widgetHeight, wtiScenario } from "../src/lib/markets.ts";
 
 let n = 0;
 const t = (name, fn) => { fn(); n++; console.log("PASS ", name); };
@@ -14,6 +14,7 @@ t("the indices that have a feed are listed; the two that do not are named in the
   assert.ok(!/Nasdaq Composite|Nifty/.test(names));
   assert.match(INDICES_NOTE, /Nasdaq Composite/); assert.match(INDICES_NOTE, /Nifty 50/);
 });
+t("the CFD note explains the label and is the same text on every tab", () => assert.match(CFD_NOTE, /CFD.*broker quotes.*not the official level/));
 t("broker-quote rows say CFD in their name (they are not the official level)", () => {
   for (const x of TABS.flatMap((tab) => TAB_SYMBOLS[tab])) if (/^(FOREXCOM|OANDA|CAPITALCOM):/.test(x.name)) assert.match(x.displayName, /CFD/, x.name);
 });

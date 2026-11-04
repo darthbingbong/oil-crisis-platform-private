@@ -173,7 +173,7 @@ await widgetText(tab, /S&P 500/); await widgetText(tab, /\d[\d,]*\.\d+[\s\S]*\d[
 check("tablet 820 px: no horizontal page scroll", await tab.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
 await shot(panel(tab), "tablet_markets");
 await tab.close();
-const phone = await newPage(390, 844);
+const phone = await newPage(390, 1700); // tall on purpose: the page scrolls inside the right column, so a short viewport cuts the panel out of an element screenshot
 await openDash(phone);
 await widgetText(phone, /S&P 500/); await widgetText(phone, /\d[\d,]*\.\d+[\s\S]*\d[\d,]*\.\d+[\s\S]*\d[\d,]*\.\d+/, 30000); await phone.waitForTimeout(3000);
 check("phone 390 px: no horizontal page scroll", await phone.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), `(scrollWidth ${await phone.evaluate(() => document.documentElement.scrollWidth)})`);

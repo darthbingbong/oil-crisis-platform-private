@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { usePrice } from "../hooks/usePrice";
-import { EIA_HELP, FORMULA_BAND_PP, INDICES_NOTE, TABS, TAB_LABEL, TV_SCRIPT_URL, WIDGET_CHIP, WIDGET_HELP, widgetConfig, widgetHeight, wtiScenario, type MarketTab } from "../lib/markets";
+import { CFD_NOTE, EIA_HELP, FORMULA_BAND_PP, INDICES_NOTE, TABS, TAB_LABEL, TV_SCRIPT_URL, WIDGET_CHIP, WIDGET_HELP, widgetConfig, widgetHeight, wtiScenario, type MarketTab } from "../lib/markets";
 import { TOKENS } from "../lib/constants";
 import type { PriceLive } from "../types";
 import TradingViewWidget from "./TradingViewWidget";
@@ -174,6 +174,7 @@ export default function MarketsPanel({ scenario }: { scenario: ScenarioNumbers |
           </div>
         ))}
         {tab === "indices" && <p className="text-[11px]" style={{ margin: 0, color: TOKENS.ash }} data-testid="indices-note">{INDICES_NOTE}</p>}
+        <p className="text-[11px]" style={{ margin: 0, color: TOKENS.ash }} data-testid="cfd-note">{CFD_NOTE}</p>
         {tab === "commodities" && (
           <p className="text-[11px]" style={{ margin: 0, color: TOKENS.ash }} data-testid="lithium-note">No free source for lithium prices, so none are shown.</p>
         )}
