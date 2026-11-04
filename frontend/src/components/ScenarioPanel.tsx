@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { simulate, simulateReportPreview, type ReportPreview } from "../lib/api";
 import { localSimulate } from "../lib/localFormula";
+import { VALIDATED_SUPPLY_LOSS_MAX_PCT } from "../lib/markets";
 import { encodeScenario } from "../lib/scenarioParams";
 import { useAnimatedNumber } from "../lib/useAnimatedNumber";
 import Slider from "./Slider";
@@ -32,9 +33,6 @@ const DEFAULT_SCENARIO: SimulateRequest = {
 
 const DEBOUNCE_MS = 200;
 
-/** Largest supply loss among the 21 daily-resolution events the formula's error was validated on
- * (backend/data/events.csv; the backend reports the same value as validated_supply_loss_max_pct). */
-const VALIDATED_SUPPLY_LOSS_MAX_PCT = 8;
 
 const DEFAULT_LITHIUM_AVAILABILITY_PCT = 10;
 const DEFAULT_DURATION_DAYS = 30;
@@ -71,6 +69,8 @@ interface Props {
   prefill?: RouteScenarioPrefill | null;
   /** Tells the globe which route to draw as disrupted (crimson) and how intense the conflict is. */
   onRouteScenarioChange?: (state: { routeId: string; disruptionType: "blockade" | "detour"; altRouteId: string | null } | null, conflictIntensity: number) => void;
+  /** The supply loss and the 30-day formula move this panel is showing, for the WTI scenario number in the Markets panel. */
+  onScenarioNumbers?: (n: { supplyLossPct: number; movePct: number }) => void;
 }
 
 export default function ScenarioPanel({
@@ -78,6 +78,7 @@ export default function ScenarioPanel({
   routes = [],
   prefill = null,
   onRouteScenarioChange,
+  onScenarioNumbers,
 }: Props) {
   const navigate = useNavigate();
   const [scenario, setScenario] = useState<SimulateRequest>(DEFAULT_SCENARIO);
@@ -202,6 +203,10 @@ export default function ScenarioPanel({
       clearTimeout(timer);
     };
   }, [scenario, newsUpdateSignal]);
+
+  useEffect(() => {
+    onScenarioNumbers?.({ supplyLossPct: scenario.supply_loss_pct, movePct: result.predicted_price_change_pct });
+  }, [scenario.supply_loss_pct, result.predicted_price_change_pct, onScenarioNumbers]);
 
   const animatedPricePct = useAnimatedNumber(result.predicted_price_change_pct);
   const animatedVehicleYears = useAnimatedNumber(result.ev_feasibility.gasoline_vehicle_years_displaced);

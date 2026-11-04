@@ -2,6 +2,7 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } fro
 import { useSearchParams } from "react-router-dom";
 import AlertFeed from "../components/AlertFeed";
 import ChokepointPanel from "../components/ChokepointPanel";
+import MarketsPanel, { type ScenarioNumbers } from "../components/MarketsPanel";
 import EarthGlobe from "../components/globe/EarthGlobe";
 import Header from "../components/Header";
 import PriceTicker from "../components/PriceTicker";
@@ -79,6 +80,8 @@ export default function Dashboard() {
   }, [search, setSearch]);
   const [disrupted, setDisrupted] = useState<{ routeId: string; altRouteId: string | null } | null>(null);
   const [conflictIntensity, setConflictIntensity] = useState(6);
+  const [scenarioNumbers, setScenarioNumbers] = useState<ScenarioNumbers | null>(null);
+  const handleScenarioNumbers = useCallback((n: ScenarioNumbers) => setScenarioNumbers((p) => (p && p.supplyLossPct === n.supplyLossPct && p.movePct === n.movePct ? p : n)), []);
   const handleSimulateRoute = useCallback(
     (p: Omit<RouteScenarioPrefill, "nonce">) => setPrefill({ ...p, nonce: Date.now() }),
     []
@@ -202,7 +205,9 @@ export default function Dashboard() {
             routes={routes}
             prefill={prefill}
             onRouteScenarioChange={handleRouteScenarioChange}
+            onScenarioNumbers={handleScenarioNumbers}
           />
+          <MarketsPanel scenario={scenarioNumbers} />
           <ChokepointPanel
             selected={selectedChokepoint}
             onSelect={setSelectedChokepoint}
