@@ -4,7 +4,7 @@ What this key can and cannot do (docs/ais_verification.md, docs/DECISIONS.md D1 
   * Vessels Nearby is centred on ONE vessel with a fixed 10 nm radius. A response is therefore a SAMPLE ("vessels within 10 nm of <vessel>, seen at <time>"),
     never a count for a chokepoint or any area.
   * The watchlist is up to 8 tankers that the PROVIDER typed as tankers (ship type 80 to 89) in that sample. Their positions are confirmed one by one with
-    Vessel Position (metered: 50 calls, hard ceiling of 16 in total for the watchlist; at most 3 more, from the reserve, for the one-off location search, so never more than 19). Fleet Position is not used: it needs a fleet made in the console.
+    Vessel Position (metered: 50 calls, hard limit of 23 calls in total for the key, DECISIONS D20: 11 used + 12 for the final refresh of 12 tankers). Fleet Position is not used: it needs a fleet made in the console.
   * Nothing here claims what a tanker carries: AIS does not say crude from products.
 
 Freshness (MASTER_PROMPT_2.md section 3.3, applied honestly): there is no background poller on this key (Vessel Position allows 50 calls for the key's whole life),
@@ -29,9 +29,10 @@ WATCHLIST_FILE = SNAP_DIR / "watchlist.json"
 
 TANKER_TYPES = range(80, 90)                  # AIS ship types 80 to 89: tankers (the provider's own typing)
 MAX_WATCHLIST = 8
-POSITION_CALL_CEILING = 16                    # owner's hard stop for the watchlist's Vessel Position calls in total (raised from 14 on 2026-11-03 so the final snapshot can refresh all 8)
-POSITION_EXPLORE_ALLOWANCE = 3                # the one-off location search may spend up to 3 more, out of the reserve
-POSITION_ABSOLUTE_LIMIT = POSITION_CALL_CEILING + POSITION_EXPLORE_ALLOWANCE   # 19 of 50: nothing may pass this
+# Vessel Position, calls in total for the key (50 allowed). History: 14, then 16 (owner, 2026-11-03: refresh all 8), then 23 (owner, 2026-11-04:
+# the watchlist grew to 12 tankers and Fleet Position cannot take a list of MMSIs). 11 used before the final snapshot + 12 refresh calls = 23. Nothing may pass it.
+POSITION_ABSOLUTE_LIMIT = 23
+POSITION_CALL_CEILING = POSITION_ABSOLUTE_LIMIT
 POLL_INTERVAL_S = 60                          # a deliberate refresh counts as one poll
 LIVE_FETCH_MAX_AGE_S = 2 * POLL_INTERVAL_S    # "within two poll intervals"
 LIVE_MEDIAN_POSITION_AGE_S = 10 * 60          # "median position age under 10 minutes"

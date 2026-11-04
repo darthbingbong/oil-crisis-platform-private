@@ -131,27 +131,27 @@ def position_reply(mmsi):
     return {"status": 0, "msg": "", "data": row(mmsi, last_age=30)}
 
 
-def test_positions_stop_at_the_hard_ceiling_of_16_calls(tmp_path):
-    assert wl.POSITION_CALL_CEILING == 16 and wl.POSITION_ABSOLUTE_LIMIT == 19
+def test_positions_stop_at_the_hard_ceiling_of_23_calls(tmp_path):
+    assert wl.POSITION_CALL_CEILING == 23 and wl.POSITION_ABSOLUTE_LIMIT == 23
     mmsis = list(range(300_000_001, 300_000_025))
     c, p, clock = make(tmp_path, Provider([position_reply(m) for m in mmsis]))
     got, why = wl.fetch_positions(c, mmsis, raw_dir=tmp_path / "raw", sleep=clock.advance)
-    assert len(p.requests) == 16 and len(got) == 16 and "ceiling of 16" in why
-    assert c.budget()["vessel_position"]["used"] == 16 and c.budget()["vessel_position"]["left"] == 34
+    assert len(p.requests) == 23 and len(got) == 23 and "ceiling of 23" in why
+    assert c.budget()["vessel_position"]["used"] == 23 and c.budget()["vessel_position"]["left"] == 27
 
 
-def test_no_caller_can_push_positions_past_the_absolute_limit_of_19(tmp_path):
+def test_no_caller_can_push_positions_past_the_absolute_limit_of_23(tmp_path):
     mmsis = list(range(400_000_001, 400_000_030))
     c, p, clock = make(tmp_path, Provider([position_reply(m) for m in mmsis]))
     got, why = wl.fetch_positions(c, mmsis, raw_dir=tmp_path / "raw", ceiling=50, sleep=clock.advance)     # even asking for 50
-    assert len(p.requests) == 19 and "ceiling of 19" in why
+    assert len(p.requests) == 23 and "ceiling of 23" in why
 
 
 def test_positions_count_calls_from_earlier_runs(tmp_path):
     c, p, clock = make(tmp_path, Provider([position_reply(m) for m in range(30)]))
     wl.fetch_positions(c, list(range(100_000_001, 100_000_009)), raw_dir=tmp_path / "raw", sleep=clock.advance)       # 8 calls
-    got, why = wl.fetch_positions(c, list(range(200_000_001, 200_000_013)), raw_dir=tmp_path / "raw", sleep=clock.advance)
-    assert len(p.requests) == 16 and len(got) == 8 and "ceiling" in why
+    got, why = wl.fetch_positions(c, list(range(200_000_001, 200_000_021)), raw_dir=tmp_path / "raw", sleep=clock.advance)
+    assert len(p.requests) == 23 and len(got) == 15 and "ceiling" in why
 
 
 def test_positions_stop_at_the_first_error_without_retry(tmp_path):
