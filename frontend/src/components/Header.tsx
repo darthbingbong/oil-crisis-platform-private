@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useAnimatedNumber } from "../lib/useAnimatedNumber";
 import type { StreamStatus } from "../hooks/useNewsStream";
 import type { PriceState } from "../types";
+import type { ViewMode } from "../lib/viewState";
+import ViewToggle from "./ViewToggle";
 
 type BackendStatus = "loading" | "live" | "mock";
 
@@ -9,6 +11,9 @@ interface Props {
   backendStatus: BackendStatus;
   priceState: PriceState | null;
   streamStatus: StreamStatus;
+  /** GLOBE | MAP switch (shown when both are given) */
+  view?: ViewMode;
+  onViewChange?: (v: ViewMode) => void;
 }
 
 const BADGE: Record<BackendStatus, { text: string; color: string }> = {
@@ -17,7 +22,7 @@ const BADGE: Record<BackendStatus, { text: string; color: string }> = {
   mock: { text: "OFFLINE · MOCK DATA", color: "var(--color-alarm)" },
 };
 
-export default function Header({ backendStatus, priceState, streamStatus }: Props) {
+export default function Header({ backendStatus, priceState, streamStatus, view, onViewChange }: Props) {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
@@ -29,8 +34,8 @@ export default function Header({ backendStatus, priceState, streamStatus }: Prop
   const animatedPrice = useAnimatedNumber(priceState?.crude_price_usd ?? 0, 800);
 
   return (
-    <header className="flex items-center justify-between gap-4 px-4 sm:px-8 py-5">
-      <div className="flex items-center gap-4 min-w-0">
+    <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 sm:px-8 py-5">
+      <div className="flex items-center gap-4">
         <span
           className="w-1.5 h-1.5 rounded-full shrink-0"
           style={{
@@ -50,6 +55,7 @@ export default function Header({ backendStatus, priceState, streamStatus }: Prop
       </div>
 
       <div className="flex items-center gap-5 shrink-0">
+        {view && onViewChange && <ViewToggle view={view} onChange={onViewChange} />}
         {priceState && (
           <div
             className="hidden md:flex items-baseline gap-2"

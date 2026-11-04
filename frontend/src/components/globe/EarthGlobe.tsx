@@ -37,6 +37,10 @@ interface Props {
   altRouteId: string | null;
   conflictIntensity: number;
   onSimulateRoute: (prefill: Omit<RouteScenarioPrefill, "nonce">) => void;
+  /** The selection shared with the 2D map (a route id or a location id). The globe reports its own selections here and, when it opens with one already made,
+   *  goes straight to it without replaying the camera flight. */
+  selectedId?: string | null;
+  onSelectedChange?: (id: string | null) => void;
 }
 
 type Phase = "idle" | "traveling" | "detail" | "returning";
@@ -263,7 +267,10 @@ export default function EarthGlobe({
   altRouteId,
   conflictIntensity,
   onSimulateRoute,
+  selectedId = null,
+  onSelectedChange,
 }: Props) {
+  const [instant, setInstant] = useState(false);
   const [hoveredRoute, setHoveredRoute] = useState<{ id: string; x: number; y: number; width: number } | null>(null);
   const [activeRoute, setActiveRoute] = useState<RouteSummary | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -305,8 +312,9 @@ export default function EarthGlobe({
       setActiveLocation(loc);
       setTravelTargetLocal(latLngToVector3(loc.lat, loc.lng, EARTH_RADIUS * 1.003));
       setPhase("traveling");
+      onSelectedChange?.(loc.id);
     },
-    [phase]
+    [phase, onSelectedChange]
   );
 
   const handleSelectRoute = useCallback(
@@ -318,9 +326,23 @@ export default function EarthGlobe({
       setHoveredRoute(null);
       setTravelTargetLocal(latLngToVector3(lat, lng, EARTH_RADIUS * 1.003));
       setPhase("traveling");
+      onSelectedChange?.(route.id);
     },
-    [phase]
+    [phase, onSelectedChange]
   );
+
+  // Opened from the map with something selected: apply it once (the data may arrive after mount), instantly.
+  const appliedInitial = useRef(false);
+  useEffect(() => {
+    if (appliedInitial.current || !selectedId || phase !== "idle") return;
+    const route = routes.find((r) => r.id === selectedId);
+    const loc = route ? undefined : locations.find((l) => l.id === selectedId);
+    if (!route && !loc) return;
+    appliedInitial.current = true;
+    setInstant(true);
+    if (route) handleSelectRoute(route);
+    else if (loc) handleActivate(loc);
+  }, [selectedId, routes, locations, phase, handleSelectRoute, handleActivate]);
 
   const handleRouteHover = useCallback((id: string | null, x?: number, y?: number) => {
     if (id === null) return setHoveredRoute(null);
@@ -400,13 +422,17 @@ export default function EarthGlobe({
             travelTargetLocal={travelTargetLocal}
             rotatingGroupRef={rotatingGroupRef}
             savedCamera={savedCamera}
-            reducedMotion={reducedMotion}
-            onArrived={() => setPhase("detail")}
+            reducedMotion={reducedMotion || instant}
+            onArrived={() => {
+              setPhase("detail");
+              setInstant(false);
+            }}
             onReturned={() => {
               setPhase("idle");
               setActiveLocation(null);
               setActiveRoute(null);
               setTravelTargetLocal(null);
+              onSelectedChange?.(null);
             }}
           />
         )}
