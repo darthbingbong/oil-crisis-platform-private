@@ -161,8 +161,13 @@ pj = client.get("/api/v1/price/live").json()
 traj_ = s["sections"]["price"]["chart"]["trajectory"]
 results.append((len(traj_) == 1 and traj_[0]["day"] == 30, "(API)", "the price result is one point, day 30", str(traj_[0]["day"])))
 mv_ = round(5 / CFG.elasticity_abs, 2)
-claim("DEMO_SCRIPT.md", f"${pj['wti'] * (1 + mv_ / 100):,.2f}** (+{mv_:.1f}%)", "the WTI scenario card at the default 5% supply loss")
-claim("DEMO_SCRIPT.md", f"range ${pj['wti'] * (1 + (mv_ - CFG.price_band_pp) / 100):,.2f} to ${pj['wti'] * (1 + (mv_ + CFG.price_band_pp) / 100):,.2f}", "the WTI scenario range (plus or minus the 13.09 pp)")
+# the WTI card follows the EIA price, which differs between machines and days (with no EIA key the offline CSV row is used), so these two are checked only when this
+# machine's price is the one the script was generated with (same as-of date)
+if f"as of {pj['as_of']}" in DOCS["DEMO_SCRIPT.md"]:
+  claim("DEMO_SCRIPT.md", f"${pj['wti'] * (1 + mv_ / 100):,.2f}** (+{mv_:.1f}%)", "the WTI scenario card at the default 5% supply loss")
+  claim("DEMO_SCRIPT.md", f"range ${pj['wti'] * (1 + (mv_ - CFG.price_band_pp) / 100):,.2f} to ${pj['wti'] * (1 + (mv_ + CFG.price_band_pp) / 100):,.2f}", "the WTI scenario range (plus or minus the 13.09 pp)")
+else:
+  print("SKIPPED: this machine's WTI price is not the one the DEMO_SCRIPT was generated with, so the WTI scenario figures were not checked.")
 
 # the whole DEMO_SCRIPT: regenerate it from the template and the API now, and it must equal the file (the date it was generated on is taken from the file itself)
 if have_ais:
