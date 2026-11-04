@@ -18,8 +18,11 @@ import VesselLayer from "./VesselLayer";
 import { latLngToVector3 } from "../../lib/geo";
 import { ROUTE_TYPE_LABEL, formatMbpd, routeMidpoint } from "../../lib/routeGeometry";
 import { useReducedMotion } from "../../lib/useReducedMotion";
-import type { ConflictEvent, CurrentConditions, Location, RouteScenarioPrefill, RouteSummary } from "../../types";
+import type { ConflictEvent, CurrentConditions, Location, RouteScenarioPrefill, RouteSummary, WatchVessel } from "../../types";
 import RoutePanel from "../RoutePanel";
+import RealVesselPanel from "../RealVesselPanel";
+import type { VesselExtras } from "../../hooks/useVesselExtras";
+import WatchLayer from "./WatchLayer";
 import Atmosphere from "./Atmosphere";
 import Clouds from "./Clouds";
 import Earth, { EARTH_RADIUS } from "./Earth";
@@ -41,6 +44,14 @@ interface Props {
    *  goes straight to it without replaying the camera flight. */
   selectedId?: string | null;
   onSelectedChange?: (id: string | null) => void;
+  /** The saved real tankers, the selected one (an MMSI, shared with the 2D map through the URL) and its saved track and Nearby sample. */
+  watchVessels?: WatchVessel[];
+  vesselMmsi?: number | null;
+  onVesselChange?: (mmsi: number | null) => void;
+  extras?: VesselExtras | null;
+  keyLine?: string | null;
+  /** A badge for the real tankers: "SNAPSHOT <time> · N REAL TANKERS" and the key line */
+  watchBadge?: { title: string; label: string; keyLine: string; expired: boolean } | null;
 }
 
 type Phase = "idle" | "traveling" | "detail" | "returning";
@@ -70,6 +81,7 @@ interface RotatingGlobeProps {
     onSelect: (i: number | null) => void;
     onTick: (info: VesselInfo | null) => void;
   };
+  watchLayer: { vessels: WatchVessel[]; selectedMmsi: number | null; track: [number, number][] | null; onSelect: (v: WatchVessel) => void; onHover: (mmsi: number | null) => void };
   routeLayer: {
     routes: RouteSummary[];
     hoveredRouteId: string | null;
@@ -101,6 +113,7 @@ function RotatingGlobe({
   onActivate,
   interactive,
   vessels,
+  watchLayer,
   routeLayer,
 }: RotatingGlobeProps) {
   useFrame((_, delta) => {
@@ -134,6 +147,9 @@ function RotatingGlobe({
         onHover={routeLayer.onHover}
         onSelect={routeLayer.onSelect}
       />
+      {watchLayer.vessels.length > 0 && (
+        <WatchLayer vessels={watchLayer.vessels} selectedMmsi={watchLayer.selectedMmsi} track={watchLayer.track} interactive={interactive} onSelect={watchLayer.onSelect} onHover={watchLayer.onHover} />
+      )}
       {vessels.source && (
         <VesselLayer
           source={vessels.source}
@@ -212,7 +228,10 @@ function CameraRig({ phase, travelTargetLocal, rotatingGroupRef, savedCamera, re
   const elapsed = useRef(0);
   const running = useRef<"traveling" | "returning" | null>(null);
 
-  useEffect(() => {
+  // The flight starts as soon as everything it needs exists. The globe's textures load in a Suspense boundary, so the rotating group can be missing for a moment after
+  // a flight was requested (a vessel or route in a shared link, applied the instant its data arrives): the frame loop below retries until it is there.
+  const start = () => {
+    if (running.current) return;
     if (phase === "traveling" && travelTargetLocal && rotatingGroupRef.current) {
       const worldTarget = rotatingGroupRef.current.localToWorld(travelTargetLocal.clone());
       savedCamera.current = { position: camera.position.clone(), distance: camera.position.length() };
@@ -230,12 +249,16 @@ function CameraRig({ phase, travelTargetLocal, rotatingGroupRef, savedCamera, re
       elapsed.current = 0;
       running.current = "returning";
     }
-    // Deliberately re-run only on phase changes: the start/end refs above are
-    // meant to be captured once per transition, not recomputed every render.
+  };
+  useEffect(() => {
+    running.current = null;
+    start();
+    // Re-run only on phase changes: the start/end refs are captured once per transition.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
   useFrame((_, delta) => {
+    if (!running.current) start();
     if (!running.current) return;
     const duration = reducedMotion ? 0.001 : TRAVEL_DURATION_S;
     elapsed.current += delta;
@@ -269,10 +292,17 @@ export default function EarthGlobe({
   onSimulateRoute,
   selectedId = null,
   onSelectedChange,
+  watchVessels = [],
+  vesselMmsi = null,
+  onVesselChange,
+  extras = null,
+  keyLine = null,
+  watchBadge = null,
 }: Props) {
   const [instant, setInstant] = useState(false);
   const [hoveredRoute, setHoveredRoute] = useState<{ id: string; x: number; y: number; width: number } | null>(null);
   const [activeRoute, setActiveRoute] = useState<RouteSummary | null>(null);
+  const [activeVessel, setActiveVessel] = useState<WatchVessel | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [focusedId, setFocusedId] = useState<string | null>(null);
@@ -302,7 +332,8 @@ export default function EarthGlobe({
   const savedCamera = useRef<{ position: Vector3; distance: number } | null>(null);
   const reducedMotion = useReducedMotion();
 
-  const targeting = hoveredId !== null || focusedId !== null || hoveredRoute !== null;
+  const [hoveredWatch, setHoveredWatch] = useState<number | null>(null);
+  const targeting = hoveredId !== null || focusedId !== null || hoveredRoute !== null || hoveredWatch !== null;
   const paused = targeting || phase !== "idle" || reducedMotion;
   const interactive = phase === "idle";
 
@@ -310,6 +341,7 @@ export default function EarthGlobe({
     (loc: Location) => {
       if (phase !== "idle") return; // guard against overlapping transitions (rapid double-click, etc.)
       setActiveLocation(loc);
+      setActiveVessel(null);
       setTravelTargetLocal(latLngToVector3(loc.lat, loc.lng, EARTH_RADIUS * 1.003));
       setPhase("traveling");
       onSelectedChange?.(loc.id);
@@ -323,6 +355,7 @@ export default function EarthGlobe({
       const [lat, lng] = routeMidpoint(route.path);
       setActiveRoute(route);
       setActiveLocation(null);
+      setActiveVessel(null);
       setHoveredRoute(null);
       setTravelTargetLocal(latLngToVector3(lat, lng, EARTH_RADIUS * 1.003));
       setPhase("traveling");
@@ -330,6 +363,46 @@ export default function EarthGlobe({
     },
     [phase, onSelectedChange]
   );
+
+  const handleSelectVessel = useCallback(
+    (v: WatchVessel) => {
+      if (phase !== "idle") return;
+      setActiveVessel(v);
+      setActiveRoute(null);
+      setActiveLocation(null);
+      setHoveredRoute(null);
+      setTravelTargetLocal(latLngToVector3(v.lat, v.lng, EARTH_RADIUS * 1.003));
+      setPhase("traveling");
+      onVesselChange?.(v.mmsi);
+    },
+    [phase, onVesselChange]
+  );
+
+  // A vessel chosen elsewhere (the search box, the 2D map, a shared link): fly to it. From the detail view of something else, go back first, then fly.
+  const vesselMmsiRef = useRef(vesselMmsi);
+  const activeVesselRef = useRef<WatchVessel | null>(null);
+  useEffect(() => { vesselMmsiRef.current = vesselMmsi; activeVesselRef.current = activeVessel; });
+  const appliedVessel = useRef(false);
+  // The vessel whose panel was just closed: the address still names it for a moment after the globe has let go of it, and it must not be flown to again.
+  const dismissedVessel = useRef<number | null>(null);
+  useEffect(() => {
+    if (dismissedVessel.current !== null && dismissedVessel.current !== vesselMmsi) dismissedVessel.current = null;
+    if (vesselMmsi === null || activeVessel?.mmsi === vesselMmsi || dismissedVessel.current === vesselMmsi) return;
+    const v = watchVessels.find((x) => x.mmsi === vesselMmsi);
+    if (!v) return;
+    if (phase === "idle") {
+      if (!appliedVessel.current) {
+        appliedVessel.current = true;
+        // oxlint-disable-next-line react/set-state-in-effect -- one-shot sync with the shared URL selection; the data can arrive after mount
+        setInstant(true);
+      }
+      // oxlint-disable-next-line react/set-state-in-effect -- the same one-shot sync: start the flight to the vessel chosen elsewhere
+      handleSelectVessel(v);
+    } else if (phase === "detail") {
+      // oxlint-disable-next-line react/set-state-in-effect -- the selection changed from outside while another detail view is open
+      setPhase("returning");
+    }
+  }, [vesselMmsi, watchVessels, phase, activeVessel, handleSelectVessel]);
 
   // Opened from the map with something selected: apply it once (the data may arrive after mount), instantly.
   const appliedInitial = useRef(false);
@@ -370,6 +443,10 @@ export default function EarthGlobe({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [phase, handleBack]);
 
+  const trackLine = useMemo<[number, number][] | null>(
+    () => (activeVessel && extras && extras.mmsi === activeVessel.mmsi && extras.track?.status === "SAVED" ? extras.track.points.map((p) => [p[0], p[1]] as [number, number]) : null),
+    [activeVessel, extras]
+  );
   const hoveredRouteData = hoveredRoute ? (routes.find((r) => r.id === hoveredRoute.id) ?? null) : null;
 
   return (
@@ -401,6 +478,7 @@ export default function EarthGlobe({
               onSelect: setSelectedVessel,
               onTick: setVesselInfo,
             }}
+            watchLayer={{ vessels: watchVessels, selectedMmsi: activeVessel?.mmsi ?? null, track: trackLine, onSelect: handleSelectVessel, onHover: setHoveredWatch }}
             routeLayer={{
               routes,
               hoveredRouteId: hoveredRoute?.id ?? null,
@@ -434,6 +512,8 @@ export default function EarthGlobe({
               setActiveRoute(null);
               setTravelTargetLocal(null);
               onSelectedChange?.(null);
+              if (activeVesselRef.current && vesselMmsiRef.current === activeVesselRef.current.mmsi) { dismissedVessel.current = activeVesselRef.current.mmsi; onVesselChange?.(null); }      // not when another vessel was chosen while this one was open
+              setActiveVessel(null);
             }}
           />
         )}
@@ -523,6 +603,18 @@ export default function EarthGlobe({
                 : `flow ${formatMbpd(hoveredRouteData.annual_flow_bpd)} (${hoveredRouteData.baseline_year ?? hoveredRouteData.data_year})`}
           </div>
         </div>
+      )}
+
+      {watchBadge && (
+        <div data-testid="globe-watch-badge" className="data-readout" style={{ position: "absolute", right: 12, bottom: 12, zIndex: 4, maxWidth: "min(340px, 60%)", fontSize: 11, color: "var(--color-ion)", background: "rgba(3,3,3,0.9)", border: "1px solid rgba(89,224,201,0.4)", borderRadius: 4, padding: "5px 9px", textAlign: "right", pointerEvents: "none" }}>
+          {watchBadge.title}
+          <span style={{ display: "block", color: "var(--color-ash)" }}>{watchBadge.label}</span>
+          <span data-testid="ais-key-line" style={{ display: "block", color: watchBadge.expired ? "var(--color-alarm)" : "var(--color-ash)" }}>{watchBadge.keyLine}</span>
+        </div>
+      )}
+
+      {phase === "detail" && activeVessel && extras && (
+        <RealVesselPanel vessel={activeVessel} extras={extras} keyLine={keyLine} onClose={handleBack} style={{ zIndex: 12 }} />
       )}
 
       {activeLocation && (
