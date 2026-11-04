@@ -34,7 +34,8 @@ function niceAxis(lo: number, hi: number, targetTicks = 6): { domain: [number, n
   return { domain: [min, max], ticks };
 }
 
-const DAY_TICKS = [0, 30, 60, 90, 120, 150, 180];
+const DAY_TICKS = [0, 30, 60, 90, 120, 150, 180]; // the barrels chart (arithmetic over the disruption) keeps its axis
+const PRICE_DAY_TICKS = [0, 5, 10, 15, 20, 25, 30]; // the price outlook is 30 days and nothing else
 
 function Frame({ height = 300, children, testId }: { height?: number; children: React.ReactElement; testId: string }) {
   return (
@@ -91,7 +92,8 @@ export function PriceChart({ report }: { report: ReportResponse }) {
   const ceiling = sec.chart.validated_price_ceiling_pct;
   const ref = report.validated_reference;
   const bandShown = sec.chart.band_validated;
-  const dur = report.scenario.duration_days;
+  const horizon = sec.chart.horizon_days;
+  const end = traj[traj.length - 1];
 
   // Split the line into a solid part (inside the validated range) and a dashed part (beyond it); neighbours at the boundary are
   // included in both so the two pieces join without a gap.
@@ -103,7 +105,6 @@ export function PriceChart({ report }: { report: ReportResponse }) {
       day: p.day,
       valid: touchesValid ? p.pct : null,
       beyond: touchesBeyond ? p.pct : null,
-      band: bandShown && p.low !== null && p.high !== null ? [p.low, p.high] : null,
     };
   });
   const anyBeyond = traj.some((p) => p.beyond_validated);
@@ -117,25 +118,35 @@ export function PriceChart({ report }: { report: ReportResponse }) {
 
   return (
     <>
+      <div
+        data-testid="price-validation-badge"
+        className="section-label"
+        style={{ display: "inline-block", marginBottom: 8, padding: "3px 10px", borderRadius: 4, border: `1px solid ${report.kpis.outside_validated_range ? TOKENS.alarm : TOKENS.gain}`, color: report.kpis.outside_validated_range ? TOKENS.alarm : TOKENS.gain }}
+      >
+        {report.kpis.validation_badge}
+      </div>
       <Frame height={340} testId="chart-price">
         <ComposedChart data={data} margin={{ top: 14, right: 16, left: 4, bottom: 20 }}>
           <CartesianGrid stroke={GRID} vertical={false} />
-          <XAxis dataKey="day" type="number" domain={[0, 180]} ticks={DAY_TICKS} tick={AXIS} label={{ value: "days since the disruption starts", position: "insideBottom", offset: -10, fill: TOKENS.ash, fontSize: 11 }} />
+          <XAxis dataKey="day" type="number" domain={[0, horizon]} ticks={PRICE_DAY_TICKS} tick={AXIS} label={{ value: `days (${horizon}-day outlook; the line between is illustrative)`, position: "insideBottom", offset: -10, fill: TOKENS.ash, fontSize: 11 }} />
           <YAxis tick={AXIS} domain={yDomain} ticks={yTicks} tickFormatter={(v) => `${Math.round(v)}%`} width={52} allowDataOverflow />
           <Tooltip
             {...TOOLTIP}
             labelFormatter={(d) => `day ${d}`}
-            formatter={(v, name) => (Array.isArray(v) ? [`${Number(v[0]).toFixed(1)}% to ${Number(v[1]).toFixed(1)}%`, "± band (validated)"] : [`${fmtSigned(Number(v))}%`, name === "beyond" ? "beyond the validated range" : "within the validated range"])}
+            formatter={(v, name) => [`${fmtSigned(Number(v))}%`, name === "beyond" ? "beyond the validated range" : "within the validated range"]}
           />
 
           {/* shaded zone: the price the linear formula gives above the edge of the validated range */}
           {anyBeyond && <ReferenceArea y1={ceiling} y2={hi} fill={TOKENS.alarm} fillOpacity={0.07} ifOverflow="hidden" />}
           {/* the bypass assumption (Hormuz): the same blockade under two published capacities */}
           {sens.length > 1 && (
-            <ReferenceArea x1={0} x2={dur} y1={Math.min(...sensPeaks)} y2={Math.max(...sensPeaks)} fill={TOKENS.crude} fillOpacity={0.22} ifOverflow="visible"
+            <ReferenceArea x1={0} x2={horizon} y1={Math.min(...sensPeaks)} y2={Math.max(...sensPeaks)} fill={TOKENS.crude} fillOpacity={0.22} ifOverflow="visible"
               label={{ value: `bypass sensitivity: ${Number((sens[0].bypass_bpd / 1e6).toFixed(2))} vs ${fmtMbd(sens[1].bypass_bpd)}`, position: "insideTopLeft", dy: -2, fill: TOKENS.crude, fontSize: 11 }} />
           )}
-          {bandShown && <Area type="monotone" dataKey="band" stroke="none" fill={LANE} fillOpacity={0.16} isAnimationActive={false} connectNulls />}
+          {/* the +/- 13.09 pp is a measured error of the 30-day figure, so it is drawn at day 30 only */}
+          {bandShown && end.low !== null && end.high !== null && (
+            <ReferenceLine segment={[{ x: horizon, y: end.low }, { x: horizon, y: end.high }]} stroke={LANE} strokeWidth={10} strokeOpacity={0.4} ifOverflow="visible" />
+          )}
 
           <ReferenceLine y={ceiling} stroke={TOKENS.ash} strokeDasharray="2 4"
             label={{ value: `formula at ${report.validated_supply_loss_max_pct}% supply loss: ${fmtSigned(ceiling)}%`, position: "insideBottomRight", dy: 17, fill: TOKENS.ash, fontSize: 11 }} />
@@ -149,9 +160,9 @@ export function PriceChart({ report }: { report: ReportResponse }) {
 
       <Legend
         items={[
-          { color: LANE, label: "linear formula, within the validated range" },
+          { color: LANE, label: `linear formula, ${horizon}-day value within the validated range (the line before day ${horizon} is an illustrative path)` },
           ...(anyBeyond ? [{ color: TOKENS.alarm, label: "linear formula, beyond the validated range (extrapolation)", dashed: true }] : []),
-          ...(bandShown ? [{ color: LANE, label: `± ${report.kpis.price_band_pp} pp measured error band`, swatch: "box" as const }] : []),
+          ...(bandShown ? [{ color: LANE, label: `± ${report.kpis.price_band_pp} pp measured error of the ${horizon}-day figure (drawn at day ${horizon})`, swatch: "box" as const }] : []),
           { color: TOKENS.ion, label: `largest validated event (reference): ${ref.name.replace(/\s*\(.*\)/, "")}, soft figure, still unfolding`, dashed: true },
           ...(sens.length > 1 ? [{ color: TOKENS.crude, label: `bypass-capacity sensitivity range (${Number((sens[0].bypass_bpd / 1e6).toFixed(2))} vs ${fmtMbd(sens[1].bypass_bpd)})`, swatch: "box" as const }] : []),
         ]}

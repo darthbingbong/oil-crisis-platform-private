@@ -333,6 +333,8 @@ export interface ReportResponse {
   current_conditions: CurrentConditions;
   kpis: {
     price_impact_pct: number;
+    price_horizon_days: number;
+    validation_badge: string;
     price_band_pp: number | null;
     outside_validated_range: boolean;
     validated_note: string | null;
@@ -353,7 +355,7 @@ export interface ReportResponse {
       numbers: { displaced_bpd: number; supply_loss_pct: number; transit_gap_bbl: number; baseline_voyage_days?: number; delivery_factor?: number };
     };
     price: ReportSectionBase & {
-      chart: { trajectory: TrajectoryPoint[]; half_life_days: number; band_validated: boolean; validated_price_ceiling_pct: number; validated_reference: ValidatedReference };
+      chart: { trajectory: TrajectoryPoint[]; horizon_days: number; band_validated: boolean; validated_price_ceiling_pct: number; validated_reference: ValidatedReference };
       sensitivity: BypassCase[];
     };
     evs: ReportSectionBase & {

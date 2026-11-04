@@ -24,7 +24,7 @@ export default function KpiStrip({ report }: { report: ReportResponse }) {
       >
         <Tile
           testId="kpi-price"
-          label="Price impact (linear formula)"
+          label={`${k.price_horizon_days}-day price impact (linear formula)`}
           value={`${fmtSigned(k.price_impact_pct)}%`}
           color={outside ? "var(--color-alarm)" : "var(--color-bone)"}
           sub={outside ? "not validated at this magnitude" : `± ${k.price_band_pp} pp (measured error)`}
@@ -45,6 +45,14 @@ export default function KpiStrip({ report }: { report: ReportResponse }) {
           sub={`${report.scenario.lithium_availability_pct}% availability over ${k.horizon_years} years (cap ${fmtCompact(report.sections.lithium.chart.cases.sourced.supply_cap_over_horizon_t_lce)} t)`}
           color={k.lithium_deficit_t_lce > 0 ? "var(--color-alarm)" : "var(--color-bone)"}
         />
+      </div>
+
+      <div
+        data-testid="kpi-validation-badge"
+        className="section-label"
+        style={{ display: "inline-block", marginBottom: 10, padding: "3px 10px", borderRadius: 4, border: `1px solid ${outside ? "var(--color-alarm)" : "var(--color-gain)"}`, color: outside ? "var(--color-alarm)" : "var(--color-gain)" }}
+      >
+        {k.validation_badge}
       </div>
 
       {outside && (
