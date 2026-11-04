@@ -17,7 +17,9 @@
 
 - **Say:** "Top bar: WTI and Brent from the EIA API. The badge says DAILY_CLOSE. WTI 103.37 and Brent 123.10 dollars a barrel, as of 2026-10-27, 8 days old (figures at the time this script was generated). It is a daily close published weekly, so I never call it live."
 - **Point at** the amber **SIMULATED VESSELS** badge and the **MODEL BASELINE** price in the header: "Those tankers are not real ships and that price is a simulation. Both are labelled, and neither feeds any result."
-- **Point at** the history chart: "24 real events since 1973. This is the data the price formula was tested on."
+- **Point at** the **Markets** panel (right column, scroll down; it replaces the old historical-events chart): "Indices, commodities and FX. WTI and Brent are my own cards from the EIA feed, with the same DAILY_CLOSE chip and date. Everything else is TradingView's free widget, and the chip says so: *Via TradingView widget, delay set by TradingView*. I never see those prices, so I cannot put a time on them and I never call them live."
+- **Do:** open the **Commodities** tab, tick **Show the 30-day scenario on the WTI card**, then move the supply-loss slider past 8%: "Only the WTI card has a scenario number: the last EIA close times the same 30-day formula. Up to 8% supply loss it says VALIDATED 30 DAYS with the measured error; past 8% the badge flips to OUTSIDE VALIDATED RANGE and the band disappears."
+- If the venue blocks TradingView the card says "Widget unavailable" and shows no number; the EIA cards still work.
 
 ### 0:45 to 1:30. A route and its evidence
 

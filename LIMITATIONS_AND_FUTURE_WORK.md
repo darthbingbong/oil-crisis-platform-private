@@ -120,3 +120,13 @@ The literal readings are impossible (Argentina or Chile alone would exceed the w
 - **Tracks:** three saved 7-day tracks only (OIZMENDI, MUHUT SILVER, CAPE ANN). No Malacca tanker has one: all four were stopped, so no load was spent on them.
 - **The "vessels near this vessel" lists are two saved 10 nm samples** around FRONT ALTAIR (Huelva) and SINGAPORE ENERGY (Malacca). Nothing here counts vessels at a chokepoint; ports and a scenario-exposure count were not built (DECISIONS D1, D2, D24).
 - **On the globe at the default zoom the 8 Huelva tankers are one dot** (they sit within a few nautical miles); the search box or a zoom separates them.
+
+## 13. Markets panel (M13): limits
+
+- **We never see the TradingView prices.** They are drawn by TradingView's own free widget in an iframe, so no "as of" time, no delay figure and no saved fallback number can be shown; TradingView says stock data is delayed (without naming the delay) and forex is real time. The chip says so and nothing is labelled LIVE.
+- **Several rows are broker CFD quotes** (S&P 500, Dow, Nasdaq 100, FTSE 100, Nikkei 225, Hang Seng, VIX, natural gas, copper, dollar index), not official index levels or exchange prices. They are marked CFD on screen. Gold and silver (TVC), DAX (XETR) and Sensex (BSE) are TradingView's own or exchange feeds, still delayed as TradingView states.
+- **Not available for free:** Nasdaq Composite and Nifty 50 returned "no data" in the widget on 2026-11-04 (the Nasdaq 100 and the Sensex stand in); **lithium prices** have no free source and are not shown. A symbol that TradingView later withdraws would show its own "no data" row.
+- **WTI and Brent are EIA daily closes in a weekly release**, so they are about a week old (8 days on 2026-11-04) next to widget rows that are about a day old. The two ages are not comparable and are labelled separately.
+- **The WTI scenario number is the plain formula on a stale base:** last EIA close times (1 + supply loss / 0.15 as a percentage). Inside 8% supply loss it carries the measured +/- 13.09 pp; beyond it, none. It is a model scenario, not a forecast, and it is switched off when the EIA price is the saved fallback.
+- **The visitor's browser contacts TradingView** once the panel has been scrolled to. TradingView's pages say it tracks the embedding page URL and the symbol; they do not say whether commercial use is allowed. Alpha Vantage was tested (8 calls on 2026-11-04) and not used: its free key is "personal, non-commercial use" with nothing on public display, and index data needs a paid plan.
+- **Frame rate:** with all three widgets mounted the 2D map still ran at 87 to 103 fps (zoom 2) on software rendering; the measurement varies by about 20 percent between runs.
