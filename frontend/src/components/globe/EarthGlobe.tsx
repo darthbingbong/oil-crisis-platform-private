@@ -339,6 +339,7 @@ export default function EarthGlobe({
     const loc = route ? undefined : locations.find((l) => l.id === selectedId);
     if (!route && !loc) return;
     appliedInitial.current = true;
+    // oxlint-disable-next-line react/set-state-in-effect -- one-shot sync with the shared URL selection; the data (routes, locations) can arrive after mount
     setInstant(true);
     if (route) handleSelectRoute(route);
     else if (loc) handleActivate(loc);
