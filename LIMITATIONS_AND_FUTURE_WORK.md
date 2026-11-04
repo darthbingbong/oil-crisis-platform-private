@@ -105,3 +105,9 @@ The literal readings are impossible (Argentina or Chile alone would exceed the w
 - **(to do)** Measure frame rate on a real GPU.
 - **(to do)** Replace the older NewsAPI pipeline's live polling (or move to a paid plan) before any public deployment.
 - **(to do)** Break the real EIA service on purpose (a rejected key against the real endpoint) to check the fallback end to end.
+
+## 11. The 2D map (M11): measured limits
+
+- **Dragging the map is slow on software rendering.** With every layer on, the map holds about 71 fps (zoom 2) and 97 fps (zoom 5.5) while vessels move, but dragging it runs at about 3.7 fps with a worst frame near 1 s (`docs/m11_screenshots/map_fps.txt`). Every camera move redraws the country outlines; the static outlines sit on their own canvas so that moving vessels never redraw them, and the coarsest outline level is used while the camera moves. This was measured in Chromium with software WebGL (SwiftShader), which is a lower bound; a real GPU was not measured (still on the to-do list above).
+- **Country outlines are simplified** at three zoom levels (Douglas-Peucker, tolerances 0.2, 0.05 and 0.01 degrees) from the bundled Natural Earth 1:50m file. At the highest zoom the coastline is the 1:50m shape, not a survey.
+- **The real-tanker groups are two samples, not coverage**: eight tankers near Huelva (seen 2026-11-03 15:58 UTC) and four in the Strait of Malacca (seen 16:13 to 16:28 UTC). Three of the four Malacca positions come from the Vessels Nearby sample, not from Vessel Position. No tanker was found near Hormuz or Fujairah.
