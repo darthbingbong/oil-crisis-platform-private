@@ -16,7 +16,7 @@
 ### 0:00 to 0:45. The dashboard and what is real on it
 
 - **Say:** "Top bar: WTI and Brent from the EIA API. The badge says @@ticker_status@@. @@ticker_say@@ It is a daily close published weekly, so I never call it live."
-- **Point at** the amber **SIMULATED VESSELS** badge and the **MODEL BASELINE** price in the header: "Those tankers are not real ships and that price is a simulation. Both are labelled, and neither feeds any result."
+- **Point at** the amber **SIMULATED VESSELS** badge and the **WTI BASELINE** price in the header: "Those tankers are not real ships; the badge says so. The baseline is the same EIA close as the ticker, with its date: it is the starting price of the WTI scenario card, and hovering shows its source."
 - **Point at** the **Markets** panel (right column, scroll down) but do not dwell yet: "I come back to this."
 
 ### 0:45 to 1:45. Globe to map, a route and its evidence

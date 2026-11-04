@@ -11,7 +11,7 @@ const body = async () => (await p.locator("body").innerText());
 check("dashboard: SIMULATED VESSELS badge", (await p.locator('[data-testid="vessel-badge"]').innerText()).includes("SIMULATED"));
 check("dashboard: price status badge is DAILY_CLOSE or OFFLINE_FALLBACK", /DAILY_CLOSE|OFFLINE_FALLBACK/.test(await p.locator('[data-testid="price-status"]').innerText()), "(" + (await p.locator('[data-testid="price-status"]').innerText()).trim() + ")");
 check("dashboard: price age is shown", await has('[data-testid="price-age"]'), "(" + (await p.locator('[data-testid="price-age"]').innerText()) + ")");
-check("dashboard: model baseline is labelled MODEL BASELINE, not a price quote", (await body()).includes("MODEL BASELINE"));
+check("dashboard: the header price is labelled WTI BASELINE with its EIA date, not a live quote", /WTI BASELINE[\s\S]*EIA \d{4}-\d{2}-\d{2}/.test(await body()));
 check("dashboard: no standalone LIVE label", !/\bLIVE\b/.test(await body()));
 check("dashboard: scenario badge says (simulated)", (await body()).includes("SCENARIO (SIMULATED)") || (await body()).includes("SCENARIO (simulated)"));
 check("dashboard: no 'Predicted' label", !/Predicted/.test(await body()));

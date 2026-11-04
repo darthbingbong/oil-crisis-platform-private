@@ -40,7 +40,7 @@ const badge = (await text("price-status")).trim();
 check("ticker badge reads DAILY_CLOSE or OFFLINE_FALLBACK", /DAILY_CLOSE|OFFLINE_FALLBACK/.test(badge), `(${badge})`);
 check("ticker shows the as-of date and its age", /\d{4}-\d{2}-\d{2}/.test(await text("price-as-of")), `(${await text("price-as-of")})`);
 check("SIMULATED VESSELS badge", (await text("vessel-badge")).includes("SIMULATED VESSELS"));
-check("MODEL BASELINE label in the header", (await body()).includes("MODEL BASELINE"));
+check("WTI BASELINE (the EIA close) in the header", (await body()).includes("WTI BASELINE"));
 check("the historical events chart is gone and the Markets panel is there (M13)", !/24 events|HISTORICAL EVENTS/i.test(await body()) && (await page.locator('[data-testid="markets-panel"]').count()) === 1);
 await shot("demo_01_dashboard");
 

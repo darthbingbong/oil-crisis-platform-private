@@ -69,7 +69,7 @@ await page.waitForTimeout(2500);
 check(`ticker badge reads ${price.status}`, (await text("price-status")).includes(price.status));
 check("ticker shows the as-of date and its age", (await text("price-as-of")).includes(price.as_of), `(${await text("price-as-of")})`);
 check("SIMULATED VESSELS badge", (await text("vessel-badge")).includes("SIMULATED VESSELS"));
-check("MODEL BASELINE label in the header", (await body()).includes("MODEL BASELINE"));
+check("WTI BASELINE (the EIA close) in the header", (await body()).includes("WTI BASELINE"));
 check("the historical events chart is gone; the Markets panel is there", !/24 events|HISTORICAL EVENTS/i.test(await body()) && (await page.locator('[data-testid="markets-panel"]').count()) === 1);
 await shot("demo_01_dashboard");
 
