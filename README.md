@@ -135,6 +135,12 @@ All optional. Set them in `backend/.env` (copy `backend/.env.example`). Never pu
 | WS | `/ws/vessels` | new | Tanker updates from the AIS provider (server-side key). First frame is a status frame; **UNVERIFIED against the live feed**. With no key it sends the status and closes |
 | GET | `/api/v1/vessels/status` | new | The AIS feed status as JSON |
 | GET | `/api/v1/health` | new | State of each external feed (`price`, `news`, `ais`) as `ok` / `degraded` / `fallback` / `unknown`, with a plain sentence each, and an `overall` |
+| GET | `/api/v1/vessels/watchlist` | new (M11) | The saved real-tanker snapshot with the AIS key's state (`key`, `key_expired`, `key_line`). Never calls the provider |
+| GET | `/api/v1/ais/budget` | new (M12) | Calls used and left per ShipFinder service, counted from our own `logs/ais_calls.jsonl`, with holds, breakers and the key's expiry |
+| GET | `/api/v1/ais/search?q=` | new (M12) | Searches the **saved** watchlist only (name, MMSI, IMO) |
+| POST | `/api/v1/ais/search/provider` | new (M12) | ONE ShipFinder Vessel Search, only from an explicit button press; status 31 is `NO_MATCH`; limits and breaker respected; from 2026-11-13 it makes no call (`KEY_EXPIRED`) |
+| GET | `/api/v1/vessels/{mmsi}/track` | new (M12) | The saved past track (`past track, fetched at <time>`) or `no saved track`; the headline is the one that travelled furthest |
+| GET | `/api/v1/vessels/{mmsi}/near` | new (M12) | The saved Vessels Nearby sample that contains the vessel, with its seed and time. Never a live Nearby call |
 | POST | `/api/v1/dev/news-feed`, `/api/v1/news/test-inject` | DEV-ONLY | Simulate a feed failure or an empty feed; inject a test headline |
 | GET | `/api/v1/news/stream`, `/api/v1/alerts`, `/api/v1/price-state` (older pipeline) | unchanged | SSE alert stream, recent alerts, the SIMULATED model-baseline price |
 
@@ -513,12 +519,23 @@ The full list, with what was observed, is in **`LIMITATIONS_AND_FUTURE_WORK.md`*
 - **The older news pipeline uses a NewsAPI Developer key**, which is outside that plan's terms for production use.
 - **Frame rates are from software rendering** (a lower bound); a real GPU was not measured.
 
+### Real tankers on both views (M12)
+
+Twelve **real** tankers from a saved ShipFinder snapshot (eight near Huelva, Spain, seen 2026-11-03 15:58 UTC; four in the Strait of Malacca, seen 16:13 to 16:28 UTC) are drawn in teal on the globe and on the 2D map, always labelled **SNAPSHOT** with their seen-at time. They are two samples, not coverage of any area; chokepoint traffic stays **SIMULATED**.
+
+- **One vessel panel on both views:** name, MMSI, IMO, flag, type, length, speed, course, destination, draught, AIS status, position, how the position was confirmed, the SNAPSHOT badge with its time, and "cargo type not confirmed by AIS". The selected vessel is in the address (`vessel=<MMSI>`), so switching Globe/Map, reloading or sharing the link keeps it.
+- **Saved past track:** drawn on the surface of the globe and on the map, labelled "past track, fetched at <time>", or "no saved track". MUHUT SILVER is the headline track (it sailed 846 nm in the week, 659 nm start to end); CAPE ANN is kept and labelled "stationary during this window".
+- **Vessels near this vessel (10 nm):** the saved Nearby sample only, labelled with its seed and time. No live Nearby call is ever made (that service is on hold).
+- **Search box:** typing searches the saved vessels; the provider is asked only when you press "Search the provider" (one search per press; "no match" for status 31; limits and breaker respected).
+- **The key expires on 2026-11-13.** From that date the app makes no AIS call and every view says "AIS key expired, showing data saved on <date>"; there is no error screen. To check this without waiting, start a backend with `AIS_TODAY=2026-11-13` (testing only). `GET /api/v1/health` carries "AIS key expires in N days".
+
 ## Tests
 
 | What | Command | Result at v1.0 |
 |---|---|---|
 | Backend (pytest): calculation engine, golden values, report consistency, route API snapshots, news, price feed, AIS adapter, frontend consistency, repo hygiene | `cd backend ; .\venv\Scripts\python.exe -m pytest` (the venv, not the system Python) | **319 passed, 1 expected failure** (the recorded negation case in `test_news_real_headlines.py`) |
 | Frontend type-check, lint, production build | `cd frontend ; npx tsc -b ; npx oxlint ; npm run build` | tsc clean; lint 1 warning (a pre-existing `set-state-in-effect` note in `ChokepointPanel.tsx`); build OK |
+| M11 and M12 (2D map, real vessels): plain-node unit checks, then two real-Chromium walkthroughs | `cd backend ; .env\Scripts\python.exe -m pytest tests	est_viewstate_unit.py` ; `cd frontend ; SHOT_DIR=..\docs\m12_screenshots node e2e\m12_view.mjs` (needs the backend on :8000, `npm run dev`, and a second backend on :8001 started with `AIS_TODAY=2026-11-13`) ; `node e2e\map_view.mjs` | at M12: backend **447 passed, 1 expected failure**; 43 unit checks; `m12_view.mjs` **64 checks pass**, `map_view.mjs` **51 pass**, 0 console errors; frames per second on software rendering with all layers on: 78 (zoom 2) and 114 (zoom 5.5) |
 | Claims audit: every number in the README, DEMO_SCRIPT and LIMITATIONS rebuilt from the running app | `cd backend ; python tools\check_claims.py` | **50 of 50 claims match** (also run inside the pytest suite) |
 | Browser walkthroughs (real Chromium, software WebGL), screenshots in `docs/` | `frontend/e2e/*.mjs` (see its README) | Run per milestone; M8 and M9 runs had 0 console errors (the "backend down" state shows 10 browser-logged 502s, which is expected) |
 

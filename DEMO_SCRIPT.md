@@ -1,6 +1,6 @@
 # Demo script: 5 minutes for a professor
 
-> **Generated, not typed.** Every number below was produced by the running API on 2026-11-02 by `backend/tools/make_demo_script.py` (it calls `/api/v1/simulate/report` and reads `backend/services/config.py`). Re-run it if you change anything: `cd backend ; python tools\make_demo_script.py`. The ticker figures are the one thing that changes daily; say the as-of date aloud on the day.
+> **Generated, not typed.** Every number below was produced by the running API on 2026-11-04 by `backend/tools/make_demo_script.py` (it calls `/api/v1/simulate/report` and reads `backend/services/config.py`). Re-run it if you change anything: `cd backend ; python tools\make_demo_script.py`. The ticker figures are the one thing that changes daily; say the as-of date aloud on the day.
 
 **The one-sentence pitch.** "You pick a route on the globe, blockade it or force a detour, and the app gives the price impact from a formula I can do by hand, then how many electric cars and how much lithium it would take to replace the lost oil, with every assumption on the page."
 
@@ -15,7 +15,7 @@
 
 ### 0:00 to 0:45. The dashboard and what is real on it
 
-- **Say:** "Top bar: WTI and Brent from the EIA API. The badge says DAILY_CLOSE. WTI 103.37 and Brent 123.10 dollars a barrel, as of 2026-10-27, 6 days old (figures at the time this script was generated). It is a daily close published weekly, so I never call it live."
+- **Say:** "Top bar: WTI and Brent from the EIA API. The badge says DAILY_CLOSE. WTI 103.37 and Brent 123.10 dollars a barrel, as of 2026-10-27, 8 days old (figures at the time this script was generated). It is a daily close published weekly, so I never call it live."
 - **Point at** the amber **SIMULATED VESSELS** badge and the **MODEL BASELINE** price in the header: "Those tankers are not real ships and that price is a simulation. Both are labelled, and neither feeds any result."
 - **Point at** the history chart: "24 real events since 1973. This is the data the price formula was tested on."
 
@@ -63,6 +63,8 @@
 ### 4:15 to 5:00. The vessels, the limits, and the close
 
 - **Do:** with the Suez scenario active, show the **SIMULATED** vessels on the Suez lane glide onto the Cape lane (amber). Click one (zoom in first): every field it lacks says "simulated", and the panel ends "cargo type not confirmed by AIS".
+- **Do (the real vessel):** type **muhut** in the search box and open **MUHUT SILVER** (saved real tanker, flag Marshall Islands). Point at the teal line: "past track, fetched at 2026-11-03 16:11 UTC", **HEADLINE TRACK**, 846 nm sailed, 659 nm start to end. Switch GLOBE to MAP and back: same panel, same track.
+- **Say:** "This one is real, but it is a saved snapshot, not live: the key expires on 13 November, so everything real in this app is labelled SNAPSHOT with its time, and after that date the app says so and makes no AIS calls. It shows where one ship was last week. It does not say what it carries, and the 'vessels near this vessel' list is a saved 10-nautical-mile sample around one seed ship, not traffic at a chokepoint."
 - **Say:** "That is an illustration. The live AIS adapter is built but **unverified**: I have not had a key. AIS also has real limits: coverage gaps, ships that switch the transponder off, unreliable destinations, and it never says what a tanker carries."
 - **Close:** "What I would trust: the chain of arithmetic and the sources. What I would not: any single price number at extreme shocks, or the lithium figure beyond NMC batteries. All of it is in the Limitations file."
 

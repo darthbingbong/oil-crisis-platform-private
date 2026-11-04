@@ -63,6 +63,8 @@
 ### 4:15 to 5:00. The vessels, the limits, and the close
 
 - **Do:** with the Suez scenario active, show the **SIMULATED** vessels on the Suez lane glide onto the Cape lane (amber). Click one (zoom in first): every field it lacks says "simulated", and the panel ends "cargo type not confirmed by AIS".
+- **Do (the real vessel):** type **muhut** in the search box and open **MUHUT SILVER** (saved real tanker, flag Marshall Islands). Point at the teal line: "past track, fetched at 2026-11-03 16:11 UTC", **HEADLINE TRACK**, 846 nm sailed, 659 nm start to end. Switch GLOBE to MAP and back: same panel, same track.
+- **Say:** "This one is real, but it is a saved snapshot, not live: the key expires on 13 November, so everything real in this app is labelled SNAPSHOT with its time, and after that date the app says so and makes no AIS calls. It shows where one ship was last week. It does not say what it carries, and the 'vessels near this vessel' list is a saved 10-nautical-mile sample around one seed ship, not traffic at a chokepoint."
 - **Say:** "That is an illustration. The live AIS adapter is built but **unverified**: I have not had a key. AIS also has real limits: coverage gaps, ships that switch the transponder off, unreliable destinations, and it never says what a tanker carries."
 - **Close:** "What I would trust: the chain of arithmetic and the sources. What I would not: any single price number at extreme shocks, or the lithium figure beyond NMC batteries. All of it is in the Limitations file."
 

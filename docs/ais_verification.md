@@ -122,6 +122,12 @@ Result: the two Gulf candidates were not tankers and not near Hormuz/Fujairah, s
 
 Vessel Position headroom: ceiling 16 (5 left), absolute limit 19 (8 left). That is not enough to refresh 12 tankers; see DECISIONS D17.
 
-## 11. Open questions for the user
+## 12. M12 (2026-11-04): no provider calls were made
+
+- **Malacca tracks:** the owner approved up to 2 more History Track loads for Malacca tankers underway according to their saved status. All four were stopped when last seen: SINGAPORE ENERGY (at anchor, 0.1 kn), TEMBEK (moored, 0.0 kn), ZARGA (at anchor, 0.0 kn), ETYFA PROMETHEAS (at anchor, 0.2 kn). **Nothing was spent**; History Track stays at 3 of 10.
+- **Calls this session:** none to the provider. Every test uses a mock transport or a canned reply; the expired-key checks fake the date. The call log still holds 129 calls (Vessel Position 11 of 50).
+- **New endpoints:** `GET /api/v1/ais/budget` (counts from `logs/ais_calls.jsonl`), `GET /api/v1/ais/search`, `POST /api/v1/ais/search/provider`, `GET /api/v1/vessels/{mmsi}/track`, `GET /api/v1/vessels/{mmsi}/near`; `key` and `ais_key_line` in `/health` and `/vessels/watchlist`. See DECISIONS D21 to D24.
+
+## 13. Open questions for the user
 
 None blocking. Final snapshot due 2026-11-10; the key expires 2026-11-13.
