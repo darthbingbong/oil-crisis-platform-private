@@ -356,3 +356,16 @@ def test_refresh_interval(monkeypatch):
     assert refresh.interval_seconds() == 6 * 3600
     monkeypatch.setenv("REFRESH_INTERVAL_HOURS", "junk")
     assert refresh.interval_seconds() == 24 * 3600
+
+
+def test_estimated_set_carries_no_provider_wording_except_the_one_disclosure():
+    """Found by the hosted browser run: the default-detour note still said 'ShipFinder planned distances' while the numbers were the estimates."""
+    from services.voyage_sets import estimated_voyages
+    doc = estimated_voyages(json.loads((ROOT / "backend" / "data" / "routes.json").read_text(encoding="utf-8")))
+    meta_note = doc["_meta"]["voyage_distances"]["note"]
+    body = json.dumps({**doc, "_meta": {k: v for k, v in doc["_meta"].items() if k != "voyage_distances"}})
+    for banned in ("ShipFinder", "elaneglobal", "plan_id", "ais_route_plans", "planned sea distance", "retrieved 2026-11-02"):
+        assert banned not in body, banned
+    assert "ShipFinder" in meta_note and "not republished" in meta_note
+    suez = next(r for r in doc["routes"] if r["id"] == "suez")
+    assert "earlier estimates" in suez["default_detour_days_note"] and suez["default_detour_days"] == 12.7

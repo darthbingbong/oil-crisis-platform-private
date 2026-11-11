@@ -5,6 +5,7 @@
 
 import type {
   ChokepointRisk,
+  HostedConfig,
   ConflictEvent,
   PriceHistory,
   PriceLive,
@@ -22,15 +23,30 @@ import type {
   ProviderSearch,
 } from "../types";
 
-const API_BASE = "/api/v1";
+/** Empty when the page and the API share an origin (dev proxy, one host). A separate frontend host sets VITE_API_ORIGIN at build time (a public address, not a secret). */
+export const API_ORIGIN: string = (import.meta.env.VITE_API_ORIGIN as string | undefined)?.replace(/\/$/, "") ?? "";
+const API_BASE = `${API_ORIGIN}/api/v1`;
 
 async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, init);
   if (!res.ok) {
     const body = await res.text().catch(() => "");
+    // the public site answers with {error, message}: show that sentence, not the raw body
+    let friendly: string | null = null;
+    try {
+      const j = JSON.parse(body) as { error?: string; message?: string };
+      if (j.error && j.message) friendly = j.message;
+    } catch {
+      friendly = null;
+    }
+    if (friendly) throw new Error(friendly);
     throw new Error(`${init?.method ?? "GET"} ${path} failed: ${res.status} ${body}`);
   }
   return res.json() as Promise<T>;
+}
+
+export function getHosted(): Promise<HostedConfig> {
+  return fetchJson<HostedConfig>("/hosted");
 }
 
 export function simulate(req: SimulateRequest): Promise<SimulateResponse> {

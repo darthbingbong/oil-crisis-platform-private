@@ -4,6 +4,8 @@ import CurrentConditionsNote from "../components/CurrentConditionsNote";
 import { BarrelsChart, EvChart, ImporterChart, LithiumChart, PriceChart } from "../components/results/Charts";
 import EconomyPanel from "../components/results/EconomyPanel";
 import PriceTicker from "../components/PriceTicker";
+import SiteFooter from "../components/SiteFooter";
+import { useHosted } from "../hooks/useHosted";
 import KpiStrip from "../components/results/KpiStrip";
 import LithiumControl from "../components/results/LithiumControl";
 import ReportSection from "../components/results/ReportSection";
@@ -99,6 +101,7 @@ export default function Results() {
             <p style={{ margin: 0 }}>Go <Link to="/" style={{ color: "var(--color-crude)", textDecoration: "underline" }}>back to the map</Link>, click a route and choose &ldquo;Simulate disruption on this route&rdquo;, then &ldquo;Run full simulation&rdquo;.</p>
           </Card>
         </div>
+        <SiteFooter />
       </main>
     );
   }
@@ -131,6 +134,7 @@ export default function Results() {
 
         {state.kind === "ready" && <ReportBody report={state.report} onLithium={setLithium} />}
       </div>
+      <SiteFooter />
     </main>
   );
 }
@@ -149,6 +153,8 @@ function Chip({ children, testId }: { children: React.ReactNode; testId?: string
 }
 
 function ReportBody({ report, onLithium }: { report: ReportResponse; onLithium: (v: number) => void }) {
+  // the wording follows the distance set the server uses: ShipFinder planned distances (local copy) or the earlier estimates (public site)
+  const estimated = useHosted()?.voyage_distances === "estimated";
   const s = report.scenario;
   const sec = report.sections;
   const isDetour = s.disruption_type === "detour";
@@ -175,10 +181,10 @@ function ReportBody({ report, onLithium }: { report: ReportResponse; onLithium: 
             {s.detour_days_source === "user" ? (
               <>
                 <span className="section-label" style={{ color: "var(--color-crude)", margin: "0 6px" }}>your input</span>
-                {s.detour_days_default != null && <>(the route&apos;s derived default is {s.detour_days_default} days: the Cape voyage minus the Suez voyage, both planned sea distances from ShipFinder route planning at 14 knots).</>}
+                {s.detour_days_default != null && <>(the route&apos;s derived default is {s.detour_days_default} days: the Cape voyage minus the Suez voyage, {estimated ? "both earlier estimates (great-circle sums over illustrative waypoints)" : "both planned sea distances from ShipFinder route planning"} at 14 knots).</>}
               </>
             ) : (
-              <><span className="section-label" style={{ color: "var(--color-ash)", margin: "0 6px" }}>route default, derived</span>(Cape minus Suez planned sea distance at 14 knots; change it in the scenario).</>
+              <><span className="section-label" style={{ color: "var(--color-ash)", margin: "0 6px" }}>route default, derived</span>(Cape minus Suez {estimated ? "estimated" : "planned"} sea distance at 14 knots; change it in the scenario).</>
             )}
           </p>
         )}

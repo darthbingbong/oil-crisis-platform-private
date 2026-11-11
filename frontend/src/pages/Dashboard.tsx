@@ -6,6 +6,7 @@ import MarketsPanel, { type ScenarioNumbers } from "../components/MarketsPanel";
 import EarthGlobe from "../components/globe/EarthGlobe";
 import Header from "../components/Header";
 import PriceTicker from "../components/PriceTicker";
+import SiteFooter from "../components/SiteFooter";
 import ScenarioPanel from "../components/ScenarioPanel";
 import { mockConflicts } from "../data/mockConflicts";
 import { mockRefineries } from "../data/mockRefineries";
@@ -216,6 +217,7 @@ export default function Dashboard() {
           <AlertFeed alerts={alerts} status={streamStatus} />
         </div>
       </main>
+      <SiteFooter />
     </div>
   );
 }

@@ -553,3 +553,21 @@ export interface WatchlistResponse {
   vessels: WatchVessel[];
   samples: WatchlistSample[];
 }
+
+/** GET /api/v1/hosted: what the deployment says about itself (public facts only, never a key). */
+export interface HostedSource {
+  enabled: boolean;
+  label: string;
+  attribution: string | null;
+  url: string | null;
+}
+export interface HostedConfig {
+  hosted: boolean;
+  sources: Record<string, HostedSource>;
+  voyage_distances: "estimated" | "shipfinder";
+  vessels: "SIMULATED_ONLY" | "SIMULATED_AND_SAVED_REAL";
+  disclaimer: string;
+  privacy: string;
+  repo_url: string;
+  tradingview_note: string;
+}

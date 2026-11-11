@@ -40,6 +40,8 @@ def estimated_voyages(doc: dict) -> dict:
     for r in out["routes"]:
         if r["id"] in ("suez", "bab_el_mandeb") and cape is not None and r["id"] in days_by_id:
             r["default_detour_days"] = round(cape - days_by_id[r["id"]], 1)
+            r["default_detour_days_note"] = (f"Cape voyage {cape} d minus Suez voyage {days_by_id[r['id']]} d, both earlier estimates (great-circle sums over illustrative waypoints) at 14 kn. "
+                                             "An estimate, not a planned or surveyed distance.")
     meta = out.get("_meta", {})
     if "voyage_distances" in meta:
         meta["voyage_distances"] = {"source": "earlier estimates (great-circle sums over illustrative waypoints)", "speed_knots": SPEED_KNOTS,

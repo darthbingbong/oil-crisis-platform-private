@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { API_ORIGIN } from "../lib/api";
 import type { AisVessel } from "../lib/vesselSim";
 
 export interface AisStatus {
@@ -15,7 +16,7 @@ export function useAisStreamConfigured(): boolean | null {
   const [configured, setConfigured] = useState<boolean | null>(null);
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/v1/vessels/status").then((r) => r.json()).then((s: { state?: string }) => { if (!cancelled) setConfigured(s.state !== "no_key"); }).catch(() => { if (!cancelled) setConfigured(null); });
+    fetch(`${API_ORIGIN}/api/v1/vessels/status`).then((r) => r.json()).then((s: { state?: string }) => { if (!cancelled) setConfigured(s.state !== "no_key"); }).catch(() => { if (!cancelled) setConfigured(null); });
     return () => { cancelled = true; };
   }, []);
   return configured;
@@ -43,7 +44,7 @@ export function useVesselStream(enabled: boolean) {
     const connect = () => {
       if (stopped) return;
       setPhase("connecting");
-      ws = new WebSocket(`${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws/vessels`);
+      ws = new WebSocket(API_ORIGIN ? `${API_ORIGIN.replace(/^http/, "ws")}/ws/vessels` : `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws/vessels`);
       ws.onopen = () => { backoff = BACKOFF_START_MS; setPhase("open"); };
       ws.onmessage = (ev) => {
         try {

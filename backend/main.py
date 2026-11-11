@@ -106,6 +106,7 @@ app.add_exception_handler(Exception, friendly_500)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=hosted.cors_origins(),
+    expose_headers=["Retry-After"],            # so the page can read how long to wait after a 429
     allow_methods=["*"],
     allow_headers=["*"],
 )

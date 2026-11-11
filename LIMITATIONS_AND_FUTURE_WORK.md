@@ -108,7 +108,7 @@ The literal readings are impossible (Argentina or Chile alone would exceed the w
 - **(to do)** A print-friendly or PDF version of the Results page.
 - **(to do)** Run the older AISStream adapter with a real key and flip `VERIFIED_AGAINST_LIVE_FEED` (the ShipFinder path is verified and saved; the AISStream one never ran live).
 - **(to do)** Measure frame rate on a real GPU.
-- **(to do, milestone M16)** Hosting readiness: switch NewsAPI and the Anthropic classifier off in hosted mode, scheduled refreshes served from cache, the 390 px phone check, a footer, and a clean-export public repo (DECISIONS D25 to D32). Nothing in M16 is built yet.
+- **Hosting readiness (M16) is built and verified on this machine only** (see section 14): it has not run on a real host.
 - **(to do)** Break the real EIA service on purpose (a rejected key against the real endpoint) to check the fallback end to end.
 
 ## 11. The 2D map (M11): measured limits
@@ -135,3 +135,14 @@ The literal readings are impossible (Argentina or Chile alone would exceed the w
 - **The WTI scenario number is the plain formula on a stale base:** last EIA close times (1 + supply loss / 0.15 as a percentage). Inside 8% supply loss it carries the measured +/- 13.09 pp; beyond it, none. It is a model scenario, not a forecast, and it is switched off when the EIA price is the saved fallback.
 - **The visitor's browser contacts TradingView** once the panel has been scrolled to. TradingView's pages say it tracks the embedding page URL and the symbol; they do not say whether commercial use is allowed. Alpha Vantage was tested (8 calls on 2026-11-04) and not used: its free key is "personal, non-commercial use" with nothing on public display, and index data needs a paid plan.
 - **Frame rate:** with all three widgets mounted the 2D map still ran at 87 to 103 fps (zoom 2) on software rendering; the measurement varies by about 20 percent between runs.
+
+## 14. Hosted mode (M16): limits
+
+- **Verified on one machine, not on a host.** The hosted run (`frontend/e2e/m16_hosted.mjs`, 70 checks, 0 console errors at 1440, 820 and 390 px) used a hosted-mode backend on port 8002 and a production build served from a different origin on port 4173, so CORS was exercised, but no real hosting provider, domain, HTTPS or reverse proxy was involved.
+- **The Claude classifier path was only run with fakes.** There was no Anthropic key on the machine where hosted mode was built, so the cache-once, daily cap, monthly cap and rule-based fallback are proven by unit tests with a counting fake, not by a real API call. The prices per million tokens behind the dollar cap (5 in, 25 out) are an assumption, set high on purpose.
+- **The scheduled refresh runs inside the web process.** A host that stops the process between visits (a free tier that sleeps) will not run it; the first visitor then sees the dated CSV price and the saved demo snapshot of headlines until the start-up refresh finishes (about two minutes, GDELT being paced at 6 s a route).
+- **Caches live in memory and local files.** The price cache is in memory, so a restart empties it until the next refresh; the route-news cache is on disk and survives. The Claude ledger is a local file: on a host with a disk that is wiped on each deploy the caps and the headline cache start again from zero.
+- **The rate limit is per process and uses the first address in `X-Forwarded-For`**, which a client can fake when no trusted proxy sets it; it stops accidents and casual scripts, not a determined attacker. Several processes would each count separately.
+- **No real tankers on the public site.** ShipFinder is off there (public display is unconfirmed, D10 and D27), so the public site shows SIMULATED vessels only, and the public voyage lengths are the earlier estimates (Suez default detour 12.7 days, against 14.0 in the author's local copy). Scenario numbers that depend on voyage length therefore differ a little between the two.
+- **The Global Energy Monitor licence is unconfirmed** ("CC BY 4.0 per GEM's general statement, not confirmed for this tracker", D30). If GEM says no, the GEM-derived values must come out before the public site is promoted.
+- **No privacy tooling beyond not collecting.** The site sets no cookies and runs no analytics; the host's own access logs and TradingView's widgets are outside this project's control, and the footer says so.
