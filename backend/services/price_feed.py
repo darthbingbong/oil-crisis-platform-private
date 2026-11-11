@@ -25,6 +25,8 @@ from typing import Awaitable, Callable, Protocol
 import httpx
 import pandas as pd
 
+from services import hosted  # noqa: E402
+
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 CSV_PATH = DATA_DIR / "oil_daily_prices.csv"
 
@@ -254,6 +256,7 @@ FALLBACK_MESSAGES = {
     "http_error": "EIA could not be reached or returned a server error, so this is the last row of the local CSV file.",
     "bad_response": "EIA's reply could not be understood, so this is the last row of the local CSV file.",
     "no_data": "EIA returned no prices, so this is the last row of the local CSV file.",
+    "cache_only": "The server has not fetched EIA prices yet today (visitors are served from its daily refresh), so this is the last row of the local CSV file.",
 }
 
 
@@ -271,6 +274,7 @@ class PriceService:
         self._factory = provider_factory or (lambda key: EiaProvider(key))
         self._clock = clock
         self._cache: dict | None = None               # {"points", "fetched_at", "latency_ms"} from the last successful EIA call
+        self._refreshing = False                       # True only inside refresh(): the one caller allowed to reach EIA in hosted mode
 
     # -- EIA access with cache ------------------------------------------------
     async def _eia(self) -> tuple[list[dict], dict]:
@@ -279,7 +283,11 @@ class PriceService:
         if not key:                                    # no key means no EIA data, whatever an earlier cache holds
             raise PriceFeedError("no_key", "no API key configured")
         c = self._cache
-        if c and self._clock() - c["fetched_at"] < CACHE_TTL_SECONDS:
+        if hosted.cache_only() and not self._refreshing:         # hosted: a visitor is served what the schedule fetched, however old, never a new call
+            if c:
+                return c["points"], {"fetched_at": c["fetched_at"], "cached": True, "latency_ms": c["latency_ms"]}
+            raise PriceFeedError("cache_only", "no cached EIA answer yet")
+        if c and self._clock() - c["fetched_at"] < CACHE_TTL_SECONDS and not self._refreshing:
             return c["points"], {"fetched_at": c["fetched_at"], "cached": True, "latency_ms": c["latency_ms"]}
         provider = self._factory(key)
         try:
@@ -291,6 +299,14 @@ class PriceService:
         latency = getattr(provider, "last_latency_ms", None)
         self._cache = {"points": points, "fetched_at": self._clock(), "latency_ms": latency}
         return points, {"fetched_at": self._cache["fetched_at"], "cached": False, "latency_ms": latency}
+
+    async def refresh(self) -> dict:
+        """The scheduled refresh (services/refresh.py): the only path to EIA in hosted mode. Returns the live() answer, so a failure is visible in it."""
+        self._refreshing = True
+        try:
+            return await self.live()
+        finally:
+            self._refreshing = False
 
     def _today(self) -> date:
         return datetime.fromtimestamp(self._clock(), tz=timezone.utc).date()

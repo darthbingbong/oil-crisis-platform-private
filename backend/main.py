@@ -52,6 +52,7 @@ from ev_lithium import (
 )
 from refineries import capacity_at_risk_bpd, capacity_at_risk_pct_of_global, load_refineries, refineries_at_chokepoint
 from routers import news as route_news_router
+from routers import hosted as hosted_router
 from routers import health as health_router
 from routers import price as price_router
 from routers import vessels as vessels_router
@@ -68,6 +69,9 @@ from news import price_engine
 from news import sse as news_sse
 from news.classify import classify_article
 from news.fixtures import FIXTURES
+from services import hosted
+from services.guards import HostedGuards, friendly_500
+from services.refresh import refresh_loop
 from news.ingestion import url_hash
 from news.models import Article, ClassifiedEvent
 from news.poller import poll_loop, run_poll_cycle
@@ -79,11 +83,12 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     news_db.init_db()
-    poller_task = asyncio.create_task(poll_loop())
+    # hosted: NewsAPI is off and visitors never trigger a fetch; one scheduled refresh (services/refresh.py) fills the caches instead
+    poller_task = asyncio.create_task(refresh_loop() if hosted.hosted_mode() else poll_loop())
     # Route-news cache warm-up: one route at a time, at least 6 s apart, so the first click in a demo is instant.
     # Set NEWS_WARMUP=0 to disable (e.g. to measure a cold start).
     warmup_task = None
-    if warmup_enabled():
+    if warmup_enabled() and not hosted.hosted_mode():
         warmup_task = asyncio.create_task(warm_cache(all_routes()))
     yield
     poller_task.cancel()
@@ -94,11 +99,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Oil Crisis Simulation API", lifespan=lifespan)
 
-# Allow a frontend running on a different port (e.g. React on :3000) to call
-# this API during development. Tighten this before deploying publicly.
+# Guards first (rate limits, closed developer endpoints, friendly errors; hosted mode only), then CORS added LAST so it is the outermost layer and a 429
+# still carries its CORS headers. Local mode allows any origin (development on another port); hosted allows only FRONTEND_ORIGIN.
+app.add_middleware(HostedGuards)
+app.add_exception_handler(Exception, friendly_500)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=hosted.cors_origins(),
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -110,6 +117,7 @@ app.include_router(health_router.router)    # GET /api/v1/health: state of each 
 app.include_router(vessels_router.router)   # WS /ws/vessels, GET /api/v1/vessels/status
 app.include_router(ais_router.router)         # M12: /ais/budget, /ais/search, /ais/search/provider, /vessels/{mmsi}/track, /vessels/{mmsi}/near
 app.include_router(watchlist_router.router)  # GET /api/v1/vessels/watchlist: the saved real-tanker snapshot (never calls the provider)
+app.include_router(hosted_router.router)   # GET /api/v1/hosted: public deployment facts (sources on or off, attributions, disclaimer)
 app.include_router(route_news_router.router)  # GET /api/v1/routes/{id}/news (GDELT) + DEV-ONLY /dev/news-feed
 
 # ---------------------------------------------------------------------------

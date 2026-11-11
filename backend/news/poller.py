@@ -38,6 +38,11 @@ async def run_poll_cycle() -> list[tuple[Article, ClassifiedEvent, str]]:
     classifier_used) for every article that was actually classified this
     cycle (whether or not price_relevant)."""
     articles = await asyncio.to_thread(fetch_live_articles)
+    return await process_articles(articles)
+
+
+async def process_articles(articles: list[Article]) -> list[tuple[Article, ClassifiedEvent, str]]:
+    """The steps shared by the NewsAPI poller and the hosted GDELT bridge: skip what was processed, filter, classify, record, price."""
     new_events: list[tuple[Article, ClassifiedEvent, str]] = []
 
     for article in articles:

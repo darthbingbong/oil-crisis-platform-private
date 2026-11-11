@@ -29,10 +29,13 @@ import httpx
 from .cache import TTLCache
 from .news_classifier import classify_headline
 
+from services import hosted  # noqa: E402
+
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 GDELT_URL = os.environ.get("NEWS_GDELT_URL", "https://api.gdeltproject.org/api/v2/doc/doc")
 CACHE_TTL_SECONDS = 20 * 60          # brief: cache 15 to 30 minutes
+HOSTED_CACHE_TTL_SECONDS = 26 * 3600  # hosted: one scheduled refresh a day, so an entry is fresh until the next one is due (plus two hours of slack)
 # Measured against the real API from this machine: the TLS handshake alone takes about 10 s and a full answer 12 to 15 s,
 # so timeouts are generous. A total budget stops retries from running away (the panel shows a loading state meanwhile).
 CONNECT_TIMEOUT_SECONDS = 25.0
@@ -273,7 +276,7 @@ _cache: TTLCache | None = None
 def default_cache() -> TTLCache:
     global _cache
     if _cache is None:
-        _cache = TTLCache(DATA_DIR / "cache" / "route_news", CACHE_TTL_SECONDS)
+        _cache = TTLCache(DATA_DIR / "cache" / "route_news", HOSTED_CACHE_TTL_SECONDS if hosted.hosted_mode() else CACHE_TTL_SECONDS)
     return _cache
 
 
@@ -374,6 +377,7 @@ async def get_route_news(
     cache: TTLCache | None = None,
     fetch: Callable[[str], Awaitable[list[dict]]] | None = None,
     stale_while_revalidate: bool = False,
+    force: bool = False,
 ) -> dict:
     """stale_while_revalidate=True (used by the HTTP endpoint): an expired cached result is returned IMMEDIATELY, marked stale and
     refreshing, while a background task fetches a new one. Without it (tests, warm-up) the fetch is awaited."""
@@ -382,6 +386,18 @@ async def get_route_news(
     rq = query_for(route)
     key = f"news_{route['id']}"
     entry = cache.get(key)
+
+    if hosted.cache_only() and not force and _simulation_mode == "off":
+        # hosted: no visitor ever reaches GDELT. The schedule fills the cache once a day; an older entry is labelled with its age, never "refreshing"
+        if entry is not None:
+            fresh = cache.is_fresh(entry)
+            return _response(route, entry["payload"]["items"], entry["fetched_at"], stale=not fresh, status=("ok" if entry["payload"]["items"] else "empty") if fresh else "stale",
+                             message=None if fresh else _stale_message(entry["fetched_at"]))
+        snap = snapshot_for(route["id"])
+        if snap is not None:
+            epoch = datetime.strptime(snap["fetched_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
+            return _response(route, snap["items"], epoch, stale=False, status="snapshot", snapshot=True, message=_snapshot_message(snap["fetched_at"]))
+        return _response(route, [], None, stale=False, status="unavailable", message=UNAVAILABLE_MESSAGE)
 
     if entry is not None and cache.is_fresh(entry) and _simulation_mode == "off":
         p = entry["payload"]
