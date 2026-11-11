@@ -36,7 +36,7 @@ A free Render service sleeps after about 15 minutes without traffic, and the dai
 
 The free plan has a monthly limit of instance hours; one always-awake service fits inside it.
 
-Measured cold start without the ping: see the section at the end of this file (filled in after the first deploy).
+Measured on 2026-11-11 (free plan): after a deploy the first refresh took about **11 minutes** to cover all 14 routes (start 12:23:08Z, last route 12:33:55Z; GDELT answers slowly and each route waits at least 6 s). 3 of the 14 routes (Turkish Straits, Cape of Good Hope, SUMED) got no answer from GDELT in that run and show "unavailable" until the next refresh. During those minutes the site shows labelled fallback data. The **cold-start time of a sleeping free service (the first request after about 15 idle minutes) has not been measured yet**; Render documents it as roughly a minute.
 
 ### Turning the Claude classifier on later
 1. In the Render dashboard add `ANTHROPIC_API_KEY` (your key).
