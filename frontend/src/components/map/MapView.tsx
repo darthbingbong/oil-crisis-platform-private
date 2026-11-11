@@ -332,7 +332,7 @@ export default function MapView(props: Props) {
         <span style={{ color: "var(--color-ash)" }}>Route geometry is illustrative, not surveyed. Map: Natural Earth (public domain).</span>
       </div>
 
-      <div style={{ position: "absolute", right: 12, bottom: 12, zIndex: 5, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, pointerEvents: "none", maxWidth: "min(360px, 60%)" }} className="max-sm:!left-3 max-sm:!max-w-none max-sm:!bottom-14">
+      <div style={{ position: "absolute", right: 12, bottom: 12, zIndex: 5, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, pointerEvents: "none", maxWidth: "min(360px, 60%)" }} className="max-sm:!left-3 max-sm:!max-w-none max-sm:!bottom-[72px]">
         {on.has("watchlist") && haveSnapshot && (
           <SnapshotBadge testId="watch-badge" title={`SNAPSHOT ${fmtUtc(wl!.captured_at_utc)} · ${wl!.vessels.length} REAL TANKERS`} label={wl!.label ?? ""} keyLine={wl!.key_line} expired={wl!.key_expired}
             style={{ fontSize: 11, color: "var(--color-ion)", background: "rgba(3,3,3,0.9)", border: "1px solid rgba(89,224,201,0.4)", borderRadius: 4, padding: "5px 9px", textAlign: "right" }} />
@@ -351,7 +351,7 @@ export default function MapView(props: Props) {
         )}
       </div>
 
-      <div style={{ position: "absolute", left: 12, bottom: 116, zIndex: 5, display: "flex", flexDirection: "column", gap: 4 }}>
+      <div style={{ position: "absolute", left: 12, bottom: 116, zIndex: 5, display: "flex", flexDirection: "column", gap: 4 }} className="max-sm:!bottom-[156px]">
         {[["+", "Zoom in", 1], ["−", "Zoom out", -1]].map(([sym, label, d]) => (
           <button key={label as string} type="button" aria-label={label as string} data-testid={`map-zoom-${(d as number) > 0 ? "in" : "out"}`} onClick={() => zoomBy(d as number)}
             style={{ width: 36, height: 36, background: "rgba(3,3,3,0.9)", border: "1px solid rgba(244,241,234,0.2)", borderRadius: 4, color: "var(--color-bone)", cursor: "pointer", fontSize: 16 }}>{sym}</button>

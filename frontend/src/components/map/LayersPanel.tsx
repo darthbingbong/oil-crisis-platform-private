@@ -61,7 +61,7 @@ function rows(c: LayerCounts): { group: string; items: Row[] }[] {
 export default function LayersPanel({ on, onToggle, counts }: { on: Set<LayerId>; onToggle: (id: LayerId) => void; counts: LayerCounts }) {
   const [open, setOpen] = useState(() => window.innerWidth >= 900);          // collapsed by default on a tablet or phone, where it would cover the map
   return (
-    <div data-testid="layers-panel" style={{ position: "absolute", left: 12, top: 12, zIndex: 6, width: 270, maxWidth: "calc(100% - 24px)", maxHeight: "calc(100% - 252px)", display: "flex", flexDirection: "column", background: "rgba(3,3,3,0.9)", border: "1px solid rgba(244,241,234,0.16)", borderRadius: 6 }}>
+    <div data-testid="layers-panel" className="max-sm:!max-h-[calc(100%-284px)]" style={{ position: "absolute", left: 12, top: 12, zIndex: 6, width: 270, maxWidth: "calc(100% - 24px)", maxHeight: "calc(100% - 252px)", display: "flex", flexDirection: "column", background: "rgba(3,3,3,0.9)", border: "1px solid rgba(244,241,234,0.16)", borderRadius: 6 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 10px" }}>
         <button type="button" data-testid="layers-collapse" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="section-label" style={{ color: "var(--color-bone)", cursor: "pointer", display: "flex", gap: 6, alignItems: "center", minHeight: 32, minWidth: 32 }}>
           <span aria-hidden>{open ? "▾" : "▸"}</span> LAYERS

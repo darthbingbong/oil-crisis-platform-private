@@ -103,6 +103,11 @@ for (const [w, h, tag] of [[1440, 900, "laptop"], [820, 1180, "tablet"], [390, 8
     check(`${tag}: Layers panel (open) does not overlap ${name}`, o !== null && !hit(panel, o), `(panel ${panel && Math.round(panel.t)}-${panel && Math.round(panel.b)}, ${name} ${o && Math.round(o.t)}-${o && Math.round(o.b)})`);
   }
   check(`${tag}: the panel stays inside the map`, panel.b <= h && panel.r <= w);
+  const badgeBox = await rect(p, '[data-testid="watch-badge"]');
+  for (const [name, sel] of [["Reset view", '[data-testid="map-reset-view"]'], ["zoom in", '[data-testid="map-zoom-in"]'], ["zoom out", '[data-testid="map-zoom-out"]'], ["legend", '[data-testid="route-legend"]'], ["Layers panel", '[data-testid="layers-panel"]']]) {
+    const o = await rect(p, sel);
+    check(`${tag}: the SNAPSHOT badge does not overlap ${name}`, o !== null && badgeBox !== null && !hit(badgeBox, o), `(badge ${badgeBox && Math.round(badgeBox.t)}-${badgeBox && Math.round(badgeBox.b)}, ${name} ${o && Math.round(o.t)}-${o && Math.round(o.b)})`);
+  }
   await shot(p, `m17_${tag}_map`);
 
   // news feed
@@ -111,6 +116,7 @@ for (const [w, h, tag] of [[1440, 900, "laptop"], [820, 1180, "tablet"], [390, 8
   const badge = await text(p, '[data-testid="headlines-badge"]');
   const items = await p.locator('[data-testid="headline-item"]').count();
   check(`${tag}: News Alert Feed is not CONNECTING and not stuck loading`, !/CONNECTING|LOADING/.test(badge) && !/CONNECTING/.test(await text(p, "body")), `(${badge}, ${items} headlines)`);
+  if (OUT) await p.locator('[data-testid="headlines-feed"]').screenshot({ path: path.join(OUT, `m17_${tag}_news_feed.png`) }).catch(() => {});
   check(`${tag}: the feed shows headlines with the GDELT source, or a plain message`, items > 0 ? /GDELT/.test(await text(p, '[data-testid="headlines-feed"]')) : (await p.locator('[data-testid="headlines-empty"], [data-testid="headlines-error"]').count()) === 1);
   await p.close();
 }
