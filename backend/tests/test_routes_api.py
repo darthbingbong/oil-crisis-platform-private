@@ -25,7 +25,7 @@ if _PLANS_FILE.exists():                      # the author's copy: ShipFinder pl
 else:                                         # the public edition: no provider data, the earlier estimates (docs/m10_voyage_before.json)
     _BEFORE = json.loads((Path(__file__).resolve().parent.parent.parent / "docs" / "m10_voyage_before.json").read_text(encoding="utf-8"))["routes"]
     SUEZ_T, DEFAULT_DETOUR = _BEFORE["suez"]["baseline_voyage_days"], _BEFORE["suez"]["default_detour_days"]
-assert (SUEZ_T, DEFAULT_DETOUR) == (19.5, 14.0)
+assert (SUEZ_T, DEFAULT_DETOUR) == ((19.5, 14.0) if _PLANS_FILE.exists() else (21.2, 12.7))
 
 # (url path exactly as a client could send it, snapshot file)
 LEGACY_CALLS = [
