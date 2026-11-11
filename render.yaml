@@ -1,0 +1,24 @@
+# Render Blueprint for the backend (FastAPI). Frontend: Cloudflare Pages (see DEPLOY.md).
+# Secrets are NOT in this file: keys marked sync: false are typed into the Render dashboard.
+services:
+  - type: web
+    name: oil-crisis-api
+    runtime: python
+    plan: free                      # free plan sleeps after ~15 min idle; DEPLOY.md sets up a keep-warm ping. Use "starter" to avoid that.
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/ping   # no external call, no key
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.13.2
+      - key: HOSTED_MODE
+        value: "1"
+      - key: HOSTED_ENABLE_ANTHROPIC   # classifier OFF for launch: headlines are classified by the rule-based classifier
+        value: "0"
+      - key: FRONTEND_ORIGIN           # the Cloudflare Pages address, no trailing slash
+        sync: false
+      - key: EIA_API_KEY               # type this into the dashboard yourself
+        sync: false
+      # ANTHROPIC_API_KEY is deliberately absent; see DEPLOY.md "Turning the Claude classifier on later"

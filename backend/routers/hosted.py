@@ -12,3 +12,9 @@ router = APIRouter(prefix="/api/v1")
 @router.get("/hosted")
 def hosted_config() -> dict:
     return hosted.public_config()
+
+
+@router.get("/ping")
+def ping() -> dict:
+    """Keep-warm and health-check target: no external call, no file read, no key. A free host that sleeps when idle is pinged here every few minutes."""
+    return {"ok": True}

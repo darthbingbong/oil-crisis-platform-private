@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 the author of this project
+Copyright (c) 2026 Anand V
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-This licence covers the source code only. The files under backend/data/ and the
-figures taken from third parties keep the licences and terms of their sources,
-which are listed in the README ("Data sources").
