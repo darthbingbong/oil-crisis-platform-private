@@ -8,6 +8,25 @@ A terminal-style web app for exploring what a maritime oil disruption would do. 
 - Known limits: **`LIMITATIONS_AND_FUTURE_WORK.md`**.
 - Build instructions it was written to: `MASTER_PROMPT.md`. Phase 1 modelling decisions: `backend/PHASE1_SUMMARY.md`.
 
+## Run it yourself
+
+You need Python 3.13 and Node 22. No API key is needed: with none, the app runs on the data in the repository and says so on screen (see [With no API keys at all](#with-no-api-keys-at-all)).
+
+```powershell
+git clone https://github.com/darthbingbong/oil-crisis-platform-final
+cd oil-crisis-platform-final\backend
+python -m venv venv ; .\venv\Scripts\Activate.ps1 ; pip install -r requirements.txt
+python -m uvicorn main:app --port 8000
+# second terminal
+cd ..\frontend ; npm install ; npm run dev      # open http://localhost:5173
+```
+
+This public copy has no real vessel positions (only simulated vessels, labelled SIMULATED) and uses the earlier estimated voyage distances; why is in [Hosted mode](#hosted-mode-m16) and `docs/DECISIONS.md`. Optional keys (EIA for the live price, Anthropic for Claude classification) go in `backend/.env`, copied from `backend/.env.example`, which has no values.
+
+## Disclaimer
+
+**Educational project. Figures are model estimates, not forecasts or financial advice.** Nothing here is investment, trading or policy advice. Every number is either sourced (with the source shown) or labelled as an assumption or estimate; the only validated claim is the 30-day price move for supply losses up to 8% (see [What is verified and what is not](#what-is-verified-and-what-is-not)). Market tables are third-party widgets; headlines are links to their publishers. The code is under the MIT licence (`LICENSE`); the data files keep the licences and terms of their sources (see [Data sources](#data-sources)).
+
 ## Contents
 1. [Quick start (Windows)](#quick-start-windows) · 2. [Architecture](#architecture) · 3. [Environment variables](#environment-variables) · 4. [API endpoints](#api-endpoints) · 5. [Data sources](#data-sources) · 6. [Methodology](#methodology) · 7. [The calculation chain](#the-calculation-chain) · 8. [Every assumption](#every-assumption) · 9. [What is verified and what is not](#what-is-verified-and-what-is-not) · 10. [Changelog / corrected values](#changelog--corrected-values) · 11. [Feature notes](#feature-notes) · 12. [Limitations](#limitations) · 13. [Tests](#tests) · 14. [Repo hygiene and secrets](#repo-hygiene-and-secrets)
 
@@ -112,6 +131,15 @@ All optional. Set them in `backend/.env` (copy `backend/.env.example`). Never pu
 | `AIS_API_KEY` | none | ShipFinder Open Platform key (server-side only; never printed, logged or sent to the browser). Without it, or after it expires on 2026-11-13, the app shows the saved snapshot and makes no call |
 | `AIS_ENABLED` | `1` | `0` is the kill switch: no provider call is ever made |
 | `AIS_TODAY` | unset | **Testing only**: `YYYY-MM-DD` fakes today's date so the expired-key behaviour can be checked (for example `2026-11-13`) |
+| `HOSTED_MODE` | unset (local) | `1` = public deployment (see [Hosted mode](#hosted-mode-m16)): visitors are served from caches filled by one scheduled refresh, rate limits and friendly errors are on, developer endpoints are closed, CORS allows only `FRONTEND_ORIGIN` |
+| `HOSTED_ENABLE_<SOURCE>` | the safe side | One flag per source, read only in hosted mode. `EIA`, `GDELT`, `TRADINGVIEW`, `GEM`, `ANTHROPIC` default **on**; `SHIPFINDER`, `AISSTREAM`, `NEWSAPI`, `ALPHAVANTAGE`, `SHIPFINDER_DISTANCES` default **off** |
+| `FRONTEND_ORIGIN` | none | The one web address allowed to call the API from a browser in hosted mode |
+| `PUBLIC_REPO_URL` | the project repository | The footer's repository link |
+| `REFRESH_INTERVAL_HOURS` | `24` | Hours between scheduled refreshes in hosted mode |
+| `CLAUDE_DAILY_CALL_CAP` | `50` | Most Claude classification calls per UTC day; after it the rule-based classifier answers |
+| `CLAUDE_MONTHLY_USD_CAP` | `5.00` | Most dollars per UTC month, counted from the token usage the API reports |
+| `CLAUDE_INPUT_USD_PER_MTOK`, `CLAUDE_OUTPUT_USD_PER_MTOK` | `5`, `25` | **Assumed** prices per million tokens for that count (the highest of the model family, so the cap stops early) |
+| `CLAUDE_CLASSIFIER_MODEL` | the model named in `news/classifier_claude.py` | Which Claude model classifies headlines |
 | `AISSTREAM_API_KEY` | none | AISStream.io key for the tanker feed. Without it: simulated vessels. Adapter is **unverified against the live feed** |
 | `ANTHROPIC_API_KEY` | none | Lets the older news pipeline classify headlines with Claude; otherwise a rule-based classifier |
 | `NEWSAPI_API_KEY` | none | NewsAPI key for the older pipeline's polling (the free plan is dev/test only, see Limitations) |
@@ -147,6 +175,7 @@ All optional. Set them in `backend/.env` (copy `backend/.env.example`). Never pu
 | POST | `/api/v1/ais/search/provider` | new (M12) | ONE ShipFinder Vessel Search, only from an explicit button press; status 31 is `NO_MATCH`; limits and breaker respected; from 2026-11-13 it makes no call (`KEY_EXPIRED`) |
 | GET | `/api/v1/vessels/{mmsi}/track` | new (M12) | The saved past track (`past track, fetched at <time>`) or `no saved track`; the headline is the one that travelled furthest |
 | GET | `/api/v1/vessels/{mmsi}/near` | new (M12) | The saved Vessels Nearby sample that contains the vessel, with its seed and time. Never a live Nearby call |
+| GET | `/api/v1/hosted` | new (M16) | Facts about the deployment for the footer and the vessel layer: hosted or local, which sources are on, their attributions, the disclaimer, the privacy note, the repository link. Never a key |
 | POST | `/api/v1/dev/news-feed`, `/api/v1/news/test-inject` | DEV-ONLY | Simulate a feed failure or an empty feed; inject a test headline |
 | GET | `/api/v1/news/stream`, `/api/v1/news/alerts`, `/api/v1/news/recent`, `/api/v1/news/price` (older pipeline) | unchanged | SSE alert stream, the alerts that moved the simulated price, the audit log of every classified article, the SIMULATED model-baseline price (never a quote) |
 | POST | `/api/v1/news/poll-now` | DEV-ONLY | Runs one poll cycle of the older NewsAPI pipeline (NewsAPI key needed; outside the plan's terms for public use) |
@@ -560,6 +589,27 @@ Twelve **real** tankers from a saved ShipFinder snapshot (first found on 2026-11
 - **Rows marked CFD are broker quotes** (FOREXCOM, OANDA, CAPITALCOM) that track the index or commodity closely; they are not the official level. **Not available in the free widget:** Nasdaq Composite and Nifty 50 (the Nasdaq 100 and the Sensex stand in); lithium has no free source.
 - **WTI scenario toggle:** the last EIA WTI close times the same 30-day formula the Crisis Scenario panel uses (supply loss / 0.15). Up to 8% supply loss it shows VALIDATED 30 DAYS and the measured +/- 13.09 pp; above 8% it shows OUTSIDE VALIDATED RANGE with no band. It switches itself off when the EIA price is a stale fallback. No other card has a scenario number and there are no cross-asset estimates.
 - **No key, no server cache** for these quotes: the browser contacts TradingView directly (a one-line note says so). Alpha Vantage is not used (its free terms say "personal, non-commercial use" and nothing about public display; DECISIONS D26).
+
+## Hosted mode (M16)
+
+`HOSTED_MODE=1` turns the same code into a public deployment. Local mode (the default) is unchanged. Decisions: `docs/DECISIONS.md` D25 to D32 and D37.
+
+| Source | Hosted default | What visitors get |
+|---|---|---|
+| EIA | **on** | WTI and Brent from the scheduled refresh, with the EIA date; the dated CSV only until the first refresh has run |
+| GDELT | **on** | Route headlines from the scheduled refresh (cache labelled with its age), with the GDELT citation |
+| TradingView | **on** | The Markets widgets, with the attribution and a note that the visitor's browser contacts TradingView |
+| Global Energy Monitor | **on** | Refinery and pipeline values with the exact citation and the note "licence unconfirmed" |
+| Anthropic (Claude) | **on, capped** | Each headline classified once and cached; a daily call cap, a monthly dollar cap, and a rule-based fallback |
+| ShipFinder | **off** | SIMULATED vessels only; the saved real tankers, tracks and samples stay on the author's machine |
+| AISStream | **off** | Not set up |
+| NewsAPI | **off** | The older pipeline is fed from GDELT headlines instead |
+| Alpha Vantage | **off** | Not used on the public site (its free terms say personal, non-commercial use) |
+| ShipFinder-derived voyage distances | **off** | The earlier estimated distances (great-circle sums over illustrative waypoints), labelled as estimates |
+
+What else changes when hosted: a visitor request never causes an EIA or GDELT call (one scheduled refresh a day and one at start-up do), a sliding one-minute rate limit per client (120 requests, 30 for the calculator) answers 429 with a plain sentence and `Retry-After`, the developer and test endpoints answer 404, CORS allows only `FRONTEND_ORIGIN`, an unexpected failure is one friendly sentence (never a traceback), and the footer shows the disclaimer, an attribution for every enabled source, the TradingView note, a privacy note (no cookies, no analytics) and the repository link.
+
+Because the voyage distances differ, the same scenario gives slightly different numbers on the public site than in the author's local copy (for the Suez detour, the default is 12.7 days on the estimated set against 14.0 on the ShipFinder-derived set). Evidence: `docs/m10_voyage_before.json` and `docs/m10_voyage_after.json`.
 
 ## Tests
 
