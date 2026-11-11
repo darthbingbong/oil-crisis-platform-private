@@ -164,7 +164,7 @@ const budget = await page.evaluate(() => fetch("/api/v1/ais/budget").then((r) =>
 const health = await page.evaluate(() => fetch("/api/v1/health").then((r) => r.json()));
 fs.writeFileSync(path.join(OUT, "m12_budget.json"), JSON.stringify({ budget, health_ais_key: health.ais_key, health_line: health.ais_key_line }, null, 1));
 const used = (s) => budget.services[s].used;
-check("GET /api/v1/ais/budget: Vessel Position 11 of 50, Track 3 of 10, Port-to-Port 5, Point-to-Point 2, Fleet 0", used("vessel_position") === 11 && budget.services.vessel_position.left === 39 && used("vessel_track") === 3 && budget.services.vessel_track.left === 7 && used("route_port") === 5 && used("route_point") === 2 && used("fleet_position") === 0, `(position ${used("vessel_position")}, track ${used("vessel_track")})`);
+check("GET /api/v1/ais/budget: Vessel Position 23 of 50, Track 3 of 10, Port-to-Port 5, Point-to-Point 2, Fleet 0", used("vessel_position") === 23 && budget.services.vessel_position.left === 27 && used("vessel_track") === 3 && budget.services.vessel_track.left === 7 && used("route_port") === 5 && used("route_point") === 2 && used("fleet_position") === 0, `(position ${used("vessel_position")}, track ${used("vessel_track")})`);
 check("...unmetered services are counted but have no 'left'; Nearby is on hold", used("vessels_nearby") === 41 && budget.services.vessels_nearby.left === null && !!budget.services.vessels_nearby.hold);
 check("/health carries 'AIS key expires in N days'", /^AIS key expires in \d+ days? \(2026-11-13\)$/.test(health.ais_key_line), `(${health.ais_key_line})`);
 
@@ -206,8 +206,8 @@ if (expiredUp) {
   await openMap(ex, `view=map&vessel=${MUHUT}`);
   await ex.waitForSelector('[data-testid="watch-vessel-panel"]', { timeout: 20000 });
   await ex.waitForTimeout(2500);
-  check("a banner says 'AIS key expired, showing data saved on 2026-11-03'", /AIS key expired, showing data saved on 2026-11-03/.test(await text(ex, '[data-testid="key-expired-banner"]')));
-  check("the real-tanker badge carries the same line", /AIS key expired, showing data saved on 2026-11-03/.test(await text(ex, '[data-testid="ais-key-line"]')));
+  check("a banner says 'AIS key expired, showing data saved on 2026-11-11'", /AIS key expired, showing data saved on 2026-11-11/.test(await text(ex, '[data-testid="key-expired-banner"]')));
+  check("the real-tanker badge carries the same line", /AIS key expired, showing data saved on 2026-11-11/.test(await text(ex, '[data-testid="ais-key-line"]')));
   const ep = await text(ex, '[data-testid="watch-vessel-panel"]');
   check("the vessel panel still shows everything, with the saved track and its date, and the expiry line", /MUHUT SILVER/.test(ep) && /past track, fetched at 2026-11-03 16:11 UTC/.test(ep) && /AIS key expired, showing data saved on/.test(await text(ex, '[data-testid="vessel-key-line"]')));
   check("no error screen anywhere", !/something went wrong|unexpected error|application error|failed to fetch|error:/i.test(await bodyText(ex)));
@@ -222,7 +222,7 @@ if (expiredUp) {
   await ex.locator('[data-testid="view-globe"]').click();
   await ex.waitForSelector('[data-testid="watch-vessel-panel"]', { timeout: 60000 });
   await ex.waitForTimeout(5000);
-  check("expired key, globe: same vessel panel and the expired line in the globe badge", /MUHUT SILVER/.test(await text(ex, '[data-testid="watch-vessel-panel"]')) && /AIS key expired, showing data saved on 2026-11-03/.test(await text(ex, '[data-testid="ais-key-line"]')));
+  check("expired key, globe: same vessel panel and the expired line in the globe badge", /MUHUT SILVER/.test(await text(ex, '[data-testid="watch-vessel-panel"]')) && /AIS key expired, showing data saved on 2026-11-11/.test(await text(ex, '[data-testid="ais-key-line"]')));
   await shot(ex, "m12_08_expired_key_globe");
   const exBudget = await ex.evaluate(() => fetch("/api/v1/ais/budget").then((r) => r.json()));
   check("expired: the budget endpoint still answers and says the key has expired", exBudget.key.expired === true && /expired/.test(exBudget.key.line));

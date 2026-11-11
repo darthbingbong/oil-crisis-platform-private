@@ -159,12 +159,12 @@ await page.locator('[data-testid="watch-vessel-close"]').click();
 // ------------------------------------------------------------------ 4b. both real-tanker groups, each with its SNAPSHOT label and seen-at time
 console.log("\n--- 4b. the two real-tanker groups");
 const labels = await page.evaluate(() => window.__map.watchLabels());
-check("two group labels: Huelva and Malacca, each SNAPSHOT with a seen-at time in UTC", labels.length === 2 && labels.some((l) => /Huelva/.test(l)) && labels.some((l) => /Malacca/.test(l)) && labels.every((l) => /^SNAPSHOT · .* · seen \d\d:\d\d( to \d\d:\d\d)? UTC · \d+ tankers$/.test(l)), `(${labels.join(" | ")})`);
-check("the Malacca label shows a time RANGE (its seed was confirmed at 16:13, the rest come from the 16:28 sample), not one time that hides that", /Malacca.* seen 16:13 to 16:28 UTC/.test(labels.join(" | ")));
+check("two group labels: Huelva and Malacca, each SNAPSHOT with a seen-at time in UTC", labels.length === 2 && labels.some((l) => /Huelva/.test(l)) && labels.some((l) => /Malacca/.test(l)) && labels.every((l) => /^SNAPSHOT · first found near .* · seen \d\d:\d\d( to \d\d:\d\d)? UTC · \d+ tankers$/.test(l)), `(${labels.join(" | ")})`);
+check("after the final snapshot every Malacca record was refreshed together, so its label shows one time (08:32 UTC) and says first found near", /Malacca.* seen 08:32 UTC/.test(labels.join(" | ")));
 const wl2 = await page.evaluate(() => fetch("/api/v1/vessels/watchlist").then((r) => r.json()));
-for (const [tag, area, wantSource] of [["huelva", /Huelva/, /Vessel Position/], ["malacca", /Malacca/, /Vessels Nearby sample only/]]) {
+for (const [tag, area, wantSource] of [["huelva", /Huelva/, /Vessel Position/], ["malacca", /Malacca/, /Vessel Position/]]) {
   const grp = wl2.vessels.filter((v) => area.test(v.area));
-  const pick = tag === "malacca" ? grp.find((v) => v.position_confirmed_by === "Vessels Nearby sample only") : grp[0];
+  const pick = grp[0];
   await page.evaluate(([a, b]) => window.__map.flyTo(a, b, 9.5), [pick.lat, pick.lng]);
   await page.waitForTimeout(1800);
   const pp = await page.evaluate(([a, b]) => window.__map.project(a, b), [pick.lat, pick.lng]);

@@ -94,7 +94,7 @@ const RealVesselPanel = memo(function RealVesselPanel({ vessel, extras, keyLine,
         <Row k="Position" v={`${v.lat.toFixed(3)}°, ${v.lng.toFixed(3)}°`} />
       </div>
       <div className="text-xs" style={{ color: "var(--color-ash)", marginTop: 8 }}>
-        {v.area}. Position confirmed by {v.position_confirmed_by ?? "unknown"}; typed as a tanker by the {v.typed_as_tanker_by ?? "provider"}.
+        First found near {v.area} on 2026-11-03; it has sailed since. Position confirmed by {v.position_confirmed_by ?? "unknown"}; typed as a tanker by the {v.typed_as_tanker_by ?? "provider"}.
         {v.flag_source ? ` Flag: ${v.flag_source}.` : ""} A saved position, not a live one.
       </div>
       <div data-testid="vessel-cargo-note" className="text-xs" style={{ color: "var(--color-crude)", marginTop: 6 }}>{v.cargo_note}</div>

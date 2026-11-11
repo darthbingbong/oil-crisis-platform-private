@@ -100,7 +100,7 @@ export function watchGroupLabels(watch: WatchVessel[]) {
     const times = vs.map((v) => v.record_fetched_utc).filter((x): x is string => !!x).sort();
     const hm = (s: string) => s.slice(11, 16);
     const seen = times.length ? (hm(times[0]) === hm(times[times.length - 1]) ? `${hm(times[0])} UTC` : `${hm(times[0])} to ${hm(times[times.length - 1])} UTC`) : "time unknown";
-    return { lng: vs.reduce((s, v) => s + v.lng, 0) / vs.length, lat: Math.max(...vs.map((v) => v.lat)), text: `SNAPSHOT · ${area.replace(/ \(.*\)$/, "")} · seen ${seen} · ${vs.length} tankers` };
+    return { lng: vs.reduce((s, v) => s + v.lng, 0) / vs.length, lat: Math.max(...vs.map((v) => v.lat)), text: `SNAPSHOT · first found near ${area.replace(/ \(.*\)$/, "")} · seen ${seen} · ${vs.length} tankers` };
   });
   groupLabels.set(watch, hit);
   return hit;

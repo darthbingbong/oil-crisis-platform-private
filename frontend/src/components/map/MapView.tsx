@@ -397,7 +397,7 @@ export default function MapView(props: Props) {
             <>
               <div className="section-label" style={{ color: "var(--color-ion)" }}>SNAPSHOT · REAL VESSEL</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: "var(--color-bone)", marginTop: 2 }}>{hoveredWatch.name ?? `MMSI ${hoveredWatch.mmsi}`}</div>
-              <div className="data-readout" style={{ fontSize: 11, color: "var(--color-ash)", marginTop: 2 }}>{hoveredWatch.nav_status} · {hoveredWatch.area}</div>
+              <div className="data-readout" style={{ fontSize: 11, color: "var(--color-ash)", marginTop: 2 }}>{hoveredWatch.nav_status} · first found near {hoveredWatch.area}</div>
             </>
           )}
         </div>

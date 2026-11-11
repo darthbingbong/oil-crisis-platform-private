@@ -75,7 +75,7 @@ export default function WatchLayer({ vessels, selectedMmsi, track, interactive, 
             <div data-testid="globe-watch-tooltip" style={{ transform: "translateY(-26px)", whiteSpace: "nowrap", background: "rgba(3,3,3,0.9)", border: "1px solid rgba(89,224,201,0.4)", borderRadius: 6, padding: "5px 9px" }}>
               <div className="section-label" style={{ color: TEAL }}>SNAPSHOT · REAL VESSEL</div>
               <div style={{ fontSize: 12, fontWeight: 600, color: "var(--color-bone)" }}>{hovered.v.name ?? `MMSI ${hovered.v.mmsi}`}</div>
-              <div className="data-readout" style={{ fontSize: 11, color: "var(--color-ash)" }}>{hovered.v.nav_status} · {hovered.v.area}</div>
+              <div className="data-readout" style={{ fontSize: 11, color: "var(--color-ash)" }}>{hovered.v.nav_status} · first found near {hovered.v.area}</div>
             </div>
           </Html>
         </group>
