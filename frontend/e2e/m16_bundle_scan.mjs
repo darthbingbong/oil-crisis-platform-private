@@ -26,6 +26,6 @@ const patterns = [["sk-ant-", /sk-ant-[A-Za-z0-9_-]{10,}/], ["ghp_ token", /ghp_
 for (const [label, re] of patterns) check(`no ${label} in the bundle`, !blob.some(([, t]) => re.test(t)));
 const hex = blob.flatMap(([f, t]) => (t.match(/\b(?=[a-f0-9]*[a-f])(?=[a-f0-9]*\d)[a-f0-9]{32,}\b/gi) ?? []).map((m) => [path.basename(f), m.length]));
 check("no 32+ character hex token mixing letters and digits (a run of digits only, such as a maths constant, is not a token)", hex.length === 0, hex.length ? `(${hex.length} found, in ${[...new Set(hex.map((h) => h[0]))].join(", ")})` : "");
-check("the API origin in the bundle is the public address only", blob.some(([, t]) => t.includes("http://127.0.0.1:8002")) && !blob.some(([, t]) => /api\.eia\.gov|newsapi\.org|elaneglobal|api\.anthropic\.com|aisstream\.io|alphavantage\.co/i.test(t)));
+check("the API origin in the bundle is the public address only", blob.some(([, t]) => t.includes((process.env.API_ORIGIN_EXPECT ?? "http://127.0.0.1:8002"))) && !blob.some(([, t]) => /api\.eia\.gov|newsapi\.org|elaneglobal|api\.anthropic\.com|aisstream\.io|alphavantage\.co/i.test(t)));
 console.log(bad ? `\n${bad} FAILED` : "\nall clear");
 process.exit(bad ? 1 : 0);

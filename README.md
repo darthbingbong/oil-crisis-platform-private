@@ -8,6 +8,8 @@ A terminal-style web app for exploring what a maritime oil disruption would do. 
 - Known limits: **`LIMITATIONS_AND_FUTURE_WORK.md`**.
 - Build instructions it was written to: `MASTER_PROMPT.md`. Phase 1 modelling decisions: `backend/PHASE1_SUMMARY.md`.
 
+**Live site:** <https://oil-crisis-platform-final.pages.dev> (frontend on Cloudflare Pages, API on Render: <https://oil-crisis-api.onrender.com>). Deploy settings: [`DEPLOY.md`](DEPLOY.md). The first visit after a quiet period can take up to a minute while the free API host wakes up.
+
 ## Run it yourself
 
 You need Python 3.13 and Node 22. No API key is needed: with none, the app runs on the data in the repository and says so on screen (see [With no API keys at all](#with-no-api-keys-at-all)).
@@ -132,7 +134,7 @@ All optional. Set them in `backend/.env` (copy `backend/.env.example`). Never pu
 | `AIS_ENABLED` | `1` | `0` is the kill switch: no provider call is ever made |
 | `AIS_TODAY` | unset | **Testing only**: `YYYY-MM-DD` fakes today's date so the expired-key behaviour can be checked (for example `2026-11-13`) |
 | `HOSTED_MODE` | unset (local) | `1` = public deployment (see [Hosted mode](#hosted-mode-m16)): visitors are served from caches filled by one scheduled refresh, rate limits and friendly errors are on, developer endpoints are closed, CORS allows only `FRONTEND_ORIGIN` |
-| `HOSTED_ENABLE_<SOURCE>` | the safe side | One flag per source, read only in hosted mode. `EIA`, `GDELT`, `TRADINGVIEW`, `GEM`, `ANTHROPIC` default **on**; `SHIPFINDER`, `AISSTREAM`, `NEWSAPI`, `ALPHAVANTAGE`, `SHIPFINDER_DISTANCES` default **off** |
+| `HOSTED_ENABLE_<SOURCE>` | the safe side | One flag per source, read only in hosted mode. `EIA`, `GDELT`, `TRADINGVIEW`, `GEM`, `ANTHROPIC`, `SHIPFINDER_SNAPSHOT` (show the saved 2026-11-11 tankers, read-only) and `SHIPFINDER_DISTANCES` (route-planned voyage days) default **on**; `SHIPFINDER` (live calls), `AISSTREAM`, `NEWSAPI`, `ALPHAVANTAGE` default **off** |
 | `FRONTEND_ORIGIN` | none | The one web address allowed to call the API from a browser in hosted mode |
 | `PUBLIC_REPO_URL` | the project repository | The footer's repository link |
 | `REFRESH_INTERVAL_HOURS` | `24` | Hours between scheduled refreshes in hosted mode |
@@ -176,6 +178,8 @@ All optional. Set them in `backend/.env` (copy `backend/.env.example`). Never pu
 | GET | `/api/v1/vessels/{mmsi}/track` | new (M12) | The saved past track (`past track, fetched at <time>`) or `no saved track`; the headline is the one that travelled furthest |
 | GET | `/api/v1/vessels/{mmsi}/near` | new (M12) | The saved Vessels Nearby sample that contains the vessel, with its seed and time. Never a live Nearby call |
 | GET | `/api/v1/hosted` | new (M16) | Facts about the deployment for the footer and the vessel layer: hosted or local, which sources are on, their attributions, the disclaimer, the privacy note, the repository link. Never a key |
+| GET | `/api/v1/ping` | new (M17) | Keep-warm and health-check target: `{"ok": true}`. Calls nothing external, reads no file, returns no key |
+| GET | `/api/v1/news/headlines` | new (M17) | The public site's news feed: the newest cached GDELT route headlines (publisher, time, keyword tag, route) with when each cache was fetched. Reads the cache only; no price effect |
 | POST | `/api/v1/dev/news-feed`, `/api/v1/news/test-inject` | DEV-ONLY | Simulate a feed failure or an empty feed; inject a test headline |
 | GET | `/api/v1/news/stream`, `/api/v1/news/alerts`, `/api/v1/news/recent`, `/api/v1/news/price` (older pipeline) | unchanged | SSE alert stream, the alerts that moved the simulated price, the audit log of every classified article, the SIMULATED model-baseline price (never a quote) |
 | POST | `/api/v1/news/poll-now` | DEV-ONLY | Runs one poll cycle of the older NewsAPI pipeline (NewsAPI key needed; outside the plan's terms for public use) |
@@ -198,7 +202,7 @@ Every data record in `routes.json` carries `source`, `source_url`, `data_year` a
 | ICCT, *EV supply chain* report (Feb 2024) | 0.10 kg lithium per kWh for NMC-811 cathodes | 2024 | <https://theicct.org/wp-content/uploads/2024/02/ID-85-%E2%80%93-EV-supply-chain-Report-Letter-70112-v3.pdf> |
 | IEA, *Global EV Outlook 2026* | EV sales above 20 million and about 22 million produced in 2025; average battery sizes (China below 60 kWh, EU close to 70, US 90) | 2025 | <https://www.iea.org/reports/global-ev-outlook-2026> |
 | IMF Managing Director K. Georgieva, speech of 9 Mar 2026; IMF Working Paper 17/196 | The only two macro coefficients with a verified primary source: +0.4 pp global inflation and -0.1 to -0.2% global output per +10% oil, if it lasts most of a year | 2026, 2017 | <https://www.imf.org/en/news/articles/2026/03/09/sp030926-coping-and-thriving-in-a-fluid-world> and <https://www.imf.org/en/publications/wp/issues/2017/09/05/oil-prices-and-inflation-dynamics-evidence-from-advanced-and-developing-economies-45180> |
-| ShipFinder Open Platform (Starter plan key `AIS-vessel-tracker`, valid to 2026-11-13) | Planned sea distances for the voyage days (M10, stored in `routes.json` and `data/ais_route_plans.json`); the 12 saved real tankers, their positions, three saved 7-day tracks and two Vessels Nearby samples (M12). Raw responses are kept out of git. The owner confirmed that the terms they accepted allow display and saving; **public display is unconfirmed** (DECISIONS D10, D27) | 2026-11 | <https://docs.shipfinder.com> |
+| ShipFinder Open Platform (Starter plan key `AIS-vessel-tracker`, valid to 2026-11-13) | Planned sea distances for the voyage days (M10, stored in `routes.json`); the 12 saved real tankers, their positions, three saved 7-day tracks and two Vessels Nearby samples (M12), shown on the public site as a **read-only SNAPSHOT dated 2026-11-11** from `backend/data/ais_display/` (only the fields the interface shows). **ShipFinder allowed public display for a non-commercial project that does not sell the data** (DECISIONS D38); raw responses are kept out of git and no ShipFinder call is made by the hosted site. Chokepoint traffic is simulated | 2026-11 | <https://docs.shipfinder.com> |
 | Natural Earth 1:50m admin-0 countries (public domain) | The 2D map's country outlines (bundled, simplified at three zoom levels; no tile server) | 2026 | <https://www.naturalearthdata.com/> |
 | GDELT Project, DOC 2.0 API | Route headlines (headline, source, date, link only). Attribution link shown in the panel | live | <https://www.gdeltproject.org/> |
 | AISStream.io | Tanker positions (live mode, unverified) | live | <https://aisstream.io/documentation> |
@@ -592,7 +596,7 @@ Twelve **real** tankers from a saved ShipFinder snapshot (first found on 2026-11
 
 ## Hosted mode (M16)
 
-`HOSTED_MODE=1` turns the same code into a public deployment. Local mode (the default) is unchanged. Decisions: `docs/DECISIONS.md` D25 to D32 and D37.
+`HOSTED_MODE=1` turns the same code into a public deployment. Local mode (the default) is unchanged. Decisions: `docs/DECISIONS.md` D25 to D32 and D37 to D40.
 
 | Source | Hosted default | What visitors get |
 |---|---|---|
@@ -600,16 +604,19 @@ Twelve **real** tankers from a saved ShipFinder snapshot (first found on 2026-11
 | GDELT | **on** | Route headlines from the scheduled refresh (cache labelled with its age), with the GDELT citation |
 | TradingView | **on** | The Markets widgets, with the attribution and a note that the visitor's browser contacts TradingView |
 | Global Energy Monitor | **on** | Refinery and pipeline values with the exact citation and the note "licence unconfirmed" |
-| Anthropic (Claude) | **on, capped** | Each headline classified once and cached; a daily call cap, a monthly dollar cap, and a rule-based fallback |
-| ShipFinder | **off** | SIMULATED vessels only; the saved real tankers, tracks and samples stay on the author's machine |
+| Anthropic (Claude) | **on by default, OFF at launch** | When on: each headline classified once and cached; a daily call cap, a monthly dollar cap, and a rule-based fallback. The launch deployment sets `HOSTED_ENABLE_ANTHROPIC=0` and no key, so headlines are tagged by rules (how to switch it on: `DEPLOY.md`) |
+| ShipFinder snapshot | **on, read-only** | The 12 saved real tankers, 3 saved tracks and 2 "vessels within 10 nm" samples from 2026-11-11, every one badged SNAPSHOT with its seen-at time. Footer: "Real tanker positions: ShipFinder snapshot (2026-11-11, non-commercial use). Chokepoint traffic is simulated." From 2026-11-13 the banner reads "showing data saved on 2026-11-11" |
+| ShipFinder live calls | **off** | The hosted site makes no ShipFinder call; the key expires 2026-11-13 and is not set on the host |
 | AISStream | **off** | Not set up |
-| NewsAPI | **off** | The older pipeline is fed from GDELT headlines instead |
+| NewsAPI | **off** | The "News Alert Feed" panel lists the cached GDELT route headlines instead (publisher, time, rule-based tag, route, and when the cache was fetched); they move no price. `GET /api/v1/news/headlines` |
 | Alpha Vantage | **off** | Not used on the public site (its free terms say personal, non-commercial use) |
-| ShipFinder-derived voyage distances | **off** | The earlier estimated distances (great-circle sums over illustrative waypoints), labelled as estimates |
+| ShipFinder route-planned voyage distances | **on** | The same voyage days as the local copy (Suez 19.5 days, default detour 14.0). `HOSTED_ENABLE_SHIPFINDER_DISTANCES=0` switches back to the earlier estimates |
 
 What else changes when hosted: a visitor request never causes an EIA or GDELT call (one scheduled refresh a day and one at start-up do), a sliding one-minute rate limit per client (120 requests, 30 for the calculator) answers 429 with a plain sentence and `Retry-After`, the developer and test endpoints answer 404, CORS allows only `FRONTEND_ORIGIN`, an unexpected failure is one friendly sentence (never a traceback), and the footer shows the disclaimer, an attribution for every enabled source, the TradingView note, a privacy note (no cookies, no analytics) and the repository link.
 
-Because the voyage distances differ, the same scenario gives slightly different numbers on the public site than in the author's local copy (for the Suez detour, the default is 12.7 days on the estimated set against 14.0 on the ShipFinder-derived set). Evidence: `docs/m10_voyage_before.json` and `docs/m10_voyage_after.json`.
+The public site and the author's local copy now use the same voyage distances (ShipFinder route planning, DECISIONS D38), so the same scenario gives the same numbers in both. The earlier estimated set (Suez 21.2 days, default detour 12.7) stays in the code behind `HOSTED_ENABLE_SHIPFINDER_DISTANCES=0` and in `docs/m10_voyage_before.json`.
+
+**Permission and condition.** ShipFinder replied (2026-11-11) that public display of its data on a hosted site is allowed as long as the project is non-commercial and the data is not sold. This project is non-commercial and sells nothing; if that changes, switch the two ShipFinder flags off and remove `backend/data/ais_display/`.
 
 ## Tests
 
