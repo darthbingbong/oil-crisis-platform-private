@@ -310,8 +310,16 @@ def save_tracks(records: list[dict], path: Path = TRACKS_FILE) -> Path:
     return path
 
 
+def _shipfinder_shown() -> bool:
+    from services import hosted
+    return hosted.enabled("shipfinder")
+
+
 def load_track(mmsi: int, path: Path = TRACKS_FILE) -> dict | None:
-    """The saved track for a vessel, or None. Never raises: after the key expires the panel shows this record with its date."""
+    """The saved track for a vessel, or None. Never raises: after the key expires the panel shows this record with its date.
+    Hosted mode with ShipFinder off: None (saved provider data is not shown publicly, D27)."""
+    if not _shipfinder_shown():
+        return None
     try:
         return next((t for t in json.loads(path.read_text(encoding="utf-8")).get("tracks", []) if t.get("mmsi") == mmsi), None)
     except (OSError, ValueError):
@@ -388,6 +396,8 @@ def save_snapshot(snapshot: dict, path: Path = WATCHLIST_FILE) -> Path:
 
 
 def load_watchlist(path: Path = WATCHLIST_FILE) -> dict | None:
+    if not _shipfinder_shown():
+        return None
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):

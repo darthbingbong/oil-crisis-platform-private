@@ -4,15 +4,24 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
+from services.voyage_sets import estimated_voyages
+
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 # Spellings the original /api/v1/routes/{chokepoint} endpoint accepted (matched lowercase).
 LEGACY_CHOKEPOINTS = {"hormuz": "hormuz", "bab_el_mandeb": "bab el-mandeb", "suez": "suez", "malacca": "malacca"}
 
 
-@lru_cache(maxsize=1)
+@lru_cache(maxsize=2)
+def _routes_doc(estimated: bool) -> dict:
+    doc = json.loads((DATA_DIR / "routes.json").read_text(encoding="utf-8"))
+    return estimated_voyages(doc) if estimated else doc
+
+
 def routes_doc() -> dict:
-    return json.loads((DATA_DIR / "routes.json").read_text(encoding="utf-8"))
+    """routes.json with the voyage distances the current mode allows: ShipFinder-derived (v2.0, local) or the earlier estimates (hosted, D29)."""
+    from services import hosted
+    return _routes_doc(hosted.estimated_distances())
 
 
 @lru_cache(maxsize=1)

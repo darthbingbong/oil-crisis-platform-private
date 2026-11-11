@@ -21,7 +21,7 @@ from .models import Article, ClassifiedEvent
 
 logger = logging.getLogger("news_pipeline")
 
-CLASSIFICATION_MODEL = "claude-opus-5"
+CLASSIFICATION_MODEL = os.environ.get("CLAUDE_CLASSIFIER_MODEL", "").strip() or "claude-opus-5"
 
 # Below this confidence, force price_relevant=False regardless of what the
 # model itself said -- per the brief: "reject or down-weight classifications
@@ -75,6 +75,11 @@ def _get_client() -> Anthropic:
 
 
 def classify_article(article: Article) -> ClassifiedEvent:
+    return classify_with_usage(article)[0]
+
+
+def classify_with_usage(article: Article) -> tuple[ClassifiedEvent, int, int]:
+    """(event, input tokens, output tokens): the token counts are what the API reported, used by claude_governor to count spend."""
     client = _get_client()
 
     response = client.messages.parse(
@@ -118,4 +123,5 @@ def classify_article(article: Article) -> ClassifiedEvent:
         article.title,
         event.summary,
     )
-    return event
+    u = getattr(response, "usage", None)
+    return event, int(getattr(u, "input_tokens", 0) or 0), int(getattr(u, "output_tokens", 0) or 0)

@@ -14,7 +14,9 @@ log which one did (classifier_used field) so it's visible in testing/audit.
 
 import logging
 
-from . import classifier_claude, classifier_rules
+from services import hosted
+
+from . import claude_governor, classifier_claude, classifier_rules
 from .models import Article, ClassifiedEvent
 
 logger = logging.getLogger("news_pipeline")
@@ -24,7 +26,7 @@ CLASSIFIER_RULES = "rules"
 
 
 def active_classifier_name() -> str:
-    return CLASSIFIER_CLAUDE if classifier_claude.is_available() else CLASSIFIER_RULES
+    return CLASSIFIER_CLAUDE if classifier_claude.is_available() and hosted.enabled("anthropic") else CLASSIFIER_RULES
 
 
 def classify_article(article: Article) -> tuple[ClassifiedEvent, str]:
@@ -33,5 +35,5 @@ def classify_article(article: Article) -> tuple[ClassifiedEvent, str]:
     (db.py, the alert feed, the historical chart) can record it too."""
     which = active_classifier_name()
     if which == CLASSIFIER_CLAUDE:
-        return classifier_claude.classify_article(article), CLASSIFIER_CLAUDE
+        return claude_governor.classify(article)          # cached per headline, daily and monthly caps, rule-based fallback
     return classifier_rules.classify_article(article), CLASSIFIER_RULES

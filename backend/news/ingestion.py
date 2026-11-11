@@ -69,7 +69,8 @@ def fetch_live_articles() -> list[Article]:
     """Blocking (sync httpx) by design -- callers run this off the event
     loop via asyncio.to_thread (see poller.py) so a slow/stuck request
     doesn't freeze the FastAPI process serving the dashboard."""
-    api_key = os.environ.get("NEWSAPI_API_KEY")
+    from services import hosted
+    api_key = os.environ.get("NEWSAPI_API_KEY") if hosted.enabled("newsapi") else None
     if not api_key:
         logger.info("NEWSAPI_API_KEY not set -- ingestion running in fixture-only mode.")
         return []

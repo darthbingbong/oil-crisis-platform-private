@@ -53,6 +53,9 @@ if KEY_ENV not in price_feed.SECRET_ENV_NAMES:
 
 
 def get_key() -> str:
+    from services import hosted
+    if not hosted.enabled("aisstream"):
+        return ""
     return os.environ.get(KEY_ENV, "").strip()
 
 

@@ -91,6 +91,10 @@ SERVICES: dict[str, Service] = {
 
 
 def enabled() -> bool:
+    """AIS_ENABLED=0 stops every provider call. In hosted mode ShipFinder is also off unless HOSTED_ENABLE_SHIPFINDER=1 (DECISIONS D27)."""
+    from services import hosted
+    if not hosted.enabled("shipfinder"):
+        return False
     return os.environ.get("AIS_ENABLED", "1").strip() not in ("0", "false", "False", "no")
 
 
