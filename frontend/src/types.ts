@@ -566,8 +566,30 @@ export interface HostedConfig {
   sources: Record<string, HostedSource>;
   voyage_distances: "estimated" | "shipfinder";
   vessels: "SIMULATED_ONLY" | "SIMULATED_AND_SAVED_REAL";
+  /** false on the public site: the SIMULATED / AISSTREAM LIVE switch is hidden (there is no AISStream key there) */
+  ais_live_toggle: boolean;
+  /** "pipeline" = the SSE alert stream (local); "route_news" = GDELT headlines from the route-news cache (public site) */
+  news_alerts: "pipeline" | "route_news";
   disclaimer: string;
   privacy: string;
   repo_url: string;
   tradingview_note: string;
+}
+
+/** GET /api/v1/news/headlines: cached GDELT route headlines, newest first (the public site's news feed). */
+export interface HeadlineItem {
+  title: string; source: string; published_at: string | null; url: string; tag: string;
+  route_id: string; route_name: string; feed_status: string; fetched_at: string | null;
+}
+export interface HeadlinesResponse {
+  status: "ok" | "empty" | "warming";
+  items: HeadlineItem[];
+  count: number;
+  routes: { route_id: string; route_name: string; feed_status: string; last_updated: string | null; snapshot: boolean }[];
+  fetched_oldest: string | null;
+  fetched_newest: string | null;
+  classifier: string;
+  source: string;
+  attribution: string;
+  message: string | null;
 }

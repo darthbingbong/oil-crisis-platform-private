@@ -123,8 +123,8 @@ function ClassifierTag({ classifier }: { classifier: ClassifierUsed }) {
 
 function StreamStatusBadge({ status }: { status: StreamStatus }) {
   const color =
-    status === "open" ? "var(--color-crude)" : status === "reconnecting" ? "var(--color-alarm)" : "var(--color-ash)";
-  const text = status === "open" ? "NEWS STREAM CONNECTED" : status === "reconnecting" ? "RECONNECTING" : "CONNECTING";
+    status === "open" ? "var(--color-crude)" : status === "reconnecting" || status === "unavailable" ? "var(--color-alarm)" : "var(--color-ash)";
+  const text = status === "open" ? "NEWS STREAM CONNECTED" : status === "reconnecting" ? "RECONNECTING" : status === "unavailable" ? "NEWS STREAM UNAVAILABLE" : "CONNECTING";
   return (
     <span className="section-label flex items-center gap-1.5" style={{ color }}>
       <span

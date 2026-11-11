@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useHosted } from "../hooks/useHosted";
 import { useAisStreamConfigured, type AisStatus, type StreamPhase } from "../hooks/useVesselStream";
 import type { VesselInfo } from "../lib/vesselSim";
 import { AIS_LIMITS } from "../lib/aisLimits";
@@ -21,6 +22,8 @@ interface ControlsProps {
 export function VesselControls({ mode, setMode, showingAis, phase, status, aisCount }: ControlsProps) {
   const [open, setOpen] = useState(false);
   const streamConfigured = useAisStreamConfigured();
+  const hostedCfg = useHosted();
+  const showToggle = hostedCfg?.ais_live_toggle !== false;      // the public site has no AISStream key: the switch is not offered at all
   const notConfigured = streamConfigured === false;       // the live AISStream feed has no key on this server
   const unavailable = mode === "ais" && !showingAis;
   const note =
@@ -59,7 +62,7 @@ export function VesselControls({ mode, setMode, showingAis, phase, status, aisCo
         >
           i
         </button>
-        <div role="group" aria-label="Vessel source" style={{ display: "flex", border: "1px solid rgba(244,241,234,0.18)", borderRadius: 3, overflow: "hidden" }}>
+        {showToggle && <div role="group" aria-label="Vessel source" style={{ display: "flex", border: "1px solid rgba(244,241,234,0.18)", borderRadius: 3, overflow: "hidden" }}>
           {(["simulated", "ais"] as const).map((m) => (
             <button
               key={m}
@@ -75,15 +78,15 @@ export function VesselControls({ mode, setMode, showingAis, phase, status, aisCo
               {m === "simulated" ? "Simulated" : "AISStream live"}
             </button>
           ))}
-        </div>
+        </div>}
       </div>
 
-      {notConfigured && (
+      {notConfigured && showToggle && (
         <div data-testid="vessel-feed-explain" className="text-xs" style={{ marginTop: 6, color: "var(--color-ash)", background: "rgba(3,3,3,0.8)", padding: "4px 8px", borderRadius: 3 }}>
           Live AISStream feed: not configured (no AISStream key on this server). The real tankers marked SNAPSHOT are saved ShipFinder positions, not this feed.
         </div>
       )}
-      {(note || unavailable) && !notConfigured && (
+      {(note || unavailable) && !notConfigured && showToggle && (
         <div data-testid="vessel-note" className="text-xs" style={{ marginTop: 6, color: "var(--color-crude)", background: "rgba(3,3,3,0.8)", padding: "4px 8px", borderRadius: 3 }}>
           {note}
         </div>

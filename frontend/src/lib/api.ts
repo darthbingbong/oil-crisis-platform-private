@@ -6,6 +6,7 @@
 import type {
   ChokepointRisk,
   HostedConfig,
+  HeadlinesResponse,
   ConflictEvent,
   PriceHistory,
   PriceLive,
@@ -43,6 +44,10 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
     throw new Error(`${init?.method ?? "GET"} ${path} failed: ${res.status} ${body}`);
   }
   return res.json() as Promise<T>;
+}
+
+export function getHeadlines(): Promise<HeadlinesResponse> {
+  return fetchJson<HeadlinesResponse>("/news/headlines");
 }
 
 export function getHosted(): Promise<HostedConfig> {

@@ -1,6 +1,7 @@
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AlertFeed from "../components/AlertFeed";
+import HeadlinesFeed from "../components/HeadlinesFeed";
 import ChokepointPanel from "../components/ChokepointPanel";
 import MarketsPanel, { type ScenarioNumbers } from "../components/MarketsPanel";
 import EarthGlobe from "../components/globe/EarthGlobe";
@@ -11,6 +12,8 @@ import ScenarioPanel from "../components/ScenarioPanel";
 import { mockConflicts } from "../data/mockConflicts";
 import { mockRefineries } from "../data/mockRefineries";
 import { useLiveOrMock, type DataStatus } from "../hooks/useLiveOrMock";
+import { useHeadlines } from "../hooks/useHeadlines";
+import { useHosted } from "../hooks/useHosted";
 import { useNewsStream } from "../hooks/useNewsStream";
 import { useRoutes } from "../hooks/useRoutes";
 import { useWatchlist } from "../hooks/useWatchlist";
@@ -121,7 +124,11 @@ export default function Dashboard() {
     refetchConflicts();
   }, [refetchConflicts]);
 
-  const { status: streamStatus, alerts, lastEventId } = useNewsStream();
+  // Local run: the live alert stream (SSE). Public site: no stream; the feed lists the cached GDELT route headlines instead (GET /api/v1/news/headlines).
+  const hostedCfg = useHosted();
+  const routeNewsOnly = hostedCfg?.news_alerts === "route_news";
+  const { status: streamStatus, alerts, lastEventId } = useNewsStream(hostedCfg?.news_alerts === "pipeline");
+  const headlines = useHeadlines(routeNewsOnly);
 
   // A live price-moving event -> the historical chart should pick up the
   // new row. lastEventId starts null (snapshot doesn't set it) so this
@@ -214,7 +221,7 @@ export default function Dashboard() {
             onSelect={setSelectedChokepoint}
             refineries={refineries}
           />
-          <AlertFeed alerts={alerts} status={streamStatus} />
+          {routeNewsOnly ? <HeadlinesFeed state={headlines} /> : <AlertFeed alerts={alerts} status={streamStatus} />}
         </div>
       </main>
       <SiteFooter />

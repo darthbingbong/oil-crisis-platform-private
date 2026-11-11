@@ -13,6 +13,7 @@ export default function SiteFooter() {
       <div style={{ display: "flex", flexWrap: "wrap", gap: "2px 14px", alignItems: "baseline" }}>
         <span data-testid="footer-disclaimer" style={{ color: "var(--color-bone)" }}>{cfg?.disclaimer ?? FALLBACK_DISCLAIMER}</span>
         {on.length > 0 && <span data-testid="footer-sources">Data: {on.map(([, s]) => s.label).join(" · ")}</span>}
+        {cfg?.vessels === "SIMULATED_AND_SAVED_REAL" && cfg.hosted && cfg.sources.shipfinder_snapshot?.attribution && <span data-testid="footer-vessels">{cfg.sources.shipfinder_snapshot.attribution}</span>}
         {cfg?.vessels === "SIMULATED_ONLY" && <span data-testid="footer-vessels">Vessels on this site are SIMULATED.</span>}
         {cfg?.voyage_distances === "estimated" && <span data-testid="footer-distances">Voyage lengths are estimates.</span>}
         <a href={cfg?.repo_url ?? FALLBACK_REPO} target="_blank" rel="noopener noreferrer" style={{ color: "var(--color-crude)", textDecoration: "underline", display: "inline-block", padding: "5px 0", minHeight: 24 }}>Source code</a>
