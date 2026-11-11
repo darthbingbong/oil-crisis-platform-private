@@ -45,5 +45,5 @@ def estimated_voyages(doc: dict) -> dict:
     meta = out.get("_meta", {})
     if "voyage_distances" in meta:
         meta["voyage_distances"] = {"source": "earlier estimates (great-circle sums over illustrative waypoints)", "speed_knots": SPEED_KNOTS,
-                                    "note": "The public deployment serves the earlier estimated distances; the ShipFinder-derived set is not republished (DECISIONS D29)."}
+                                    "note": "The earlier estimated distances are served (HOSTED_ENABLE_SHIPFINDER_DISTANCES=0); the ShipFinder-derived set is switched off (DECISIONS D29, D38)."}
     return out

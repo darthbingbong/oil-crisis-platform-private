@@ -22,10 +22,10 @@ if _PLANS_FILE.exists():                      # the author's copy: ShipFinder pl
     _PLANS = json.loads(_PLANS_FILE.read_text(encoding="utf-8"))["plans"]
     SUEZ_T = round(_PLANS["ras_tanura_rotterdam_suez"]["distance_nm"] / 336, 1)
     DEFAULT_DETOUR = round((_PLANS["ras_tanura_rotterdam_cape"]["distance_nm"] - _PLANS["ras_tanura_rotterdam_suez"]["distance_nm"]) / 336, 1)
-else:                                         # the public edition: no provider data, the earlier estimates (docs/m10_voyage_before.json)
-    _BEFORE = json.loads((Path(__file__).resolve().parent.parent.parent / "docs" / "m10_voyage_before.json").read_text(encoding="utf-8"))["routes"]
-    SUEZ_T, DEFAULT_DETOUR = _BEFORE["suez"]["baseline_voyage_days"], _BEFORE["suez"]["default_detour_days"]
-assert (SUEZ_T, DEFAULT_DETOUR) == ((19.5, 14.0) if _PLANS_FILE.exists() else (21.2, 12.7))
+else:                                         # the public repository: the raw plans are not in it, the derived numbers are (routes.json, DECISIONS D38)
+    _SUEZ = next(r for r in json.loads((Path(__file__).resolve().parent.parent / "data" / "routes.json").read_text(encoding="utf-8"))["routes"] if r["id"] == "suez")
+    SUEZ_T, DEFAULT_DETOUR = _SUEZ["baseline_voyage_days"], _SUEZ["default_detour_days"]
+assert (SUEZ_T, DEFAULT_DETOUR) == (19.5, 14.0)
 
 # (url path exactly as a client could send it, snapshot file)
 LEGACY_CALLS = [

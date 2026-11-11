@@ -383,7 +383,7 @@ def test_estimated_set_carries_no_provider_wording_except_the_one_disclosure():
     body = json.dumps({**doc, "_meta": {k: v for k, v in doc["_meta"].items() if k != "voyage_distances"}})
     for banned in ("ShipFinder", "elaneglobal", "plan_id", "ais_route_plans", "planned sea distance", "retrieved 2026-11-02"):
         assert banned not in body, banned
-    assert "ShipFinder" in meta_note and "not republished" in meta_note
+    assert "ShipFinder" in meta_note and "switched off" in meta_note
     suez = next(r for r in doc["routes"] if r["id"] == "suez")
     assert "earlier estimates" in suez["default_detour_days_note"] and suez["default_detour_days"] == 12.7
 
