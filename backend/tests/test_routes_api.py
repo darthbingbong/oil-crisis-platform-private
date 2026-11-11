@@ -17,9 +17,14 @@ SNAP = Path(__file__).resolve().parent / "snapshots"
 
 # M10: voyage lengths are ShipFinder planned distances (data/ais_route_plans.json) at 14 kn, not hand-waypoint sums. Expected values are derived from the stored
 # distances, and pinned below so the change from v1.0 (Suez 21.2 -> 19.5 days, default detour 12.7 -> 14.0 days) is on record.
-_PLANS = json.loads((Path(__file__).resolve().parent.parent / "data" / "ais_route_plans.json").read_text(encoding="utf-8"))["plans"]
-SUEZ_T = round(_PLANS["ras_tanura_rotterdam_suez"]["distance_nm"] / 336, 1)
-DEFAULT_DETOUR = round((_PLANS["ras_tanura_rotterdam_cape"]["distance_nm"] - _PLANS["ras_tanura_rotterdam_suez"]["distance_nm"]) / 336, 1)
+_PLANS_FILE = Path(__file__).resolve().parent.parent / "data" / "ais_route_plans.json"
+if _PLANS_FILE.exists():                      # the author's copy: ShipFinder planned distances, recomputed here from the stored plans
+    _PLANS = json.loads(_PLANS_FILE.read_text(encoding="utf-8"))["plans"]
+    SUEZ_T = round(_PLANS["ras_tanura_rotterdam_suez"]["distance_nm"] / 336, 1)
+    DEFAULT_DETOUR = round((_PLANS["ras_tanura_rotterdam_cape"]["distance_nm"] - _PLANS["ras_tanura_rotterdam_suez"]["distance_nm"]) / 336, 1)
+else:                                         # the public edition: no provider data, the earlier estimates (docs/m10_voyage_before.json)
+    _BEFORE = json.loads((Path(__file__).resolve().parent.parent.parent / "docs" / "m10_voyage_before.json").read_text(encoding="utf-8"))["routes"]
+    SUEZ_T, DEFAULT_DETOUR = _BEFORE["suez"]["baseline_voyage_days"], _BEFORE["suez"]["default_detour_days"]
 assert (SUEZ_T, DEFAULT_DETOUR) == (19.5, 14.0)
 
 # (url path exactly as a client could send it, snapshot file)

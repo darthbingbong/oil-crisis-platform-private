@@ -114,7 +114,12 @@ def test_estimated_set_equals_the_v1_numbers(host):
 def test_local_mode_keeps_the_shipfinder_set(monkeypatch):
     monkeypatch.delenv("HOSTED_MODE", raising=False)
     from services.route_data import get_route
-    assert get_route("suez")["baseline_voyage_days"] == 19.5 and get_route("suez")["default_detour_days"] == 14.0
+    raw = next(r for r in json.loads((ROOT / "backend" / "data" / "routes.json").read_text(encoding="utf-8"))["routes"] if r["id"] == "suez")
+    assert get_route("suez")["baseline_voyage_days"] == raw["baseline_voyage_days"] and get_route("suez")["default_detour_days"] == raw["default_detour_days"]    # local mode serves the file as it is
+    if raw["voyage_derivation"].get("provider"):                       # the author's copy
+        assert raw["baseline_voyage_days"] == 19.5 and raw["default_detour_days"] == 14.0
+    else:                                                              # the public edition: the earlier estimates
+        assert raw["baseline_voyage_days"] == 21.2 and raw["default_detour_days"] == 12.7
 
 
 def test_estimated_voyages_does_not_change_its_input():

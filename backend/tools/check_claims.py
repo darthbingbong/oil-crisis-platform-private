@@ -26,7 +26,8 @@ import main  # noqa: E402
 from services import news_feed  # noqa: E402
 from services.config import DEFAULT_CONFIG as CFG  # noqa: E402
 
-DOCS = {name: (ROOT / name).read_text(encoding="utf-8") for name in ("README.md", "DEMO_SCRIPT.md", "LIMITATIONS_AND_FUTURE_WORK.md")}
+# the public edition ships without DEMO_SCRIPT.md (it needs the author's saved tankers): a missing file is an empty text and its claims are skipped
+DOCS = {name: ((ROOT / name).read_text(encoding="utf-8") if (ROOT / name).exists() else "") for name in ("README.md", "DEMO_SCRIPT.md", "LIMITATIONS_AND_FUTURE_WORK.md")}
 # "AIS key expires in N days" depends on the day it is read, so the audit reads the key line as of the day DEMO_SCRIPT says it was generated
 # (a test run may have pinned AIS_TODAY to something else)
 import os  # noqa: E402
@@ -40,6 +41,8 @@ results: list[tuple[bool, str, str, str]] = []
 
 
 def claim(doc: str, expected: str, label: str) -> None:
+    if not DOCS[doc]:
+        return
     ok = expected in DOCS[doc]
     results.append((ok, doc, label, expected))
 

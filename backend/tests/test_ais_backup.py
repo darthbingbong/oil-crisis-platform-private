@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
-import backup_ais_data  # noqa: E402
+backup_ais_data = pytest.importorskip("backup_ais_data")      # the public edition has no AIS tools
 
 
 def _tree(tmp_path: Path, secret_in_file: bool = False):
