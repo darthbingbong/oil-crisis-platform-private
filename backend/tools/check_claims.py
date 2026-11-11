@@ -27,6 +27,14 @@ from services import news_feed  # noqa: E402
 from services.config import DEFAULT_CONFIG as CFG  # noqa: E402
 
 DOCS = {name: (ROOT / name).read_text(encoding="utf-8") for name in ("README.md", "DEMO_SCRIPT.md", "LIMITATIONS_AND_FUTURE_WORK.md")}
+# "AIS key expires in N days" depends on the day it is read, so the audit reads the key line as of the day DEMO_SCRIPT says it was generated
+# (a test run may have pinned AIS_TODAY to something else)
+import os  # noqa: E402
+import re  # noqa: E402
+
+_gen = re.search(r"on (\d{4}-\d{2}-\d{2}) by `backend/tools/make_demo_script.py`", DOCS["DEMO_SCRIPT.md"])
+if _gen:
+    os.environ["AIS_TODAY"] = _gen.group(1)
 client = TestClient(main.app)
 results: list[tuple[bool, str, str, str]] = []
 

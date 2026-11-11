@@ -2,7 +2,7 @@
 
 A terminal-style web app for exploring what a maritime oil disruption would do. Pick a route (a chokepoint such as Suez or Hormuz, or a pipeline) on a 3D globe, blockade it or force a detour, and see the **price impact**, the **barrels displaced**, the **electric vehicles** that would be needed to offset them, the **extra lithium** that implies, and indicative **economy and market effects**. Every number is traceable to a source, a formula or a labelled assumption.
 
-**Version 2.0 release candidate.** `v1.0` is tagged; `v2.0` is tagged only after the final AIS snapshot (planned for 2026-11-08 to 11-10, before the provider key expires on 2026-11-13). It is a student project for presenting to a professor: *credibility beats flash*. Nothing is labelled live that is not, simulated things are labelled simulated, and the places where the evidence is thin are written down (see [What is verified and what is not](#what-is-verified-and-what-is-not) and `LIMITATIONS_AND_FUTURE_WORK.md`).
+**Version 2.0.** `v1.0` and `v2.0` are tagged; `v2.0` was tagged after the final AIS snapshot taken on 2026-11-11 (08:32 UTC), before the provider key expires on 2026-11-13. It is a student project for presenting to a professor: *credibility beats flash*. Nothing is labelled live that is not, simulated things are labelled simulated, and the places where the evidence is thin are written down (see [What is verified and what is not](#what-is-verified-and-what-is-not) and `LIMITATIONS_AND_FUTURE_WORK.md`).
 
 - Walkthrough for presenting: **`DEMO_SCRIPT.md`** (7 minutes, with the arithmetic and a demo-day fallback plan).
 - Known limits: **`LIMITATIONS_AND_FUTURE_WORK.md`**.
@@ -544,7 +544,7 @@ The full list, with what was observed, is in **`LIMITATIONS_AND_FUTURE_WORK.md`*
 
 ### Real tankers on both views (M12)
 
-Twelve **real** tankers from a saved ShipFinder snapshot (eight near Huelva, Spain, seen 2026-11-03 15:58 UTC; four in the Strait of Malacca, seen 16:13 to 16:28 UTC) are drawn in teal on the globe and on the 2D map, always labelled **SNAPSHOT** with their seen-at time. They are two samples, not coverage of any area; chokepoint traffic stays **SIMULATED**.
+Twelve **real** tankers from a saved ShipFinder snapshot (first found on 2026-11-03: eight near Huelva, Spain and four in the Strait of Malacca; all twelve positions refreshed one by one in the final snapshot on 2026-11-11 08:32 UTC, so they have since sailed on) are drawn in teal on the globe and on the 2D map, always labelled **SNAPSHOT** with their seen-at time. They are two samples of where tankers were first found, not coverage of any area; chokepoint traffic stays **SIMULATED**.
 
 - **One vessel panel on both views:** name, MMSI, IMO, flag, type, length, speed, course, destination, draught, AIS status, position, how the position was confirmed, the SNAPSHOT badge with its time, and "cargo type not confirmed by AIS". The selected vessel is in the address (`vessel=<MMSI>`), so switching Globe/Map, reloading or sharing the link keeps it.
 - **Saved past track:** drawn on the surface of the globe and on the map, labelled "past track, fetched at <time>", or "no saved track". MUHUT SILVER is the headline track (it sailed 846 nm in the week, 659 nm start to end); CAPE ANN is kept and labelled "stationary during this window".

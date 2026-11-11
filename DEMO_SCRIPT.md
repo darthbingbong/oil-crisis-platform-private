@@ -1,6 +1,6 @@
 # Demo script: 7 minutes for a professor
 
-> **Generated, not typed.** Every number below was produced by the running API on 2026-11-04 by `backend/tools/make_demo_script.py` (it calls `/api/v1/simulate/report`, `/api/v1/price/live`, `/api/v1/vessels/watchlist` and the saved track endpoint, and reads `backend/services/config.py`). Re-run it if you change anything: `cd backend ; python tools\make_demo_script.py`. Two things change on their own: the ticker figures (daily) and the AIS key line (it counts down to the expiry); say the dates aloud on the day. The TradingView rows are not in this script because this app never sees those prices.
+> **Generated, not typed.** Every number below was produced by the running API on 2026-11-11 by `backend/tools/make_demo_script.py` (it calls `/api/v1/simulate/report`, `/api/v1/price/live`, `/api/v1/vessels/watchlist` and the saved track endpoint, and reads `backend/services/config.py`). Re-run it if you change anything: `cd backend ; python tools\make_demo_script.py`. Two things change on their own: the ticker figures (daily) and the AIS key line (it counts down to the expiry); say the dates aloud on the day. The TradingView rows are not in this script because this app never sees those prices.
 
 **The one-sentence pitch.** "You pick a route on a map or a globe, blockade it or force a detour, and the app gives the 30-day price impact from a formula I can do by hand, then how many electric cars and how much lithium it would take to replace the lost oil, with every assumption on the page."
 
@@ -15,7 +15,7 @@
 
 ### 0:00 to 0:45. The dashboard and what is real on it
 
-- **Say:** "Top bar: WTI and Brent from the EIA API. The badge says DAILY_CLOSE. WTI 103.37 and Brent 123.10 dollars a barrel, as of 2026-10-27, 8 days old (figures at the time this script was generated). It is a daily close published weekly, so I never call it live."
+- **Say:** "Top bar: WTI and Brent from the EIA API. The badge says DAILY_CLOSE. WTI 99.64 and Brent 107.03 dollars a barrel, as of 2026-11-03, 8 days old (figures at the time this script was generated). It is a daily close published weekly, so I never call it live."
 - **Point at** the amber **SIMULATED VESSELS** badge and the **WTI BASELINE** price in the header: "Those tankers are not real ships; the badge says so. The baseline is the same EIA close as the ticker, with its date: it is the starting price of the WTI scenario card, and hovering shows its source."
 - **Point at** the **Markets** panel (right column, scroll down) but do not dwell yet: "I come back to this."
 
@@ -29,14 +29,14 @@
 ### 1:45 to 2:45. One real vessel, with its saved track
 
 - **Do:** type **muhut** in the search box (it searches the saved vessels only; the provider is asked only if you press the button) and open **MUHUT SILVER**.
-- **Point at** the badge: "SNAPSHOT 2026-11-03 15:58 UTC · 12 REAL TANKERS. It is a snapshot, not live: AIS key expires in 9 days (2026-11-13). After that date the app says so and makes no AIS calls." Point at the vessel panel: name, MMSI, flag, type, speed, course, destination, draught, "last seen", and **"cargo type not confirmed by AIS"**.
+- **Point at** the badge: "SNAPSHOT 2026-11-11 08:32 UTC · 12 REAL TANKERS. It is a snapshot, not live: AIS key expires in 2 days (2026-11-13). After that date the app says so and makes no AIS calls." Point at the vessel panel: name, MMSI, flag, type, speed, course, destination, draught, "last seen", and **"cargo type not confirmed by AIS"**.
 - **Point at** the teal line: "past track, fetched at 2026-11-03 16:11 UTC", **HEADLINE TRACK**, 846.5 nm sailed, 658.9 nm start to end. "It shows where one ship was last week. It does not say what it carries."
 - **Say:** "The twelve real tankers are two samples, near Huelva and in the Strait of Malacca. I could not place a tanker at Hormuz. The 'vessels near this vessel' list is a saved 10-nautical-mile sample around one ship, not traffic at a chokepoint, and chokepoint traffic stays simulated and labelled." Switch **GLOBE** and **MAP**: same panel, same track.
 
 ### 2:45 to 3:30. The Markets panel
 
 - **Do:** open **Commodities**. **Say:** "WTI and Brent are my own cards from the EIA feed: `DAILY_CLOSE`, with the date and its age. Everything else here, indices, gold, silver, natural gas, copper and FX, is TradingView's free widget, and the chip says so: *Via TradingView widget, delay set by TradingView*. I never see those prices, so I cannot put a time on them, and I never call them live." Hover the **?** to read TradingView's own delay wording.
-- **Do:** tick **Show the 30-day scenario on the WTI card**. "Only the WTI card has a scenario number: the last EIA close times the same 30-day formula. With the dashboard's default 5% supply loss that is **$137.82** (+33.3%), range $124.29 to $151.35, badge `VALIDATED 30 DAYS`." Drag the supply-loss slider past 8%: "the badge flips to `OUTSIDE VALIDATED RANGE` and the range disappears."
+- **Do:** tick **Show the 30-day scenario on the WTI card**. "Only the WTI card has a scenario number: the last EIA close times the same 30-day formula. With the dashboard's default 5% supply loss that is **$132.85** (+33.3%), range $119.81 to $145.89, badge `VALIDATED 30 DAYS`." Drag the supply-loss slider past 8%: "the badge flips to `OUTSIDE VALIDATED RANGE` and the range disappears."
 - **Say if asked:** rows marked CFD are broker quotes that track the index closely, not the official level; Nasdaq Composite, Nifty and lithium prices are not shown because no free source gave them. There are no cross-asset estimates anywhere in this app.
 
 ### 3:30 to 4:30. The worked example: a 20-day Suez detour
@@ -96,7 +96,7 @@
 
 **"What happens at extreme shocks?"** The formula is linear, validated to 8% supply loss. A Hormuz blockade is 15.5% and the linear answer is +103%. Real prices would likely behave non-linearly (demand destruction, reserve releases, rerouting), so the app flags it as outside the validated range and does not cap it; capping would be invented precision in the other direction.
 
-**"Is that vessel data real?"** The twelve tankers in the 'real' layer are **real positions saved from the provider on 2026-11-03**, labelled SNAPSHOT with their time, never live, and never counted as traffic. The traffic on the lanes is **simulated** and carries a permanent badge. The provider's key expires on 2026-11-13; afterwards the app makes no AIS call and says "AIS key expired, showing data saved on <date>". An older adapter for the AISStream feed was written to its documentation and never run live. AIS limits: coverage gaps away from coasts, vessels that turn their transponder off (especially around the Gulf), destination fields typed in by the crew, tiny provider quotas (the console did not count the unmetered calls, so our own call log is the record), and no cargo information at all.
+**"Is that vessel data real?"** The twelve tankers in the 'real' layer are **real positions saved from the provider on 2026-11-11**, labelled SNAPSHOT with their time, never live, and never counted as traffic. The traffic on the lanes is **simulated** and carries a permanent badge. The provider's key expires on 2026-11-13; afterwards the app makes no AIS call and says "AIS key expired, showing data saved on <date>". An older adapter for the AISStream feed was written to its documentation and never run live. AIS limits: coverage gaps away from coasts, vessels that turn their transponder off (especially around the Gulf), destination fields typed in by the crew, tiny provider quotas (the console did not count the unmetered calls, so our own call log is the record), and no cargo information at all.
 
 **"Why are some market rows marked CFD, and where is the Nasdaq Composite?"** Those rows are broker quotes (FOREXCOM, OANDA, CAPITALCOM) delivered by TradingView's free widget; they track the index or commodity closely but are not the official level. TradingView's free widget returned no data for the Nasdaq Composite and the Nifty 50, so they are not shown (the Nasdaq 100 and the Sensex stand in), and lithium has no free price source. I do not make any estimate for indices, commodities or FX.
 
@@ -114,7 +114,7 @@
 
 | What fails | What you will see | What to do |
 |---|---|---|
-| **The AIS key has expired** (from 2026-11-13) | A red banner "AIS key expired, showing data saved on 2026-11-03"; every real vessel is a saved position; no AIS call is made | This is the designed state, not an error. Say it plainly and present the saved vessels and the saved track |
+| **The AIS key has expired** (from 2026-11-13) | A red banner "AIS key expired, showing data saved on 2026-11-11"; every real vessel is a saved position; no AIS call is made | This is the designed state, not an error. Say it plainly and present the saved vessels and the saved track |
 | **The AIS quota is used up, or the provider is down or refuses a call** | The provider search says so in plain words ("no match", "limit", or a pause with its reason); the saved vessels, tracks and samples keep working | Do not press the provider search button again. Present from the saved data |
 | **AIS key absent or `AIS_ENABLED=0`** | The real-tanker layer shows the saved snapshot or, with no snapshot, only the `SIMULATED VESSELS` badge | Expected; you were never relying on it |
 | **GDELT is down or slow** | Route news says STALE, DEMO SNAPSHOT, or "unavailable" (only 4 of 14 routes have a snapshot: Hormuz, Bab el-Mandeb, Suez, East-West) | Say what the badge means and move on: news is context, not part of any number. Click Hormuz, Bab el-Mandeb or Suez for the best chance of headlines. Run `prewarm_news.py --snapshot` beforehand to refresh |

@@ -15,12 +15,12 @@ watchlist  Takes up to 8 tankers the provider itself typed as tankers from the l
            (unmetered), then writes backend/data/ais_raw/snapshots/watchlist.json and backs up.
 
 final-snapshot  Refreshes every watchlist vessel (12) with ONE Vessel Position call each (hard limit 23 for the key, DECISIONS D20; stops at the first error), keeps
-           flags and labels, never calls Vessels Nearby (hold stays), writes watchlist.json and backs up. Refuses outside 2026-11-08 to 2026-11-10 (UTC).
+           flags and labels, never calls Vessels Nearby (hold stays), writes watchlist.json and backs up. Refuses outside 2026-11-11 to 2026-11-12 (UTC; window moved by the owner on 2026-11-11, DECISIONS D20).
 
 manifest   No provider call. Lists everything captured so far (samples, positions, flags, route plans, port lookups, search lists, tracks) with counts and the
            latest capture time, in backend/data/ais_raw/snapshots/manifest.json, and backs up. This is the "first full snapshot" record.
 
-Raw provider data stays in git-ignored folders. The key expires on 2026-11-13; the final snapshot is due by 2026-11-10.
+Raw provider data stays in git-ignored folders. The key expires on 2026-11-13; the final snapshot is due by 2026-11-12.
 """
 
 import argparse
@@ -53,7 +53,7 @@ def backup() -> None:
 
 
 def status(client: sf.ShipFinderClient) -> None:
-    print(f"key expires in {sf.days_until_expiry()} days (2026-11-13); final snapshot due 2026-11-10")
+    print(f"key expires in {sf.days_until_expiry()} days (2026-11-13); final snapshot due 2026-11-12")
     for name, b in client.budget().items():
         if b["used"] or b["hold"] or b["breaker"] == "open":
             print(f"  {name:16} used {b['used']:>3} of {b['quota'] if b['quota'] else 'unmetered'}  left {b['left']}  breaker {b['breaker']}  hold {'YES' if b['hold'] else 'no'}")
@@ -187,7 +187,7 @@ def main() -> int:
             files = sorted(wl.RAW_DIR.glob(pattern))
             parts[name] = {"files": len(files), "latest_modified_utc": wl.utc_iso(max(f.stat().st_mtime for f in files)) if files else None}
         watch = wl.load_watchlist()
-        manifest = {"kind": "SNAPSHOT MANIFEST", "written_utc": wl.utc_iso(time.time()), "key_expires": "2026-11-13", "final_snapshot_due": "2026-11-10", "parts": parts,
+        manifest = {"kind": "SNAPSHOT MANIFEST", "written_utc": wl.utc_iso(time.time()), "key_expires": "2026-11-13", "final_snapshot_due": "2026-11-12", "parts": parts,
                     "watchlist": {"vessels": len(watch["watchlist"]), "captured_utc": watch["captured_at_utc"], "sample_label": watch["sample"]["label"]} if watch else None,
                     "provider_calls": client.budget(),
                     "not_captured": ["vessel tracks (fetched on demand from the vessel panel, M12; 10 calls, 4 kept in reserve)", "any chokepoint or area coverage (this key cannot provide it)"]}

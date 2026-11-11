@@ -312,8 +312,8 @@ def test_nearby_calls_are_spaced_by_thirty_minutes():
 def test_final_snapshot_window_is_nov_8_to_10_utc():
     from datetime import datetime, timezone
     ts = lambda d: datetime.fromisoformat(d).replace(tzinfo=timezone.utc).timestamp()
-    assert not wl.in_final_snapshot_window(ts("2026-11-07T23:59:59")) and wl.in_final_snapshot_window(ts("2026-11-08T00:00:00"))
-    assert wl.in_final_snapshot_window(ts("2026-11-10T23:59:59")) and not wl.in_final_snapshot_window(ts("2026-11-11T00:00:00"))
+    assert not wl.in_final_snapshot_window(ts("2026-11-10T23:59:59")) and wl.in_final_snapshot_window(ts("2026-11-11T00:00:00"))
+    assert wl.in_final_snapshot_window(ts("2026-11-12T23:59:59")) and not wl.in_final_snapshot_window(ts("2026-11-13T00:00:00"))
 
 
 def test_refresh_keeps_labels_updates_positions_and_leaves_failed_vessels_alone():

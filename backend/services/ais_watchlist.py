@@ -351,7 +351,7 @@ def build_snapshot(sample_body: dict, seed_mmsi: int, sample_fetched_at: float, 
     }
 
 
-FINAL_SNAPSHOT_WINDOW = ("2026-11-08", "2026-11-10")      # owner decision (D12/D20): the key expires on 2026-11-13
+FINAL_SNAPSHOT_WINDOW = ("2026-11-11", "2026-11-12")      # owner decision (D12/D20, moved 2026-11-11): the key expires on 2026-11-13
 
 
 def in_final_snapshot_window(now: float) -> bool:

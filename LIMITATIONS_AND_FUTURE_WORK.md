@@ -1,6 +1,6 @@
 # Limitations and future work
 
-Final state at **v2.0 release candidate** (written 4 Nov 2026; `v2.0` is tagged after the final AIS snapshot, planned for 2026-11-08 to 11-10). Everything here was observed or measured in this project, not assumed. Items marked **(to do)** are not built yet.
+Final state at **v2.0** (written 4 Nov 2026, updated 11 Nov 2026 after the final AIS snapshot of 2026-11-11). Everything here was observed or measured in this project, not assumed. Items marked **(to do)** are not built yet.
 
 ## 0. What is verified and what is not (one table)
 
@@ -115,12 +115,12 @@ The literal readings are impossible (Argentina or Chile alone would exceed the w
 
 - **Dragging the map was slow on software rendering (fixed in M15, see below).** With every layer on, the map held about 71 fps (zoom 2) and 97 fps (zoom 5.5) while vessels move, but dragging it ran at about 6.5 fps with a worst frame near 0.7 s (`docs/m11_screenshots/map_fps.txt`). Every camera move redraws the country outlines; the static outlines sit on their own canvas so that moving vessels never redraw them, and the coarsest outline level is used while the camera moves. This was measured in Chromium with software WebGL (SwiftShader), which is a lower bound; a real GPU was not measured (still on the to-do list above).
 - **Country outlines are simplified** at three zoom levels (Douglas-Peucker, tolerances 0.2, 0.05 and 0.01 degrees) from the bundled Natural Earth 1:50m file. At the highest zoom the coastline is the 1:50m shape, not a survey.
-- **The real-tanker groups are two samples, not coverage**: eight tankers near Huelva (seen 2026-11-03 15:58 UTC) and four in the Strait of Malacca (seen 16:13 to 16:28 UTC). Three of the four Malacca positions come from the Vessels Nearby sample, not from Vessel Position. No tanker was found near Hormuz or Fujairah.
+- **The real-tanker groups are two samples, not coverage**: eight tankers first found near Huelva and four in the Strait of Malacca on 2026-11-03; all twelve positions were refreshed with one Vessel Position call each on 2026-11-11 (08:32 UTC), so they are no longer near those places. The samples show where they were first found, not where tankers are. No tanker was found near Hormuz or Fujairah.
 - **M15 drag fix.** The cost was the second canvas that draws the country outlines: every pointer move redrew it (about 140 ms a frame on software rendering). It now keeps its picture while the camera moves and is moved by a CSS transform (derived from the camera and checked against deck.gl's own projection to 0.01 px), then redrawn once when the interaction ends. Measured on the same setup: **about 27 to 45 fps while dragging** (zoom 2 and 5.5) against 6.3 to 7.4 before; the outlines are drawn 4 times per drag, all after release. **Trade-off:** during a drag a dark strip shows where new area is exposed, and the outlines snap into place on release (about 0.4 to 0.9 s of one slow frame on software rendering).
 
 ## 12. Real vessels (M12): limits
 
-- **Saved, not live.** Every real tanker is a snapshot taken on 2026-11-03; the key expires on 2026-11-13 and the app then makes no AIS call. The final refresh of all 12 positions is planned for 2026-11-08 to 11-10 (`prewarm_ais.py final-snapshot`).
+- **Saved, not live.** Every real tanker is a snapshot taken on 2026-11-11 (the final refresh, `prewarm_ais.py final-snapshot`; the three saved tracks and two Nearby samples are from 2026-11-03); the key expires on 2026-11-13 and the app then makes no AIS call.
 - **Provider search returns no position or ship type**, so a provider hit that is not already in the watchlist cannot be shown on a map.
 - **Tracks:** three saved 7-day tracks only (OIZMENDI, MUHUT SILVER, CAPE ANN). No Malacca tanker has one: all four were stopped, so no load was spent on them.
 - **The "vessels near this vessel" lists are two saved 10 nm samples** around FRONT ALTAIR (Huelva) and SINGAPORE ENERGY (Malacca). Nothing here counts vessels at a chokepoint; ports and a scenario-exposure count were not built (DECISIONS D1, D2, D24).
