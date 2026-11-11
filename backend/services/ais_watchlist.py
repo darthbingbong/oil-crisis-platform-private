@@ -311,13 +311,29 @@ def save_tracks(records: list[dict], path: Path = TRACKS_FILE) -> Path:
 
 
 def _shipfinder_shown() -> bool:
+    """Saved ShipFinder data may be shown: always locally; on the public site only while HOSTED_ENABLE_SHIPFINDER_SNAPSHOT allows it (D38).
+    This is about DISPLAY. Provider CALLS stay off in hosted mode (shipfinder.enabled)."""
     from services import hosted
-    return hosted.enabled("shipfinder")
+    return hosted.enabled("shipfinder_snapshot")
+
+
+DISPLAY_DIR = BACKEND / "data" / "ais_display"           # derived display files (tools/make_display_snapshot.py): committed; the raw folder is not
+
+
+def watchlist_file() -> Path:
+    """Hosted: the derived display snapshot. Local: the raw saved snapshot (read at call time, so tests can point WATCHLIST_FILE elsewhere)."""
+    from services import hosted
+    return DISPLAY_DIR / "watchlist.json" if hosted.hosted_mode() else WATCHLIST_FILE
+
+
+def tracks_file() -> Path:
+    from services import hosted
+    return DISPLAY_DIR / "tracks.json" if hosted.hosted_mode() else TRACKS_FILE
 
 
 def load_track(mmsi: int, path: Path = TRACKS_FILE) -> dict | None:
     """The saved track for a vessel, or None. Never raises: after the key expires the panel shows this record with its date.
-    Hosted mode with ShipFinder off: None (saved provider data is not shown publicly, D27)."""
+    Hosted mode with the snapshot switched off: None (D27, D38)."""
     if not _shipfinder_shown():
         return None
     try:

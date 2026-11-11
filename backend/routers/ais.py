@@ -40,7 +40,10 @@ def key_info(saved_utc: str | None = None) -> dict:
     days = sf.days_until_expiry()
     expired = sf.key_expired()
     saved_day = (saved_utc or "")[:10] or None
-    if expired:
+    from services import hosted
+    if hosted.hosted_mode() and saved_day and not expired:
+        line = f"Showing data saved on {saved_day}. This site makes no live ShipFinder calls."
+    elif expired:
         line = f"AIS key expired, showing data saved on {saved_day}" if saved_day else "AIS key expired, showing saved data"
     else:
         line = f"AIS key expires in {days} day{'s' if days != 1 else ''} ({sf.KEY_EXPIRES.isoformat()})"
@@ -86,7 +89,7 @@ def ais_budget() -> dict:
 
 # ---------------------------------------------------------------------------------------------------- search
 def _saved() -> list[dict]:
-    snap = wl.load_watchlist(wl.WATCHLIST_FILE)
+    snap = wl.load_watchlist(wl.watchlist_file())
     if not snap or not isinstance(snap.get("watchlist"), list):
         return []
     now = time.time()
@@ -154,11 +157,11 @@ def track_view(t: dict, headline_mmsi: int | None) -> dict:
 
 @router.get("/vessels/{mmsi}/track")
 def vessel_track(mmsi: int) -> dict:
-    t = wl.load_track(mmsi, wl.TRACKS_FILE)
+    t = wl.load_track(mmsi, wl.tracks_file())
     if not t:
         return {"status": "NONE", "mmsi": mmsi, "label": "no saved track", "points": [], "key": key_info()}
     try:
-        all_tracks = json.loads(wl.TRACKS_FILE.read_text(encoding="utf-8")).get("tracks", [])
+        all_tracks = json.loads(wl.tracks_file().read_text(encoding="utf-8")).get("tracks", [])
         best = max(all_tracks, key=lambda x: x.get("start_to_end_nm") or 0, default=None)
         headline = best["mmsi"] if best and (best.get("start_to_end_nm") or 0) >= 1.0 else None      # the headline is the one that really travelled
     except (OSError, ValueError, KeyError):
@@ -176,7 +179,7 @@ def _nm(a: tuple[float, float], b: tuple[float, float]) -> float:
 
 @router.get("/vessels/{mmsi}/near")
 def vessels_near(mmsi: int) -> dict:
-    snap = wl.load_watchlist(wl.WATCHLIST_FILE)
+    snap = wl.load_watchlist(wl.watchlist_file())
     hold = "Live Vessels Nearby is on hold. Only the saved samples below can be shown."
     if not snap:
         return {"status": "NONE", "mmsi": mmsi, "message": "No saved Nearby sample on this machine.", "note": hold, "vessels": []}

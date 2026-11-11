@@ -1,0 +1,1315 @@
+{
+ "kind": "DISPLAY SNAPSHOT",
+ "provider": "ShipFinder",
+ "captured_at_utc": "2026-11-11T08:32:47Z",
+ "watchlist_label": "A sample of real tankers near Huelva, Spain, and a few in the Strait of Malacca, each group seen at the time shown on it. Not chokepoint traffic and not coverage of any area.",
+ "note": "Derived from the saved 2026-11-11 snapshot: only the fields the interface shows. No raw provider response, no request log, no key.",
+ "watchlist": [
+  {
+   "mmsi": 319014800,
+   "imo": 9553048,
+   "name": "ORIENTAL ACACIA",
+   "ship_type": 89,
+   "length_m": 124,
+   "draught_m": 5.8,
+   "destination": "ROTTERDAM, NL",
+   "nav_status": "underway",
+   "sog_kn": 14.2,
+   "cog_deg": 71.1,
+   "heading_deg": 65.0,
+   "lat": 50.141942,
+   "lng": -0.949868,
+   "last_seen_utc": "2026-11-11T08:32:12Z",
+   "position_age_s": 36,
+   "flag_registry": "Cayman Islands",
+   "flag_from_mmsi_prefix": null,
+   "typed_as_tanker_by": "provider (ship type 89)",
+   "area": "Huelva, Spain (Gulf of Cadiz)",
+   "position_confirmed_by": "Vessel Position",
+   "record_fetched_utc": "2026-11-11T08:32:47Z"
+  },
+  {
+   "mmsi": 563202900,
+   "imo": 9390680,
+   "name": "CAPE ANN",
+   "ship_type": 83,
+   "length_m": 283,
+   "draught_m": 9.1,
+   "destination": "FOR ORDERS",
+   "nav_status": "at anchor",
+   "sog_kn": 0.7,
+   "cog_deg": 107.0,
+   "heading_deg": 172.0,
+   "lat": 36.94515,
+   "lng": -7.000322,
+   "last_seen_utc": "2026-11-11T08:31:24Z",
+   "position_age_s": 84,
+   "flag_registry": "Singapore",
+   "flag_from_mmsi_prefix": "Singapore",
+   "typed_as_tanker_by": "provider (ship type 83)",
+   "area": "Huelva, Spain (Gulf of Cadiz)",
+   "position_confirmed_by": "Vessel Position",
+   "record_fetched_utc": "2026-11-11T08:32:47Z"
+  },
+  {
+   "mmsi": 538006502,
+   "imo": 9718789,
+   "name": "MUHUT SILVER",
+   "ship_type": 80,
+   "length_m": 183,
+   "draught_m": 11.0,
+   "destination": "NEW YORK & NEW JERSEY, US",
+   "nav_status": "underway",
+   "sog_kn": 11.8,
+   "cog_deg": 275.3,
+   "heading_deg": 275.0,
+   "lat": 34.436965,
+   "lng": -26.836298,
+   "last_seen_utc": "2026-11-11T08:31:16Z",
+   "position_age_s": 92,
+   "flag_registry": "Marshall Islands",
+   "flag_from_mmsi_prefix": "Marshall Islands",
+   "typed_as_tanker_by": "provider (ship type 80)",
+   "area": "Huelva, Spain (Gulf of Cadiz)",
+   "position_confirmed_by": "Vessel Position",
+   "record_fetched_utc": "2026-11-11T08:32:47Z"
+  },
+  {
+   "mmsi": 371809000,
+   "imo": 9865520,
+   "name": "EVA TOKYO",
+   "ship_type": 82,
+   "length_m": 146,
+   "draught_m": 8.5,
+   "destination": "ROTTERDAM, NL",
+   "nav_status": "moored",
+   "sog_kn": 0.0,
+   "cog_deg": 30.1,
+   "heading_deg": 89.0,
+   "lat": 51.901043,
+   "lng": 4.361393,
+   "last_seen_utc": "2026-11-11T08:30:01Z",
+   "position_age_s": 167,
+   "flag_registry": "Panama",
+   "flag_from_mmsi_prefix": "Panama",
+   "typed_as_tanker_by": "provider (ship type 82)",
+   "area": "Huelva, Spain (Gulf of Cadiz)",
+   "position_confirmed_by": "Vessel Position",
+   "record_fetched_utc": "2026-11-11T08:32:47Z"
+  },
+  {
+   "mmsi": 224543980,
+   "imo": 9494981,
+   "name": "OIZMENDI",
+   "ship_type": 80,
+   "length_m": 80,
+   "draught_m": 3.4,
+   "destination": "HUELVA, ES",
+   "nav_status": "moored",
+   "sog_kn": 0.0,
+   "cog_deg": 62.6,
+   "heading_deg": 124.0,
+   "lat": 37.153227,
+   "lng": -6.884042,
+   "last_seen_utc": "2026-11-11T08:26:53Z",
+   "position_age_s": 355,
+   "flag_registry": "Spain",
+   "flag_from_mmsi_prefix": null,
+   "typed_as_tanker_by": "provider (ship type 80)",
+   "area": "Huelva, Spain (Gulf of Cadiz)",
+   "position_confirmed_by": "Vessel Position",
+   "record_fetched_utc": "2026-11-11T08:32:47Z"
+  },
+  {
+   "mmsi": 255806512,
+   "imo": 9420710,
+   "name": "BOCHEM OSLO",
+   "ship_type": 80,
+   "length_m": 170,
+   "draught_m": 6.0,
+   "destination": "ALGECIRAS, ES",
+   "nav_status": "moored",
+   "sog_kn": 0.0,
+   "cog_deg": 316.0,
+   "heading_deg": 127.0,
+   "lat": 37.163388,
+   "lng": -6.902963,
+   "last_seen_utc": "2026-11-11T08:30:32Z",
+   "position_age_s": 136,
+   "flag_registry": "Madeira Islands, Portugal",
+   "flag_from_mmsi_prefix": null,
+   "typed_as_tanker_by": "provider (ship type 80)",
+   "area": "Huelva, Spain (Gulf of Cadiz)",
+   "position_confirmed_by": "Vessel Position",
+   "record_fetched_utc": "2026-11-11T08:32:47Z"
+  },
+  {
+   "mmsi": 219148000,
+   "imo": 9478303,
+   "name": "ALICE THERESA",
+   "ship_type": 80,
+   "length_m": 102,
+   "draught_m": 7.8,
+   "destination": "BROFJORDEN, SE",
+   "nav_status": "moored",
+   "sog_kn": 0.0,
+   "cog_deg": 146.3,
+   "heading_deg": 298.0,
+   "lat": 58.354673,
+   "lng": 11.432582,
+   "last_seen_utc": "2026-11-11T08:31:45Z",
+   "position_age_s": 63,
+   "flag_registry": "Denmark",
+   "flag_from_mmsi_prefix": "Denmark",
+   "typed_as_tanker_by": "provider (ship type 80)",
+   "area": "Huelva, Spain (Gulf of Cadiz)",
+   "position_confirmed_by": "Vessel Position",
+   "record_fetched_utc": "2026-11-11T08:32:47Z"
+  },
+  {
+   "mmsi": 215552000,
+   "imo": 9458195,
+   "name": "HACI FATMA ANA",
+   "ship_type": 83,
+   "length_m": 123,
+   "draught_m": 5.3,
+   "destination": "ESCAS>FRLAV",
+   "nav_status": "underway",
+   "sog_kn": 8.5,
+   "cog_deg": 47.7,
+   "heading_deg": 49.0,
+   "lat": 41.352305,
+   "lng": 3.826392,
+   "last_seen_utc": "2026-11-11T08:32:22Z",
+   "position_age_s": 26,
+   "flag_registry": "Malta",
+   "flag_from_mmsi_prefix": "Malta",
+   "typed_as_tanker_by": "provider (ship type 83)",
+   "area": "Huelva, Spain (Gulf of Cadiz)",
+   "position_confirmed_by": "Vessel Position",
+   "record_fetched_utc": "2026-11-11T08:32:47Z"
+  },
+  {
+   "mmsi": 538007985,
+   "imo": 9238040,
+   "name": "SINGAPORE ENERGY",
+   "ship_type": 80,
+   "length_m": 278,
+   "draught_m": 7.0,
+   "destination": "KUALA LINGGI,MY",
+   "nav_status": "at anchor",
+   "sog_kn": 0.1,
+   "cog_deg": 0.0,
+   "heading_deg": null,
+   "lat": 2.338558,
+   "lng": 101.956148,
+   "last_seen_utc": "2026-11-10T19:30:19Z",
+   "position_age_s": 46949,
+   "flag_registry": null,
+   "flag_from_mmsi_prefix": "Marshall Islands",
+   "typed_as_tanker_by": "provider (ship type 80)",
+   "area": "Strait of Malacca",
+   "position_confirmed_by": "Vessel Position",
+   "record_fetched_utc": "2026-11-11T08:32:47Z"
+  },
+  {
+   "mmsi": 461000259,
+   "imo": 9337731,
+   "name": "TEMBEK",
+   "ship_type": 80,
+   "length_m": 315,
+   "draught_m": 9.6,
+   "destination": "AWAITING ORDERS",
+   "nav_status": "underway",
+   "sog_kn": 16.0,
+   "cog_deg": 284.0,
+   "heading_deg": 299.0,
+   "lat": 5.83,
+   "lng": 96.875,
+   "last_seen_utc": "2026-11-11T08:29:55Z",
+   "position_age_s": 173,
+   "flag_registry": null,
+   "flag_from_mmsi_prefix": "Oman",
+   "typed_as_tanker_by": "provider (ship type 80)",
+   "area": "Strait of Malacca",
+   "position_confirmed_by": "Vessel Position",
+   "record_fetched_utc": "2026-11-11T08:32:47Z"
+  },
+  {
+   "mmsi": 538003346,
+   "imo": 9431214,
+   "name": "ZARGA",
+   "ship_type": 84,
+   "length_m": 345,
+   "draught_m": 9.5,
+   "destination": "LINGGI, MALAYSIA",
+   "nav_status": "at anchor",
+   "sog_kn": 0.0,
+   "cog_deg": 47.9,
+   "heading_deg": 142.0,
+   "lat": 2.319257,
+   "lng": 101.97515,
+   "last_seen_utc": "2026-11-11T08:32:22Z",
+   "position_age_s": 26,
+   "flag_registry": null,
+   "flag_from_mmsi_prefix": "Marshall Islands",
+   "typed_as_tanker_by": "provider (ship type 84)",
+   "area": "Strait of Malacca",
+   "position_confirmed_by": "Vessel Position",
+   "record_fetched_utc": "2026-11-11T08:32:47Z"
+  },
+  {
+   "mmsi": 210060000,
+   "imo": 9236614,
+   "name": "ETYFA PROMETHEAS",
+   "ship_type": 89,
+   "length_m": 290,
+   "draught_m": 10.0,
+   "destination": "TBC",
+   "nav_status": "at anchor",
+   "sog_kn": 0.0,
+   "cog_deg": 246.8,
+   "heading_deg": 157.0,
+   "lat": 2.329845,
+   "lng": 102.024662,
+   "last_seen_utc": "2026-11-11T08:30:36Z",
+   "position_age_s": 132,
+   "flag_registry": null,
+   "flag_from_mmsi_prefix": "Cyprus",
+   "typed_as_tanker_by": "provider (ship type 89)",
+   "area": "Strait of Malacca",
+   "position_confirmed_by": "Vessel Position",
+   "record_fetched_utc": "2026-11-11T08:32:47Z"
+  }
+ ],
+ "sample": {
+  "label": "vessels within 10 nm of FRONT ALTAIR, seen at 15:58 UTC",
+  "fetched_utc": "2026-11-03T15:58:08Z",
+  "radius_nm": 10,
+  "provider_total": 65,
+  "returned": 65,
+  "caveat": "A sample around one vessel, NOT coverage of a chokepoint or any area. Vessels seen by the provider within this circle only; coverage gaps and vessels with AIS off are not included; the provider documents no cap on the number returned, so the count is not shown as a total.",
+  "seed": {
+   "mmsi": 538007007,
+   "name": "FRONT ALTAIR"
+  },
+  "vessels": [
+   {
+    "mmsi": 563202900,
+    "name": "CAPE ANN",
+    "ship_type": 83,
+    "nav_status": "at anchor",
+    "sog_kn": 0.2003891,
+    "lat": 36.942217,
+    "lng": -6.996117
+   },
+   {
+    "mmsi": 224029570,
+    "name": "NUEVO FLOR MARIA",
+    "ship_type": 30,
+    "nav_status": "fishing",
+    "sog_kn": 3.0019455,
+    "lat": 36.932112,
+    "lng": -6.749032
+   },
+   {
+    "mmsi": 224052260,
+    "name": "NUEVO PACO JOSE",
+    "ship_type": 30,
+    "nav_status": "fishing",
+    "sog_kn": 2.90272379,
+    "lat": 36.996163,
+    "lng": -6.794702
+   },
+   {
+    "mmsi": 224027840,
+    "name": "VB BORA",
+    "ship_type": 52,
+    "nav_status": "underway",
+    "sog_kn": 0.4007782,
+    "lat": 37.083895,
+    "lng": -6.928598
+   },
+   {
+    "mmsi": 224100730,
+    "name": "AITOR UNO",
+    "ship_type": 31,
+    "nav_status": "not reported",
+    "sog_kn": 0.2003891,
+    "lat": 37.081413,
+    "lng": -6.926487
+   },
+   {
+    "mmsi": 224320560,
+    "name": "RIERA FERNANDEZ",
+    "ship_type": 30,
+    "nav_status": "fishing",
+    "sog_kn": 7.60700369,
+    "lat": 37.060283,
+    "lng": -6.979068
+   },
+   {
+    "mmsi": 538004029,
+    "name": "SEAWAYS RED",
+    "ship_type": 89,
+    "nav_status": "moored",
+    "sog_kn": 0.09922179,
+    "lat": 37.082443,
+    "lng": -6.927595
+   },
+   {
+    "mmsi": 215552000,
+    "name": "HACI FATMA ANA",
+    "ship_type": 83,
+    "nav_status": "at anchor",
+    "sog_kn": 0.0,
+    "lat": 37.085,
+    "lng": -6.86
+   },
+   {
+    "mmsi": 224543980,
+    "name": "OIZMENDI",
+    "ship_type": 80,
+    "nav_status": "underway",
+    "sog_kn": 0.09922179,
+    "lat": 37.081683,
+    "lng": -6.894618
+   },
+   {
+    "mmsi": 224675000,
+    "name": "BUENAVISTA EXPRESS",
+    "ship_type": 60,
+    "nav_status": "underway",
+    "sog_kn": 17.2140083,
+    "lat": 37.089287,
+    "lng": -6.837173
+   },
+   {
+    "mmsi": 241575000,
+    "name": "SEAVEN VOYAGER",
+    "ship_type": 80,
+    "nav_status": "at anchor",
+    "sog_kn": 0.0,
+    "lat": 37.091667,
+    "lng": -6.879072
+   },
+   {
+    "mmsi": 255806512,
+    "name": "BOCHEM OSLO",
+    "ship_type": 80,
+    "nav_status": "at anchor",
+    "sog_kn": 0.0,
+    "lat": 37.076333,
+    "lng": -6.877463
+   },
+   {
+    "mmsi": 538006502,
+    "name": "MUHUT SILVER",
+    "ship_type": 80,
+    "nav_status": "at anchor",
+    "sog_kn": 0.0,
+    "lat": 37.085132,
+    "lng": -6.879688
+   },
+   {
+    "mmsi": 538007007,
+    "name": "FRONT ALTAIR",
+    "ship_type": 88,
+    "nav_status": "at anchor",
+    "sog_kn": 0.09922179,
+    "lat": 37.082112,
+    "lng": -6.895037
+   },
+   {
+    "mmsi": 992242129,
+    "name": "BOYA DE RECALADA Q9",
+    "ship_type": 23,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.09163,
+    "lng": -6.81805
+   },
+   {
+    "mmsi": 224177530,
+    "name": "POPEYE MARINO 2",
+    "ship_type": 57,
+    "nav_status": "not reported",
+    "sog_kn": 9.908561,
+    "lat": 37.065642,
+    "lng": -6.726122
+   },
+   {
+    "mmsi": 224050480,
+    "name": "ANA Y RAFAEL",
+    "ship_type": 30,
+    "nav_status": "fishing",
+    "sog_kn": 0.0,
+    "lat": 37.182487,
+    "lng": -6.959785
+   },
+   {
+    "mmsi": 224056990,
+    "name": "VB CIERZO",
+    "ship_type": 52,
+    "nav_status": "underway",
+    "sog_kn": 0.0,
+    "lat": 37.199312,
+    "lng": -6.938325
+   },
+   {
+    "mmsi": 224124190,
+    "name": "HERMANOS RIVERO",
+    "ship_type": 30,
+    "nav_status": "underway",
+    "sog_kn": 8.708171,
+    "lat": 37.178793,
+    "lng": -6.953085
+   },
+   {
+    "mmsi": 224132430,
+    "name": "TRIODO",
+    "ship_type": 36,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.194963,
+    "lng": -6.966823
+   },
+   {
+    "mmsi": 224140530,
+    "name": "DASSAI",
+    "ship_type": 37,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.195435,
+    "lng": -6.966592
+   },
+   {
+    "mmsi": 224142560,
+    "name": "FLECHA DEL ROMPIDO",
+    "ship_type": 0,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.18228,
+    "lng": -6.95968
+   },
+   {
+    "mmsi": 224320590,
+    "name": "SEGUNDO HRNOS ALONSO",
+    "ship_type": 30,
+    "nav_status": "fishing",
+    "sog_kn": 7.206226,
+    "lat": 37.141915,
+    "lng": -6.928083
+   },
+   {
+    "mmsi": 224333000,
+    "name": "VB HUELVA",
+    "ship_type": 52,
+    "nav_status": "underway",
+    "sog_kn": 0.0,
+    "lat": 37.199412,
+    "lng": -6.937838
+   },
+   {
+    "mmsi": 224364660,
+    "name": "LA PERLA DIEZ",
+    "ship_type": 37,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.177095,
+    "lng": -6.952782
+   },
+   {
+    "mmsi": 224553000,
+    "name": "GREEN HUELVA",
+    "ship_type": 53,
+    "nav_status": "underway",
+    "sog_kn": 0.0,
+    "lat": 37.198977,
+    "lng": -6.937678
+   },
+   {
+    "mmsi": 224611000,
+    "name": "COSTA LA LUZ",
+    "ship_type": 33,
+    "nav_status": "restricted manoeuvrability",
+    "sog_kn": 3.103113,
+    "lat": 37.179558,
+    "lng": -6.927467
+   },
+   {
+    "mmsi": 225996324,
+    "name": "CATACHA",
+    "ship_type": 36,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.177085,
+    "lng": -6.952928
+   },
+   {
+    "mmsi": 235061987,
+    "name": "TINA C",
+    "ship_type": 79,
+    "nav_status": "moored",
+    "sog_kn": 0.0,
+    "lat": 37.195333,
+    "lng": -6.937058
+   },
+   {
+    "mmsi": 246666000,
+    "name": "PENHAR",
+    "ship_type": 79,
+    "nav_status": "moored",
+    "sog_kn": 0.0,
+    "lat": 37.18771,
+    "lng": -6.932277
+   },
+   {
+    "mmsi": 249828000,
+    "name": "SAKURA THERESA",
+    "ship_type": 80,
+    "nav_status": "moored",
+    "sog_kn": 0.0,
+    "lat": 37.16736,
+    "lng": -6.908042
+   },
+   {
+    "mmsi": 261005702,
+    "name": "SAELIA",
+    "ship_type": 36,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.189372,
+    "lng": -6.96679
+   },
+   {
+    "mmsi": 311001801,
+    "name": "WILSON HAWK",
+    "ship_type": 70,
+    "nav_status": "moored",
+    "sog_kn": 0.0,
+    "lat": 37.190798,
+    "lng": -6.934503
+   },
+   {
+    "mmsi": 314001131,
+    "name": "DENIZ AKAY",
+    "ship_type": 70,
+    "nav_status": "moored",
+    "sog_kn": 0.0,
+    "lat": 37.182935,
+    "lng": -6.928168
+   },
+   {
+    "mmsi": 356503000,
+    "name": "PING HAI WAN",
+    "ship_type": 80,
+    "nav_status": "moored",
+    "sog_kn": 0.0,
+    "lat": 37.163277,
+    "lng": -6.902897
+   },
+   {
+    "mmsi": 636025302,
+    "name": "MILA SAN",
+    "ship_type": 70,
+    "nav_status": "moored",
+    "sog_kn": 0.09922179,
+    "lat": 37.191897,
+    "lng": -6.935407
+   },
+   {
+    "mmsi": 2241012,
+    "name": null,
+    "ship_type": 0,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.143768,
+    "lng": -6.847737
+   },
+   {
+    "mmsi": 2242121,
+    "name": null,
+    "ship_type": 0,
+    "nav_status": "not reported",
+    "sog_kn": 79.768486,
+    "lat": 37.135207,
+    "lng": -6.82592
+   },
+   {
+    "mmsi": 209651000,
+    "name": "MARIE CURIE",
+    "ship_type": 69,
+    "nav_status": "moored",
+    "sog_kn": 0.0,
+    "lat": 37.147903,
+    "lng": -6.874712
+   },
+   {
+    "mmsi": 219148000,
+    "name": "ALICE THERESA",
+    "ship_type": 80,
+    "nav_status": "moored",
+    "sog_kn": 0.0,
+    "lat": 37.157735,
+    "lng": -6.893545
+   },
+   {
+    "mmsi": 224081980,
+    "name": "PILOT THREE HUELVA",
+    "ship_type": 50,
+    "nav_status": "underway",
+    "sog_kn": 1.70233464,
+    "lat": 37.131348,
+    "lng": -6.832432
+   },
+   {
+    "mmsi": 224231960,
+    "name": "POPEYE MARINO III",
+    "ship_type": 56,
+    "nav_status": "not reported",
+    "sog_kn": 1.5019455,
+    "lat": 37.132428,
+    "lng": -6.830222
+   },
+   {
+    "mmsi": 224325960,
+    "name": "YARCLA DIECISIETE",
+    "ship_type": 53,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.125938,
+    "lng": -6.841013
+   },
+   {
+    "mmsi": 224457260,
+    "name": "YARCLA",
+    "ship_type": 52,
+    "nav_status": "not reported",
+    "sog_kn": 0.8015564,
+    "lat": 37.126703,
+    "lng": -6.840907
+   },
+   {
+    "mmsi": 224739000,
+    "name": "V CENTENARIO",
+    "ship_type": 70,
+    "nav_status": "moored",
+    "sog_kn": 0.0,
+    "lat": 37.153617,
+    "lng": -6.88475
+   },
+   {
+    "mmsi": 225373000,
+    "name": "VB TALISMAN",
+    "ship_type": 52,
+    "nav_status": "underway",
+    "sog_kn": 0.0,
+    "lat": 37.14838,
+    "lng": -6.87631
+   },
+   {
+    "mmsi": 225401000,
+    "name": "VB BRAVO",
+    "ship_type": 52,
+    "nav_status": "moored",
+    "sog_kn": 0.0,
+    "lat": 37.150833,
+    "lng": -6.879683
+   },
+   {
+    "mmsi": 225982206,
+    "name": "AMADESAM SIETE",
+    "ship_type": 53,
+    "nav_status": "not reported",
+    "sog_kn": 4.803502,
+    "lat": 37.131128,
+    "lng": -6.833093
+   },
+   {
+    "mmsi": 225985240,
+    "name": "PILOT TWO HUELVA",
+    "ship_type": 99,
+    "nav_status": "underway",
+    "sog_kn": 2.5019455,
+    "lat": 37.131307,
+    "lng": -6.832542
+   },
+   {
+    "mmsi": 225999437,
+    "name": "YARCLA DIECINUEVE",
+    "ship_type": 53,
+    "nav_status": "underway",
+    "sog_kn": 6.80544758,
+    "lat": 37.131268,
+    "lng": -6.833353
+   },
+   {
+    "mmsi": 225999971,
+    "name": "SALVAMAR VELA",
+    "ship_type": 51,
+    "nav_status": "underway",
+    "sog_kn": 0.0,
+    "lat": 37.130358,
+    "lng": -6.83217
+   },
+   {
+    "mmsi": 227480310,
+    "name": "COCO DE PARADIS",
+    "ship_type": 36,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.131407,
+    "lng": -6.83202
+   },
+   {
+    "mmsi": 227555190,
+    "name": "LE CHOSE SUR MER",
+    "ship_type": 36,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.131793,
+    "lng": -6.83196
+   },
+   {
+    "mmsi": 228260620,
+    "name": "FREEDOM",
+    "ship_type": 37,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.131577,
+    "lng": -6.829517
+   },
+   {
+    "mmsi": 244020211,
+    "name": "ETERNITY",
+    "ship_type": 36,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.131655,
+    "lng": -6.831803
+   },
+   {
+    "mmsi": 248096000,
+    "name": "DING HENG 23",
+    "ship_type": 100,
+    "nav_status": "at anchor",
+    "sog_kn": 0.0,
+    "lat": 37.100943,
+    "lng": -6.861152
+   },
+   {
+    "mmsi": 255916105,
+    "name": "GAS ESCO",
+    "ship_type": 80,
+    "nav_status": "at anchor",
+    "sog_kn": 0.0,
+    "lat": 37.1,
+    "lng": -6.878333
+   },
+   {
+    "mmsi": 261001233,
+    "name": "A QUENLLA CANECA",
+    "ship_type": 36,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.131892,
+    "lng": -6.829103
+   },
+   {
+    "mmsi": 261010178,
+    "name": "MISENA MARE",
+    "ship_type": 36,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.132053,
+    "lng": -6.829548
+   },
+   {
+    "mmsi": 261010513,
+    "name": "NUBLO",
+    "ship_type": 36,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.132467,
+    "lng": -6.830437
+   },
+   {
+    "mmsi": 319014800,
+    "name": "ORIENTAL ACACIA",
+    "ship_type": 89,
+    "nav_status": "moored",
+    "sog_kn": 0.0,
+    "lat": 37.160925,
+    "lng": -6.898957
+   },
+   {
+    "mmsi": 368064160,
+    "name": "VENTANA",
+    "ship_type": 36,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.131812,
+    "lng": -6.831943
+   },
+   {
+    "mmsi": 371809000,
+    "name": "EVA TOKYO",
+    "ship_type": 82,
+    "nav_status": "moored",
+    "sog_kn": 0.0,
+    "lat": 37.159452,
+    "lng": -6.896485
+   },
+   {
+    "mmsi": 992241107,
+    "name": "EXTR DIQUE JUAN CARL",
+    "ship_type": 6,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.108132,
+    "lng": -6.832382
+   },
+   {
+    "mmsi": 992242121,
+    "name": "PICACHO FL24W",
+    "ship_type": 5,
+    "nav_status": "not reported",
+    "sog_kn": 0.0,
+    "lat": 37.1352,
+    "lng": -6.826
+   }
+  ]
+ },
+ "extra_samples": [
+  {
+   "label": "vessels within 10 nm of SINGAPORE ENERGY, seen at 16:28 UTC",
+   "area": "Strait of Malacca",
+   "fetched_utc": "2026-11-03T16:28:13Z",
+   "radius_nm": 10,
+   "provider_total": 46,
+   "returned": 46,
+   "caveat": "A sample around one vessel, NOT coverage of a chokepoint or any area. Vessels seen by the provider within this circle only; coverage gaps and vessels with AIS off are not included; the provider documents no cap on the number returned, so the count is not shown as a total.",
+   "seed": {
+    "mmsi": 538007985,
+    "name": "SINGAPORE ENERGY"
+   },
+   "vessels": [
+    {
+     "mmsi": 219018501,
+     "name": "MAJESTIC MAERSK",
+     "ship_type": 100,
+     "nav_status": "underway",
+     "sog_kn": 7.706226,
+     "lat": 2.217967,
+     "lng": 101.842717
+    },
+    {
+     "mmsi": 255915636,
+     "name": "ESL DACHAN BAY",
+     "ship_type": 100,
+     "nav_status": "underway",
+     "sog_kn": 16.2140083,
+     "lat": 2.289195,
+     "lng": 101.858962
+    },
+    {
+     "mmsi": 414713000,
+     "name": "XIN HANG ZHOU",
+     "ship_type": 100,
+     "nav_status": "underway",
+     "sog_kn": 9.908561,
+     "lat": 2.212192,
+     "lng": 101.860273
+    },
+    {
+     "mmsi": 538009545,
+     "name": "ANNI SELMER",
+     "ship_type": 70,
+     "nav_status": "underway",
+     "sog_kn": 10.8093386,
+     "lat": 2.267177,
+     "lng": 101.810593
+    },
+    {
+     "mmsi": 372424000,
+     "name": "AZUL ACE",
+     "ship_type": 70,
+     "nav_status": "underway",
+     "sog_kn": 19.6167316,
+     "lat": 2.205028,
+     "lng": 101.951318
+    },
+    {
+     "mmsi": 538006339,
+     "name": "DEVBULK SADIYE",
+     "ship_type": 70,
+     "nav_status": "underway",
+     "sog_kn": 12.3112841,
+     "lat": 2.2182,
+     "lng": 101.95666
+    },
+    {
+     "mmsi": 995331489,
+     "name": "KUALA LINGGI NO 2",
+     "ship_type": 25,
+     "nav_status": "not reported",
+     "sog_kn": 0.0,
+     "lat": 2.275085,
+     "lng": 101.999808
+    },
+    {
+     "mmsi": 533131010,
+     "name": "IN THYE 8",
+     "ship_type": 28,
+     "nav_status": "not reported",
+     "sog_kn": 0.09922179,
+     "lat": 2.254098,
+     "lng": 102.015352
+    },
+    {
+     "mmsi": 533132007,
+     "name": "ORKIM SAPPHIRE",
+     "ship_type": 80,
+     "nav_status": "at anchor",
+     "sog_kn": 0.0,
+     "lat": 2.216288,
+     "lng": 102.078658
+    },
+    {
+     "mmsi": 533133588,
+     "name": "TAG NUR 51",
+     "ship_type": 52,
+     "nav_status": "underway",
+     "sog_kn": 0.0,
+     "lat": 2.267187,
+     "lng": 102.015973
+    },
+    {
+     "mmsi": 533133635,
+     "name": "IN THYE 9",
+     "ship_type": 52,
+     "nav_status": "not reported",
+     "sog_kn": 0.0,
+     "lat": 2.255035,
+     "lng": 102.029305
+    },
+    {
+     "mmsi": 533134106,
+     "name": "TAG NUR 37",
+     "ship_type": 52,
+     "nav_status": "at anchor",
+     "sog_kn": 0.0,
+     "lat": 2.267025,
+     "lng": 102.016415
+    },
+    {
+     "mmsi": 567615000,
+     "name": "PB ATHICHA",
+     "ship_type": 80,
+     "nav_status": "at anchor",
+     "sog_kn": 0.09922179,
+     "lat": 2.23415,
+     "lng": 102.08845
+    },
+    {
+     "mmsi": 636020131,
+     "name": "DELTA TOLMI",
+     "ship_type": 81,
+     "nav_status": "at anchor",
+     "sog_kn": 0.0,
+     "lat": 2.213083,
+     "lng": 102.091433
+    },
+    {
+     "mmsi": 636023886,
+     "name": "VL PIONEER",
+     "ship_type": 89,
+     "nav_status": "at anchor",
+     "sog_kn": 0.0,
+     "lat": 2.208887,
+     "lng": 102.09737
+    },
+    {
+     "mmsi": 995331127,
+     "name": "PULAU BATU BESAR",
+     "ship_type": 5,
+     "nav_status": "not reported",
+     "sog_kn": 0.0,
+     "lat": 2.275912,
+     "lng": 102.070442
+    },
+    {
+     "mmsi": 533911616,
+     "name": null,
+     "ship_type": 0,
+     "nav_status": "under sail",
+     "sog_kn": 6.105058,
+     "lat": 2.27969,
+     "lng": 102.01262
+    },
+    {
+     "mmsi": 461000259,
+     "name": "TEMBEK",
+     "ship_type": 80,
+     "nav_status": "moored",
+     "sog_kn": 0.0,
+     "lat": 2.319003,
+     "lng": 101.975208
+    },
+    {
+     "mmsi": 525301351,
+     "name": "KLM INTAN MAKMUR",
+     "ship_type": 70,
+     "nav_status": "not reported",
+     "sog_kn": 3.0019455,
+     "lat": 2.389758,
+     "lng": 101.974582
+    },
+    {
+     "mmsi": 533130424,
+     "name": "TAG NUR 9",
+     "ship_type": 52,
+     "nav_status": "not reported",
+     "sog_kn": 0.0,
+     "lat": 2.355387,
+     "lng": 101.960198
+    },
+    {
+     "mmsi": 533130573,
+     "name": "TAG NUR 12",
+     "ship_type": 52,
+     "nav_status": "underway",
+     "sog_kn": 0.0,
+     "lat": 2.355,
+     "lng": 101.958333
+    },
+    {
+     "mmsi": 533130655,
+     "name": "TAG NUR 20",
+     "ship_type": 52,
+     "nav_status": "underway",
+     "sog_kn": 0.299610883,
+     "lat": 2.376305,
+     "lng": 101.929673
+    },
+    {
+     "mmsi": 533130669,
+     "name": "TAG ALYA 2",
+     "ship_type": 70,
+     "nav_status": "underway",
+     "sog_kn": 0.0,
+     "lat": 2.351667,
+     "lng": 101.963333
+    },
+    {
+     "mmsi": 533131035,
+     "name": "TAG NUR 38",
+     "ship_type": 52,
+     "nav_status": "underway",
+     "sog_kn": 0.09922179,
+     "lat": 2.355058,
+     "lng": 101.95886
+    },
+    {
+     "mmsi": 533131138,
+     "name": "TAG NUR 18",
+     "ship_type": 52,
+     "nav_status": "moored",
+     "sog_kn": 0.299610883,
+     "lat": 2.376478,
+     "lng": 101.929292
+    },
+    {
+     "mmsi": 533132034,
+     "name": "TAG NUR 39",
+     "ship_type": 52,
+     "nav_status": "under sail",
+     "sog_kn": 0.09922179,
+     "lat": 2.355057,
+     "lng": 101.959347
+    },
+    {
+     "mmsi": 533132299,
+     "name": "TAG NUR 29",
+     "ship_type": 52,
+     "nav_status": "underway",
+     "sog_kn": 0.2003891,
+     "lat": 2.376332,
+     "lng": 101.930098
+    },
+    {
+     "mmsi": 538003346,
+     "name": "ZARGA",
+     "ship_type": 84,
+     "nav_status": "at anchor",
+     "sog_kn": 0.0,
+     "lat": 2.318333,
+     "lng": 101.975
+    },
+    {
+     "mmsi": 538007985,
+     "name": "SINGAPORE ENERGY",
+     "ship_type": 80,
+     "nav_status": "at anchor",
+     "sog_kn": 0.09922179,
+     "lat": 2.335227,
+     "lng": 101.955478
+    },
+    {
+     "mmsi": 538008352,
+     "name": "MERCHANT",
+     "ship_type": 81,
+     "nav_status": "at anchor",
+     "sog_kn": 0.2003891,
+     "lat": 2.336685,
+     "lng": 101.99955
+    },
+    {
+     "mmsi": 563574000,
+     "name": "SHANDONG JUNIPER",
+     "ship_type": 84,
+     "nav_status": "at anchor",
+     "sog_kn": 0.0,
+     "lat": 2.342042,
+     "lng": 101.934715
+    },
+    {
+     "mmsi": 636017383,
+     "name": "KPS MEHMET BEY",
+     "ship_type": 99,
+     "nav_status": "at anchor",
+     "sog_kn": 0.0,
+     "lat": 2.341667,
+     "lng": 101.946667
+    },
+    {
+     "mmsi": 995331128,
+     "name": "BATUAN TENGAH",
+     "ship_type": 5,
+     "nav_status": "not reported",
+     "sog_kn": 0.0,
+     "lat": 2.35305,
+     "lng": 101.985625
+    },
+    {
+     "mmsi": 995331287,
+     "name": "KUALA LINGGI NO 3",
+     "ship_type": 28,
+     "nav_status": "not reported",
+     "sog_kn": 0.0,
+     "lat": 2.323673,
+     "lng": 101.960327
+    },
+    {
+     "mmsi": 995331380,
+     "name": "KUALA LINGGI INNER",
+     "ship_type": 5,
+     "nav_status": "not reported",
+     "sog_kn": 0.0,
+     "lat": 2.391443,
+     "lng": 101.971427
+    },
+    {
+     "mmsi": 995331381,
+     "name": "KUALA LINGGI OUTER",
+     "ship_type": 5,
+     "nav_status": "not reported",
+     "sog_kn": 0.0,
+     "lat": 2.366112,
+     "lng": 101.953842
+    },
+    {
+     "mmsi": 995331487,
+     "name": "KUALA LINGGI NO 1",
+     "ship_type": 28,
+     "nav_status": "not reported",
+     "sog_kn": 0.0,
+     "lat": 2.316807,
+     "lng": 101.949455
+    },
+    {
+     "mmsi": 210060000,
+     "name": "ETYFA PROMETHEAS",
+     "ship_type": 89,
+     "nav_status": "at anchor",
+     "sog_kn": 0.2003891,
+     "lat": 2.326352,
+     "lng": 102.024515
+    },
+    {
+     "mmsi": 995331379,
+     "name": "KUALA SG BARU",
+     "ship_type": 5,
+     "nav_status": "not reported",
+     "sog_kn": 11.0097275,
+     "lat": 2.35392,
+     "lng": 102.033583
+    },
+    {
+     "mmsi": 9135684,
+     "name": "OCEAN 3",
+     "ship_type": 37,
+     "nav_status": "not reported",
+     "sog_kn": 0.0,
+     "lat": 2.47238,
+     "lng": 101.853932
+    },
+    {
+     "mmsi": 9135736,
+     "name": "OCEAN 1",
+     "ship_type": 37,
+     "nav_status": "not reported",
+     "sog_kn": 0.0,
+     "lat": 2.472375,
+     "lng": 101.854652
+    },
+    {
+     "mmsi": 228178670,
+     "name": "FENIX",
+     "ship_type": 36,
+     "nav_status": "not reported",
+     "sog_kn": 0.0,
+     "lat": 2.412387,
+     "lng": 101.865555
+    },
+    {
+     "mmsi": 413264710,
+     "name": "HU JING 1 HAO",
+     "ship_type": 37,
+     "nav_status": "not reported",
+     "sog_kn": 4.003891,
+     "lat": 2.41581,
+     "lng": 101.865883
+    },
+    {
+     "mmsi": 533132228,
+     "name": "PASSION ONE",
+     "ship_type": 36,
+     "nav_status": "underway",
+     "sog_kn": 0.7003891,
+     "lat": 2.476138,
+     "lng": 101.846298
+    },
+    {
+     "mmsi": 995330997,
+     "name": "PULAU TERUMBU",
+     "ship_type": 5,
+     "nav_status": "underway",
+     "sog_kn": 0.0,
+     "lat": 2.463282,
+     "lng": 101.844917
+    },
+    {
+     "mmsi": 995331382,
+     "name": "TELUK SINTING",
+     "ship_type": 5,
+     "nav_status": "not reported",
+     "sog_kn": 0.0,
+     "lat": 2.413197,
+     "lng": 101.941047
+    }
+   ]
+  }
+ ]
+}
